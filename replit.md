@@ -9,6 +9,7 @@ The application uses a modern full-stack architecture with React frontend, Expre
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Language: Portuguese (Brazil) - All interface messages and content should be in PT-BR.
 
 ## System Architecture
 

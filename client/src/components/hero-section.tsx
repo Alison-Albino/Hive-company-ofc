@@ -8,8 +8,8 @@ export default function HeroSection() {
   const [priceRange, setPriceRange] = useState("");
 
   const handleSearch = () => {
-    console.log("Search:", { location, propertyType, priceRange });
-    // TODO: Implement search logic
+    console.log("Busca:", { location, propertyType, priceRange });
+    alert("Funcionalidade de busca será implementada em breve!");
   };
 
   return (

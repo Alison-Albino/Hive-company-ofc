@@ -31,8 +31,8 @@ export default function Services() {
   });
 
   const handleFilter = () => {
-    console.log("Filter providers:", { category, location, rating });
-    // TODO: Implement filter logic
+    console.log("Filtrar prestadores:", { category, location, rating });
+    alert("Sistema de filtros será implementado em breve!");
   };
 
   return (

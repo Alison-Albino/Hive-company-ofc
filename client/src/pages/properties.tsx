@@ -17,8 +17,8 @@ export default function Properties() {
   });
 
   const handleSearch = () => {
-    console.log("Filter properties:", { businessType, propertyType, neighborhood, bedrooms });
-    // TODO: Implement search/filter logic
+    console.log("Filtrar propriedades:", { businessType, propertyType, neighborhood, bedrooms });
+    alert("Sistema de filtros será implementado em breve!");
   };
 
   return (

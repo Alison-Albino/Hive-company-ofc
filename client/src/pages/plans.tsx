@@ -11,7 +11,7 @@ export default function Plans() {
 
   const handleSubscribe = (planType: string) => {
     console.log("Subscribe to plan:", planType);
-    alert("Redirecionando para pagamento...");
+    alert("Redirecionando para o pagamento...");
     // TODO: Implement payment integration
   };
 

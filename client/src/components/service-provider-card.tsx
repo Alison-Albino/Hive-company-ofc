@@ -31,8 +31,8 @@ export default function ServiceProviderCard({ provider }: ServiceProviderCardPro
   };
 
   const handleContract = () => {
-    console.log("Contract provider:", provider.id);
-    // TODO: Implement contract logic
+    console.log("Contratar prestador:", provider.id);
+    alert("Redirecionando para o contato com o prestador...");
   };
 
   return (
