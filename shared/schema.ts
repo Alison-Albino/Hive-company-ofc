@@ -232,13 +232,41 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
 export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   sender: one(userProfiles, {
     fields: [chatMessages.senderId],
-    references: [chatMessages.id],
+    references: [userProfiles.id],
   }),
   receiver: one(userProfiles, {
     fields: [chatMessages.receiverId],
-    references: [chatMessages.id],
+    references: [userProfiles.id],
+  }),
+  conversation: one(conversations, {
+    fields: [chatMessages.conversationId],
+    references: [conversations.id],
   }),
 }));
+
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  messages: many(chatMessages),
+}));
+
+// Tabela de notificações
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: varchar("type").notNull(), // message, booking, review
+  title: varchar("title").notNull(),
+  content: varchar("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  relatedId: varchar("related_id"), // conversation_id, booking_id, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({

@@ -724,6 +724,123 @@ export class MemStorage implements IStorage {
     return newProfile;
   }
 
+  // Chat and notifications methods
+  private conversations: any[] = [];
+  private chatMessages: any[] = [];
+  private notifications: any[] = [];
+
+  async getConversationsByUserId(userId: string): Promise<any[]> {
+    return this.conversations.filter(c => c.participantIds.includes(userId));
+  }
+
+  async getOrCreateConversation(userId: string, providerId: string): Promise<any> {
+    const existingConversation = this.conversations.find(c => 
+      c.participantIds.includes(userId) && c.participantIds.includes(providerId)
+    );
+    
+    if (existingConversation) {
+      return existingConversation;
+    }
+
+    const userProfile = this.sampleProfiles.find(p => p.id === userId);
+    const providerProfile = this.sampleProfiles.find(p => p.id === providerId);
+    
+    const newConversation = {
+      id: randomUUID(),
+      participantIds: [userId, providerId],
+      lastMessage: null,
+      lastMessageAt: new Date(),
+      createdAt: new Date(),
+      title: `Conversa com ${providerProfile?.displayName || 'Profissional'}`
+    };
+
+    this.conversations.push(newConversation);
+    return newConversation;
+  }
+
+  async getMessagesByConversationId(conversationId: string): Promise<any[]> {
+    return this.chatMessages
+      .filter(m => m.conversationId === conversationId)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }
+
+  async createMessage(message: any): Promise<any> {
+    const newMessage = {
+      id: randomUUID(),
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      receiverId: message.receiverId,
+      message: message.message,
+      messageType: message.messageType || "text",
+      attachments: message.attachments || [],
+      read: false,
+      createdAt: new Date(),
+    };
+
+    this.chatMessages.push(newMessage);
+
+    // Update conversation last message
+    const conversation = this.conversations.find(c => c.id === message.conversationId);
+    if (conversation) {
+      conversation.lastMessage = message.message;
+      conversation.lastMessageAt = new Date();
+    }
+
+    // Create notification for receiver
+    const senderProfile = this.sampleProfiles.find(p => p.id === message.senderId);
+    await this.createNotification({
+      userId: message.receiverId,
+      type: 'message',
+      title: 'Nova mensagem',
+      content: `${senderProfile?.displayName || 'Usuário'} enviou: ${message.message.substring(0, 50)}${message.message.length > 50 ? '...' : ''}`,
+      relatedId: message.conversationId
+    });
+
+    return newMessage;
+  }
+
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+    this.chatMessages.forEach(message => {
+      if (message.conversationId === conversationId && message.receiverId === userId) {
+        message.read = true;
+      }
+    });
+  }
+
+  // Notifications methods
+  async getNotificationsByUserId(userId: string): Promise<any[]> {
+    return this.notifications
+      .filter(n => n.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createNotification(notification: any): Promise<any> {
+    const newNotification = {
+      id: randomUUID(),
+      userId: notification.userId,
+      type: notification.type,
+      title: notification.title,
+      content: notification.content,
+      isRead: false,
+      relatedId: notification.relatedId || null,
+      createdAt: new Date(),
+    };
+
+    this.notifications.push(newNotification);
+    return newNotification;
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    const notification = this.notifications.find(n => n.id === id);
+    if (notification) {
+      notification.isRead = true;
+    }
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    return this.notifications.filter(n => n.userId === userId && !n.isRead).length;
+  }
+
   async updateUserProfile(id: string, profile: any): Promise<any> {
     const index = this.sampleProfiles.findIndex(p => p.id === id);
     if (index >= 0) {

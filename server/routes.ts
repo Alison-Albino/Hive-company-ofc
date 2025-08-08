@@ -158,6 +158,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Chat endpoints
+  app.get('/api/chat/conversations', async (req, res) => {
+    try {
+      const userId = 'mock-user-id'; // Mock user ID for demo
+      const conversations = await storage.getConversationsByUserId(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      res.status(500).json({ message: 'Failed to fetch conversations' });
+    }
+  });
+
+  app.post('/api/chat/conversations', async (req, res) => {
+    try {
+      const { providerId } = req.body;
+      if (!providerId) {
+        return res.status(400).json({ message: 'Provider ID is required' });
+      }
+      const userId = 'mock-user-id'; // Mock user ID for demo
+      const conversation = await storage.getOrCreateConversation(userId, providerId);
+      res.json(conversation);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      res.status(500).json({ message: 'Failed to create conversation' });
+    }
+  });
+
+  app.get('/api/chat/conversations/:id/messages', async (req, res) => {
+    try {
+      const messages = await storage.getMessagesByConversationId(req.params.id);
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ message: 'Failed to fetch messages' });
+    }
+  });
+
+  app.post('/api/chat/conversations/:id/messages', async (req, res) => {
+    try {
+      const { message, receiverId } = req.body;
+      if (!message || !receiverId) {
+        return res.status(400).json({ message: 'Message and receiverId are required' });
+      }
+      const senderId = 'mock-user-id'; // Mock user ID for demo
+      const newMessage = await storage.createMessage({
+        conversationId: req.params.id,
+        senderId,
+        receiverId,
+        message,
+        messageType: 'text'
+      });
+      res.json(newMessage);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
+  // Notifications endpoints
+  app.get('/api/notifications', async (req, res) => {
+    try {
+      const userId = 'mock-user-id'; // Mock user ID for demo
+      const notifications = await storage.getNotificationsByUserId(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Failed to fetch notifications' });
+    }
+  });
+
+  app.get('/api/notifications/count', async (req, res) => {
+    try {
+      const userId = 'mock-user-id'; // Mock user ID for demo
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error('Error fetching notification count:', error);
+      res.status(500).json({ message: 'Failed to fetch notification count' });
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', async (req, res) => {
+    try {
+      await storage.markNotificationAsRead(req.params.id);
+      res.json({ message: 'Notification marked as read' });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: 'Failed to mark notification as read' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
