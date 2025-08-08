@@ -21,7 +21,13 @@ export default function Services() {
   }, []);
 
   const { data: serviceProviders, isLoading } = useQuery({
-    queryKey: ["/api/service-providers", category ? { category } : {}],
+    queryKey: ["/api/service-providers", category && category !== "all" ? `category=${category}` : ""],
+    queryFn: () => {
+      const url = category && category !== "all" 
+        ? `/api/service-providers?category=${category}` 
+        : '/api/service-providers';
+      return fetch(url).then(res => res.json());
+    }
   });
 
   const handleFilter = () => {
@@ -45,7 +51,7 @@ export default function Services() {
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas as categorias</SelectItem>
+                <SelectItem value="all">Todas as categorias</SelectItem>
                 <SelectItem value="plumber">Encanador</SelectItem>
                 <SelectItem value="electrician">Eletricista</SelectItem>
                 <SelectItem value="painter">Pintor</SelectItem>
@@ -113,7 +119,7 @@ export default function Services() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {serviceProviders?.map((provider: ServiceProvider) => (
+            {(serviceProviders as ServiceProvider[] || []).map((provider: ServiceProvider) => (
               <ServiceProviderCard key={provider.id} provider={provider} />
             ))}
           </div>

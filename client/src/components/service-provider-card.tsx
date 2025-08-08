@@ -52,7 +52,7 @@ export default function ServiceProviderCard({ provider }: ServiceProviderCardPro
             </p>
           </div>
           <div className="text-right">
-            {renderStars(provider.rating)}
+            {renderStars(provider.rating || "0.0")}
             <p className="text-xs text-gray-500">{provider.reviewCount} avaliações</p>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function ServiceProviderCard({ provider }: ServiceProviderCardPro
           {provider.location}
         </p>
         
-        {provider.portfolioImages.length > 0 && (
+        {provider.portfolioImages && provider.portfolioImages.length > 0 && (
           <div className="mb-4">
             <p className="text-sm font-semibold text-gray-700 mb-2">Trabalhos recentes:</p>
             <div className="grid grid-cols-3 gap-2">

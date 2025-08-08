@@ -104,7 +104,7 @@ export default function Properties() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties?.map((property: Property) => (
+            {(properties as Property[] || []).map((property: Property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
           </div>

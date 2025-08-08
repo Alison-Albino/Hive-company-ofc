@@ -68,7 +68,7 @@ export default function Plans() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {plans?.map((plan: Plan) => (
+          {(plans as Plan[] || []).map((plan: Plan) => (
             <div 
               key={plan.id} 
               className={`bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 transform hover:scale-105 ${

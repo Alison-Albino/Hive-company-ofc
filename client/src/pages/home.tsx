@@ -43,7 +43,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {featuredProperties?.map((property: Property) => (
+              {(featuredProperties as Property[] || []).map((property: Property) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
@@ -79,7 +79,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {serviceCategories?.map((category: ServiceCategoryType) => (
+              {(serviceCategories as ServiceCategoryType[] || []).map((category: ServiceCategoryType) => (
                 <ServiceCategory key={category.id} category={category} />
               ))}
             </div>

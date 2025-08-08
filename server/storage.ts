@@ -278,7 +278,16 @@ export class MemStorage implements IStorage {
 
   async createProperty(insertProperty: InsertProperty): Promise<Property> {
     const id = randomUUID();
-    const property: Property = { ...insertProperty, id, views: 0 };
+    const property: Property = { 
+      ...insertProperty, 
+      id, 
+      views: 0, 
+      status: "available",
+      bedrooms: insertProperty.bedrooms || null,
+      bathrooms: insertProperty.bathrooms || null,
+      parkingSpaces: insertProperty.parkingSpaces || null,
+      area: insertProperty.area || null
+    };
     this.properties.set(id, property);
     return property;
   }
@@ -286,14 +295,14 @@ export class MemStorage implements IStorage {
   // Service Providers
   async getServiceProviders(): Promise<ServiceProvider[]> {
     return Array.from(this.serviceProviders.values()).sort((a, b) => 
-      parseFloat(b.rating) - parseFloat(a.rating)
+      parseFloat(b.rating || "0") - parseFloat(a.rating || "0")
     );
   }
 
   async getServiceProvidersByCategory(category: string): Promise<ServiceProvider[]> {
     return Array.from(this.serviceProviders.values())
       .filter(provider => provider.categories.includes(category))
-      .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+      .sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
@@ -307,7 +316,11 @@ export class MemStorage implements IStorage {
       id, 
       rating: "0.0", 
       reviewCount: 0, 
-      verified: false 
+      verified: false,
+      description: insertProvider.description || null,
+      phone: insertProvider.phone || null,
+      email: insertProvider.email || null,
+      portfolioImages: insertProvider.portfolioImages || []
     };
     this.serviceProviders.set(id, provider);
     return provider;
@@ -340,7 +353,12 @@ export class MemStorage implements IStorage {
 
   async createPlan(insertPlan: InsertPlan): Promise<Plan> {
     const id = randomUUID();
-    const plan: Plan = { ...insertPlan, id };
+    const plan: Plan = { 
+      ...insertPlan, 
+      id, 
+      popular: insertPlan.popular || false,
+      features: [...(insertPlan.features || [])]
+    };
     this.plans.set(id, plan);
     return plan;
   }
