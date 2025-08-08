@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, MapPin, Phone, Users, Clock, CheckCircle, Search } from "lucide-react";
+import { Star, MapPin, Phone, Users, Clock, CheckCircle, Search, Zap, Wrench, Paintbrush, TreePine, HardHat, Wind, Monitor, Hammer, Sparkles, Leaf, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ServiceCategory {
@@ -56,6 +56,23 @@ interface UserProfile {
 }
 
 export default function ServicesPage() {
+  // Função para mapear ícones das categorias
+  const getCategoryIcon = (slug: string) => {
+    const iconMap: Record<string, JSX.Element> = {
+      'eletricista': <Zap className="w-8 h-8" />,
+      'encanador': <Wrench className="w-8 h-8" />,
+      'pintor': <Paintbrush className="w-8 h-8" />,
+      'paisagista': <TreePine className="w-8 h-8" />,
+      'construcao': <HardHat className="w-8 h-8" />,
+      'ar-condicionado': <Wind className="w-8 h-8" />,
+      'assistencia-tecnica': <Monitor className="w-8 h-8" />,
+      'marceneiro': <Hammer className="w-8 h-8" />,
+      'limpeza': <Sparkles className="w-8 h-8" />,
+      'jardinagem': <Leaf className="w-8 h-8" />,
+      'seguranca': <Shield className="w-8 h-8" />
+    };
+    return iconMap[slug] || <Wrench className="w-8 h-8" />;
+  };
   const params = useParams();
   const categoryParam = params.category;
   
@@ -71,7 +88,7 @@ export default function ServicesPage() {
 
   // Buscar profissionais (perfis integrados)
   const { data: profiles, isLoading: profilesLoading } = useQuery<UserProfile[]>({
-    queryKey: ['/api/profiles', { search: searchQuery, category: selectedCategory, city: selectedCity }],
+    queryKey: ['/api/profiles'],
   });
 
   // Filtrar e ranquear profissionais
@@ -107,6 +124,11 @@ export default function ServicesPage() {
 
   const isLoading = categoriesLoading || profilesLoading;
 
+  // Debug - verificar dados carregados
+  console.log('Profiles loaded:', profiles?.length, profiles);
+  console.log('Filtered profiles:', filteredAndRankedProfiles?.length);
+  console.log('Grouped profiles:', Object.keys(groupedProfiles));
+
   return (
     <div className="py-16 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,8 +158,8 @@ export default function ServicesPage() {
                   <Link key={category.id} href={`/services/${category.slug}`}>
                     <Card className="h-32 hover:shadow-md transition-all cursor-pointer group bg-white">
                       <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
-                        <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">
-                          {category.icon}
+                        <div className="text-2xl mb-2 group-hover:scale-110 transition-transform text-hive-gold">
+                          {getCategoryIcon(category.slug)}
                         </div>
                         <h3 className="font-semibold text-sm text-hive-black mb-1">{category.name}</h3>
                         <p className="text-xs text-gray-500">{category.providerCount} profissionais</p>
@@ -370,13 +392,18 @@ export default function ServicesPage() {
               </div>
             ))}
             
-            {Object.keys(groupedProfiles).length === 0 && (
+            {Object.keys(groupedProfiles).length === 0 && !isLoading && (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <Users className="w-16 h-16 mx-auto" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Nenhum profissional encontrado</h3>
-                <p className="text-gray-500">Tente ajustar os filtros ou busca para encontrar mais profissionais.</p>
+                <p className="text-gray-500">
+                  {profiles?.length ? 'Tente ajustar os filtros para encontrar mais profissionais.' : 'Carregando profissionais...'}
+                </p>
+                <div className="mt-4 text-sm text-gray-400">
+                  Debug: {profiles?.length || 0} perfis carregados, {filteredAndRankedProfiles?.length || 0} após filtros
+                </div>
               </div>
             )}
           </div>
