@@ -367,7 +367,7 @@ export class MemStorage implements IStorage {
         ]
       },
       {
-        id: randomUUID(),
+        id: 'a275f77f-969e-450a-b9ef-d0594b4f0603',
         documentType: 'CPF',
         displayName: 'Carlos Mendes',
         bio: 'Encanador com mais de 15 anos de experiência em instalações hidráulicas e reparos de emergência.',
@@ -387,6 +387,202 @@ export class MemStorage implements IStorage {
         phone: '(61) 99999-8888',
         socialLinks: {
           whatsapp: '556199999888'
+        },
+        portfolioImages: []
+      },
+      {
+        id: '61cfe2ef-bb3b-4960-bb1d-111492d7d997',
+        documentType: 'CPF',
+        displayName: 'Ana Costa',
+        bio: 'Pintora especializada em pintura residencial e decorativa. Trabalho com tintas ecológicas e técnicas modernas.',
+        profession: 'Pintor',
+        city: 'Salvador',
+        state: 'BA',
+        specialties: ['Pintura residencial', 'Pintura decorativa', 'Textura'],
+        services: ['Pintura interna', 'Pintura externa', 'Decoração'],
+        profileImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+        rating: '4.6',
+        reviewCount: 98,
+        completedJobs: 76,
+        responseTime: 25,
+        verified: true,
+        available: true,
+        planType: 'A',
+        phone: '(71) 98888-7777',
+        socialLinks: {
+          whatsapp: '5571988887777',
+          instagram: 'https://instagram.com/anapintora'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: 'f8d5b78d-493b-411b-8eb6-c6d943215875',
+        documentType: 'CPF',
+        displayName: 'Roberto Silva',
+        bio: 'Técnico em ar condicionado e refrigeração com certificações internacionais.',
+        profession: 'Ar Condicionado',
+        city: 'Recife',
+        state: 'PE',
+        specialties: ['Instalação', 'Manutenção', 'Split', 'Central'],
+        services: ['Instalação de split', 'Limpeza', 'Reparo'],
+        profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        rating: '4.8',
+        reviewCount: 187,
+        completedJobs: 143,
+        responseTime: 30,
+        verified: true,
+        available: true,
+        planType: 'A',
+        phone: '(81) 97777-6666',
+        socialLinks: {
+          whatsapp: '558197776666'
+        },
+        portfolioImages: []
+      },
+      {
+        id: 'g9e5c78f-594c-512c-9fc7-d7e954326876',
+        documentType: 'CNPJ',
+        displayName: 'TechFix Assistência Técnica',
+        bio: 'Empresa especializada em assistência técnica de eletrodomésticos e eletrônicos.',
+        companyName: 'TechFix Assistência Técnica Ltda',
+        tradeName: 'TechFix',
+        profession: 'Assistência Técnica',
+        city: 'Fortaleza',
+        state: 'CE',
+        foundedYear: 2015,
+        employeeCount: 8,
+        companyDescription: 'Especialistas em reparo de eletrodomésticos, celulares e equipamentos eletrônicos.',
+        specialties: ['Eletrodomésticos', 'Celulares', 'Eletrônicos'],
+        services: ['Reparo', 'Manutenção', 'Substituição de peças'],
+        profileImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop',
+        rating: '4.7',
+        reviewCount: 256,
+        completedJobs: 189,
+        responseTime: 15,
+        verified: true,
+        available: true,
+        planType: 'B',
+        phone: '(85) 3333-4444',
+        website: 'https://techfix.com.br',
+        socialLinks: {
+          website: 'https://techfix.com.br',
+          instagram: 'https://instagram.com/techfixce'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: 'h0f6d89g-605d-623d-0gd8-e8f065437987',
+        documentType: 'CPF',
+        displayName: 'Lucas Ferreira',
+        bio: 'Marceneiro artesanal especializado em móveis planejados e restauração de antiguidades.',
+        profession: 'Marceneiro',
+        city: 'Curitiba',
+        state: 'PR',
+        specialties: ['Móveis planejados', 'Restauração', 'Madeira maciça'],
+        services: ['Móveis sob medida', 'Restauração', 'Reparos'],
+        profileImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
+        rating: '4.9',
+        reviewCount: 67,
+        completedJobs: 45,
+        responseTime: 60,
+        verified: true,
+        available: false,
+        planType: 'A',
+        phone: '(41) 96666-5555',
+        socialLinks: {
+          whatsapp: '554196665555',
+          instagram: 'https://instagram.com/lucasmarceneiro'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: 'i1g7e90h-716e-734e-1he9-f9g176548098',
+        documentType: 'CPF',
+        displayName: 'Fernanda Oliveira',
+        bio: 'Diarista e faxineira profissional com experiência em limpeza residencial e comercial.',
+        profession: 'Limpeza',
+        city: 'Porto Alegre',
+        state: 'RS',
+        specialties: ['Limpeza residencial', 'Limpeza pós-obra', 'Organização'],
+        services: ['Faxina completa', 'Limpeza semanal', 'Limpeza pós-mudança'],
+        profileImage: 'https://images.unsplash.com/photo-1494790108755-2616b612b632?w=400&h=400&fit=crop&crop=face',
+        rating: '4.8',
+        reviewCount: 134,
+        completedJobs: 298,
+        responseTime: 20,
+        verified: true,
+        available: true,
+        planType: 'A',
+        phone: '(51) 95555-4444',
+        socialLinks: {
+          whatsapp: '555195554444'
+        },
+        portfolioImages: []
+      },
+      {
+        id: 'j2h8f01i-827f-845f-2if0-g0h287659109',
+        documentType: 'CNPJ',
+        displayName: 'Verde Jardins Ltda',
+        bio: 'Empresa de jardinagem e paisagismo para residências e empresas.',
+        companyName: 'Verde Jardins Paisagismo Ltda',
+        tradeName: 'Verde Jardins',
+        profession: 'Jardinagem',
+        city: 'Goiânia',
+        state: 'GO',
+        foundedYear: 2018,
+        employeeCount: 12,
+        companyDescription: 'Especialistas em criação e manutenção de jardins, gramados e áreas verdes.',
+        specialties: ['Paisagismo', 'Manutenção', 'Irrigação'],
+        services: ['Projeto de jardim', 'Manutenção mensal', 'Sistema de irrigação'],
+        profileImage: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop',
+        rating: '4.6',
+        reviewCount: 89,
+        completedJobs: 67,
+        responseTime: 45,
+        verified: true,
+        available: true,
+        planType: 'B',
+        phone: '(62) 3222-1111',
+        website: 'https://verdejardins.com.br',
+        socialLinks: {
+          website: 'https://verdejardins.com.br',
+          instagram: 'https://instagram.com/verdejardinsgo',
+          facebook: 'https://facebook.com/verdejardins'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: 'k3i9g12j-938g-956g-3jg1-h1i398760210',
+        documentType: 'CPF',
+        displayName: 'Paulo Santos',
+        bio: 'Serralheiro especializado em portões, grades e estruturas metálicas.',
+        profession: 'Serralheiro',
+        city: 'Campinas',
+        state: 'SP',
+        specialties: ['Portões', 'Grades', 'Soldas', 'Estruturas metálicas'],
+        services: ['Instalação de portões', 'Reparos', 'Soldas em geral'],
+        profileImage: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
+        rating: '4.5',
+        reviewCount: 78,
+        completedJobs: 56,
+        responseTime: 40,
+        verified: false,
+        available: true,
+        planType: 'A',
+        phone: '(19) 94444-3333',
+        socialLinks: {
+          whatsapp: '551994443333'
         },
         portfolioImages: []
       }
