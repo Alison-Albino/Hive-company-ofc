@@ -124,10 +124,7 @@ export default function ServicesPage() {
 
   const isLoading = categoriesLoading || profilesLoading;
 
-  // Debug - verificar dados carregados
-  console.log('Profiles loaded:', profiles?.length, profiles);
-  console.log('Filtered profiles:', filteredAndRankedProfiles?.length);
-  console.log('Grouped profiles:', Object.keys(groupedProfiles));
+
 
   return (
     <div className="py-16 bg-gray-50 min-h-screen">
@@ -401,9 +398,7 @@ export default function ServicesPage() {
                 <p className="text-gray-500">
                   {profiles?.length ? 'Tente ajustar os filtros para encontrar mais profissionais.' : 'Carregando profissionais...'}
                 </p>
-                <div className="mt-4 text-sm text-gray-400">
-                  Debug: {profiles?.length || 0} perfis carregados, {filteredAndRankedProfiles?.length || 0} após filtros
-                </div>
+
               </div>
             )}
           </div>
