@@ -43,29 +43,75 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
   // Carregar Google Maps API
   useEffect(() => {
     const loadGoogleMaps = async () => {
+      // Verificar se já está carregado
       if (window.google && window.google.maps) {
+        console.log('Google Maps já carregado');
         setIsGoogleMapsLoaded(true);
         return;
       }
 
+      // Verificar se já existe um script carregando
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      if (existingScript) {
+        console.log('Script do Google Maps já existe, aguardando carregamento...');
+        // Aguardar carregamento do script existente
+        const checkInterval = setInterval(() => {
+          if (window.google && window.google.maps) {
+            console.log('Google Maps carregado via script existente');
+            setIsGoogleMapsLoaded(true);
+            clearInterval(checkInterval);
+          }
+        }, 100);
+        
+        // Timeout após 10 segundos
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          if (!window.google || !window.google.maps) {
+            console.log('Timeout no carregamento do Google Maps, usando fallback');
+            setIsGoogleMapsLoaded(false);
+          }
+        }, 10000);
+        return;
+      }
+
       try {
-        // Usar a API key fornecida
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk';
+        // Remover qualquer callback anterior
+        delete window.initMap;
+        
+        // Criar callback único
+        const callbackName = `initGoogleMaps_${Date.now()}`;
+        window[callbackName] = () => {
+          console.log('Google Maps carregado com sucesso!');
+          setIsGoogleMapsLoaded(true);
+          delete window[callbackName];
+        };
+
+        // Usar a chave do ambiente secreto do Replit
+        const apiKey = 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk'; // Chave pública para desenvolvimento
+        
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;
         script.async = true;
         script.defer = true;
         
-        window.initMap = () => {
-          setIsGoogleMapsLoaded(true);
-        };
-        
-        script.onerror = () => {
-          console.error('Erro ao carregar Google Maps API');
+        script.onerror = (error) => {
+          console.error('Erro ao carregar Google Maps API:', error);
           setIsGoogleMapsLoaded(false);
+          delete window[callbackName];
         };
         
+        console.log('Carregando Google Maps API...');
         document.head.appendChild(script);
+        
+        // Timeout de segurança
+        setTimeout(() => {
+          if (!window.google || !window.google.maps) {
+            console.error('Timeout ao carregar Google Maps API');
+            setIsGoogleMapsLoaded(false);
+            delete window[callbackName];
+          }
+        }, 15000);
+        
       } catch (error) {
         console.error('Erro ao inicializar Google Maps:', error);
         setIsGoogleMapsLoaded(false);

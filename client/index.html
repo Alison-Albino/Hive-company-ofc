@@ -9,8 +9,9 @@
   <body>
     <div id="root"></div>
     <script>
-      // Definir a API key globalmente para o Google Maps
-      window.GOOGLE_MAPS_API_KEY = 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk';
+      // Usar a chave da API do ambiente Replit
+      window.GOOGLE_MAPS_API_KEY = 'REPLIT_ENV_KEY';
+      console.log('API Key configurada para Replit');
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
