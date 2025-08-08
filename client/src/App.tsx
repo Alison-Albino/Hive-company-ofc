@@ -10,6 +10,7 @@ import Services from "./pages/services";
 import Plans from "./pages/plans";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
+import ChatWidget from "./components/chat-widget";
 
 function Router() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Router />
           </main>
           <Footer />
+          <ChatWidget />
           <Toaster />
         </div>
       </TooltipProvider>

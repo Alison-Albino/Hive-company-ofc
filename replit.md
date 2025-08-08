@@ -39,8 +39,11 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 ### Component Architecture
 - **Design System**: Consistent component library with variants and proper TypeScript support
 - **Card-based UI**: Property cards, service provider cards, and category cards for intuitive browsing
+- **Interactive Map**: Custom map component with property markers and nearby places visualization
+- **Chat System**: Real-time chat widget with intelligent responses and contextual help
 - **Responsive Layout**: Mobile-first design with grid systems that adapt to different screen sizes
 - **Navigation**: Sticky header with mobile hamburger menu and desktop horizontal navigation
+- **Multi-view Interface**: Toggle between grid and map views for property browsing
 
 ### Authentication & Authorization
 - **Planned Implementation**: Session-based authentication with role-based access control
@@ -48,8 +51,11 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 
 ### Search & Discovery
 - **Property Search**: Multi-criteria filtering by location, property type, price range, and business type
+- **Interactive Map**: Visual property search with nearby amenities and places of interest
+- **Location Insights**: Shows hospitals, schools, supermarkets, and other important places near properties
 - **Service Discovery**: Category-based browsing with rating-based sorting and location filtering
 - **Featured Content**: Highlighted properties and top-rated service providers
+- **Chat Support**: Intelligent chat widget with contextual responses about properties and services
 
 ## External Dependencies
 

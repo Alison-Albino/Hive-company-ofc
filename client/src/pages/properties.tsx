@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "@/components/property-card";
+import MapSearch from "@/components/map-search";
 import { type Property } from "@shared/schema";
 
 export default function Properties() {
@@ -11,6 +12,8 @@ export default function Properties() {
   const [propertyType, setPropertyType] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [bedrooms, setBedrooms] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   const { data: properties, isLoading } = useQuery({
     queryKey: ["/api/properties"],
@@ -25,8 +28,30 @@ export default function Properties() {
     <div className="py-16 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-hive-black mb-4">Todos os Imóveis</h1>
-          <p className="text-gray-600 text-lg">Encontre o imóvel perfeito para você</p>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-hive-black mb-2">Todos os Imóveis</h1>
+              <p className="text-gray-600 text-lg">Encontre o imóvel perfeito para você</p>
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => setViewMode('grid')}
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                className={`${viewMode === 'grid' ? 'bg-hive-gold hover:bg-hive-gold-dark text-white' : 'border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-white'}`}
+              >
+                <i className="fas fa-th-large mr-2"></i>
+                Grade
+              </Button>
+              <Button
+                onClick={() => setViewMode('map')}
+                variant={viewMode === 'map' ? 'default' : 'outline'}
+                className={`${viewMode === 'map' ? 'bg-hive-gold hover:bg-hive-gold-dark text-white' : 'border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-white'}`}
+              >
+                <i className="fas fa-map mr-2"></i>
+                Mapa
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Extended Search Filters */}
@@ -88,26 +113,41 @@ export default function Properties() {
           </div>
         </div>
 
-        {/* Properties Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden">
-                <Skeleton className="w-full h-48" />
-                <div className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+        {/* Content based on view mode */}
+        {viewMode === 'grid' ? (
+          /* Properties Grid */
+          isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl overflow-hidden">
+                  <Skeleton className="w-full h-48" />
+                  <div className="p-4 space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(properties as Property[] || []).map((property: Property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(properties as Property[] || []).map((property: Property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          /* Map View */
+          isLoading ? (
+            <div className="bg-white rounded-xl overflow-hidden">
+              <Skeleton className="w-full h-96" />
+            </div>
+          ) : (
+            <MapSearch 
+              properties={(properties as Property[] || [])} 
+              onPropertySelect={setSelectedProperty}
+            />
+          )
         )}
       </div>
     </div>
