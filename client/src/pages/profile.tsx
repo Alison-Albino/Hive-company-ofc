@@ -61,18 +61,19 @@ interface Review {
 }
 
 export default function ProfilePage() {
-  const { profileId } = useParams();
+  const params = useParams();
+  const profileId = params.profileId;
   const [isEditing, setIsEditing] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['/api/profiles', profileId],
+    queryKey: [`/api/profiles/${profileId}`],
     enabled: !!profileId,
   });
 
   const { data: reviews } = useQuery({
-    queryKey: ['/api/profiles', profileId, 'reviews'],
+    queryKey: [`/api/profiles/${profileId}/reviews`],
     enabled: !!profileId,
   });
 
@@ -80,7 +81,7 @@ export default function ProfilePage() {
     mutationFn: (updatedProfile: Partial<UserProfile>) =>
       apiRequest(`/api/profiles/${profileId}`, 'PATCH', updatedProfile),
     onSuccess: () => {
-      queryClient.invalidateQueries(['/api/profiles', profileId]);
+      queryClient.invalidateQueries([`/api/profiles/${profileId}`]);
       setIsEditing(false);
     },
   });

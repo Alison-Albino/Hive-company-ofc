@@ -117,6 +117,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/profiles/:id/reviews', async (req, res) => {
+    try {
+      // Retornar array vazio temporariamente - implementar depois
+      res.json([]);
+    } catch (error) {
+      console.error('Error fetching profile reviews:', error);
+      res.status(500).json({ message: 'Error fetching profile reviews' });
+    }
+  });
+
   // Chat endpoint
   app.post("/api/chat", (req, res) => {
     const { message } = req.body;

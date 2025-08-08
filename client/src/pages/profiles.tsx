@@ -32,12 +32,12 @@ interface UserProfile {
 }
 
 export default function ProfilesPage() {
-  const [documentType, setDocumentType] = useState<string>('');
+  const [documentType, setDocumentType] = useState<string>('all');
   const [city, setCity] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const { data: profiles, isLoading } = useQuery({
-    queryKey: ['/api/profiles', { documentType, city, search: searchQuery }],
+  const { data: profiles, isLoading } = useQuery<UserProfile[]>({
+    queryKey: ['/api/profiles', { documentType: documentType === 'all' ? '' : documentType, city, search: searchQuery }],
   });
 
   const filteredProfiles = profiles?.filter((profile: UserProfile) =>
@@ -75,7 +75,7 @@ export default function ProfilesPage() {
                   <SelectValue placeholder="Tipo de Perfil" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
                   <SelectItem value="CPF">Pessoa Física (CPF)</SelectItem>
                   <SelectItem value="CNPJ">Empresa (CNPJ)</SelectItem>
                 </SelectContent>
@@ -104,7 +104,7 @@ export default function ProfilesPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {filteredProfiles?.filter((p: UserProfile) => p.documentType === 'CPF').length || 0}
+                {profiles?.filter((p: UserProfile) => p.documentType === 'CPF').length || 0}
               </div>
               <div className="text-gray-600">Profissionais</div>
             </CardContent>
@@ -113,7 +113,7 @@ export default function ProfilesPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-green-600 mb-2">
-                {filteredProfiles?.filter((p: UserProfile) => p.documentType === 'CNPJ').length || 0}
+                {profiles?.filter((p: UserProfile) => p.documentType === 'CNPJ').length || 0}
               </div>
               <div className="text-gray-600">Empresas</div>
             </CardContent>
@@ -122,7 +122,7 @@ export default function ProfilesPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-purple-600 mb-2">
-                {filteredProfiles?.filter((p: UserProfile) => p.verified).length || 0}
+                {profiles?.filter((p: UserProfile) => p.verified).length || 0}
               </div>
               <div className="text-gray-600">Verificados</div>
             </CardContent>
@@ -168,7 +168,7 @@ export default function ProfilesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProfiles?.map((profile: UserProfile) => (
               <Card key={profile.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                <Link href={`/profile/${profile.id}`}>
+                <Link href={`/profile/${profile.id}`} className="block">
                   <div className="p-6">
                     {/* Header do cartão */}
                     <div className="flex items-center space-x-4 mb-4">

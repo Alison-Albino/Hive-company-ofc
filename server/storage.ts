@@ -279,7 +279,7 @@ export class MemStorage implements IStorage {
     // Seed Sample Profiles
     const sampleProfilesData = [
       {
-        id: randomUUID(),
+        id: 'cfe135d3-a1bc-451e-87ac-45ab1c584f25',
         documentType: 'CPF',
         displayName: 'João Silva',
         bio: 'Especialista em reparos domésticos e instalações elétricas. Mais de 10 anos de experiência no mercado.',
@@ -304,7 +304,7 @@ export class MemStorage implements IStorage {
         portfolioImages: []
       },
       {
-        id: randomUUID(),
+        id: 'd8d5b78d-493b-411b-8eb6-c6d943215874',
         documentType: 'CNPJ',
         displayName: 'Construtora Alfa Ltda',
         bio: 'Empresa especializada em construção civil e reformas residenciais e comerciais.',
