@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { type Property } from "@shared/schema";
@@ -6,6 +6,7 @@ import { type Property } from "@shared/schema";
 interface MapSearchProps {
   properties: Property[];
   onPropertySelect: (property: Property) => void;
+  className?: string;
 }
 
 interface Location {
@@ -16,10 +17,28 @@ interface Location {
   coordinates: [number, number];
 }
 
-export default function MapSearch({ properties, onPropertySelect }: MapSearchProps) {
+export default function MapSearch({ properties, onPropertySelect, className = "" }: MapSearchProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([-22.9068, -43.1729]); // Rio de Janeiro
   const [nearbyPlaces, setNearbyPlaces] = useState<Location[]>([]);
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<any>(null);
+
+  // Carregar Google Maps API (por enquanto usar fallback customizado)
+  useEffect(() => {
+    // Para demonstração, vamos usar um mapa customizado estilizado
+    setIsGoogleMapsLoaded(false); // Forçar uso do mapa customizado
+  }, []);
+
+  const getPropertyCoords = (property: Property): [number, number] => {
+    // Coordenadas baseadas na localização
+    if (property.location.includes("Copacabana")) return [-22.9711, -43.1822];
+    if (property.location.includes("Ipanema")) return [-22.9838, -43.2056];
+    if (property.location.includes("Barra")) return [-23.0175, -43.3212];
+    if (property.location.includes("Centro")) return [-22.9035, -43.2096];
+    return [-22.9068, -43.1729];
+  };
 
   // Simulando locais próximos baseado na propriedade selecionada
   const generateNearbyPlaces = (property: Property): Location[] => {
@@ -48,15 +67,7 @@ export default function MapSearch({ properties, onPropertySelect }: MapSearchPro
     setSelectedProperty(property);
     onPropertySelect(property);
     
-    // Simular coordenadas baseadas na localização
-    const coords: [number, number] = property.location.includes("Copacabana") 
-      ? [-22.9711, -43.1822]
-      : property.location.includes("Ipanema")
-      ? [-22.9838, -43.2056]  
-      : property.location.includes("Barra")
-      ? [-23.0175, -43.3212]
-      : [-22.9068, -43.1729];
-    
+    const coords = getPropertyCoords(property);
     setMapCenter(coords);
     setNearbyPlaces(generateNearbyPlaces(property));
   };
@@ -90,11 +101,12 @@ export default function MapSearch({ properties, onPropertySelect }: MapSearchPro
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="flex">
+    <div className={`bg-white rounded-xl shadow-lg overflow-hidden ${className}`}>
+      <div className="flex flex-col lg:flex-row">
         {/* Mapa */}
         <div className="flex-1 relative">
-          <div className="bg-gray-100 h-96 flex items-center justify-center relative overflow-hidden">
+          <div className="h-96 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-50 to-green-50 h-full flex items-center justify-center relative overflow-hidden">
             {/* Simulação de mapa com grid */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
               <div className="absolute inset-0" style={{
@@ -150,11 +162,18 @@ export default function MapSearch({ properties, onPropertySelect }: MapSearchPro
               <i className="fas fa-map-marker-alt text-hive-gold mr-1"></i>
               Rio de Janeiro, RJ
             </div>
+            
+            {/* Indicação para API do Google Maps */}
+            <div className="absolute top-4 right-4 bg-white p-2 rounded shadow-md text-xs">
+              <i className="fas fa-info-circle text-blue-500 mr-1"></i>
+              Mapa customizado (Google Maps API disponível)
+            </div>
+          </div>
           </div>
         </div>
 
         {/* Painel lateral com locais próximos */}
-        <div className="w-80 bg-gray-50 p-4">
+        <div className="w-full lg:w-80 bg-gray-50 p-4">
           <h3 className="font-bold text-lg mb-4">
             {selectedProperty ? 'Locais Próximos' : 'Selecione uma Propriedade'}
           </h3>

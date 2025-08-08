@@ -43,7 +43,8 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 - **Chat System**: Real-time chat widget with intelligent responses and contextual help
 - **Responsive Layout**: Mobile-first design with grid systems that adapt to different screen sizes
 - **Navigation**: Sticky header with mobile hamburger menu and desktop horizontal navigation
-- **Multi-view Interface**: Toggle between grid and map views for property browsing
+- **Multi-view Interface**: Toggle between grid view and mixed map+list view for property browsing
+- **Adaptive Layout**: Desktop shows map and property list side-by-side, mobile shows map above and list below
 
 ### Authentication & Authorization
 - **Planned Implementation**: Session-based authentication with role-based access control

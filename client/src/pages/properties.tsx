@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "@/components/property-card";
-import MapSearch from "@/components/map-search";
+import PropertyMapView from "@/components/property-map-view";
 import { type Property } from "@shared/schema";
 
 export default function Properties() {
@@ -12,8 +12,7 @@ export default function Properties() {
   const [propertyType, setPropertyType] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [bedrooms, setBedrooms] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'mixed'>('mixed');
 
   const { data: properties, isLoading } = useQuery({
     queryKey: ["/api/properties"],
@@ -43,12 +42,12 @@ export default function Properties() {
                 Grade
               </Button>
               <Button
-                onClick={() => setViewMode('map')}
-                variant={viewMode === 'map' ? 'default' : 'outline'}
-                className={`${viewMode === 'map' ? 'bg-hive-gold hover:bg-hive-gold-dark text-white' : 'border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-white'}`}
+                onClick={() => setViewMode('mixed')}
+                variant={viewMode === 'mixed' ? 'default' : 'outline'}
+                className={`${viewMode === 'mixed' ? 'bg-hive-gold hover:bg-hive-gold-dark text-white' : 'border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-white'}`}
               >
-                <i className="fas fa-map mr-2"></i>
-                Mapa
+                <i className="fas fa-map-marked-alt mr-2"></i>
+                Mapa + Lista
               </Button>
             </div>
           </div>
@@ -137,17 +136,11 @@ export default function Properties() {
             </div>
           )
         ) : (
-          /* Map View */
-          isLoading ? (
-            <div className="bg-white rounded-xl overflow-hidden">
-              <Skeleton className="w-full h-96" />
-            </div>
-          ) : (
-            <MapSearch 
-              properties={(properties as Property[] || [])} 
-              onPropertySelect={setSelectedProperty}
-            />
-          )
+          /* Mixed Map + List View */
+          <PropertyMapView 
+            properties={(properties as Property[] || [])}
+            isLoading={isLoading}
+          />
         )}
       </div>
     </div>
