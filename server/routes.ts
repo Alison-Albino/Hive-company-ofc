@@ -89,6 +89,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile routes
+  app.get('/api/profiles', async (req, res) => {
+    try {
+      const { documentType, city } = req.query;
+      const profiles = await storage.getUserProfiles({ 
+        documentType: documentType as string,
+        city: city as string 
+      });
+      res.json(profiles);
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      res.status(500).json({ message: 'Error fetching profiles' });
+    }
+  });
+
+  app.get('/api/profiles/:id', async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ message: 'Profile not found' });
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      res.status(500).json({ message: 'Error fetching profile' });
+    }
+  });
+
   // Chat endpoint
   app.post("/api/chat", (req, res) => {
     const { message } = req.body;

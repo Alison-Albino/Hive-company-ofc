@@ -8,6 +8,8 @@ import Home from "./pages/home";
 import Properties from "./pages/properties";
 import Services from "./pages/services";
 import Plans from "./pages/plans";
+import Profiles from "./pages/profiles";
+import ProfilePage from "./pages/profile";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatWidget from "./components/chat-widget";
@@ -19,6 +21,8 @@ function Router() {
       <Route path="/properties" component={Properties} />
       <Route path="/services" component={Services} />
       <Route path="/plans" component={Plans} />
+      <Route path="/profiles" component={Profiles} />
+      <Route path="/profile/:profileId" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

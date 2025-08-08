@@ -12,6 +12,7 @@ export default function Navigation() {
     { path: "/", label: "Início" },
     { path: "/properties", label: "Imóveis" },
     { path: "/services", label: "Serviços" },
+    { path: "/profiles", label: "Profissionais" },
     { path: "/plans", label: "Planos" },
   ];
 

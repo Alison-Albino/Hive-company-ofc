@@ -23,6 +23,16 @@ export interface IStorage {
   getPlans(): Promise<Plan[]>;
   getPlan(id: string): Promise<Plan | undefined>;
   createPlan(plan: InsertPlan): Promise<Plan>;
+
+  // User operations (required for auth)
+  getUser(id: string): Promise<any>;
+  upsertUser(user: any): Promise<any>;
+
+  // User profile operations
+  getUserProfiles(params?: { documentType?: string; city?: string }): Promise<any[]>;
+  getUserProfile(id: string): Promise<any>;
+  createUserProfile(profile: any): Promise<any>;
+  updateUserProfile(id: string, profile: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -30,12 +40,16 @@ export class MemStorage implements IStorage {
   private serviceProviders: Map<string, ServiceProvider>;
   private serviceCategories: Map<string, ServiceCategory>;
   private plans: Map<string, Plan>;
+  private sampleProfiles: any[];
+  private sampleUsers: any[];
 
   constructor() {
     this.properties = new Map();
     this.serviceProviders = new Map();
     this.serviceCategories = new Map();
     this.plans = new Map();
+    this.sampleProfiles = [];
+    this.sampleUsers = [];
     this.seedData();
   }
 
@@ -261,6 +275,124 @@ export class MemStorage implements IStorage {
     plans.forEach(plan => {
       this.plans.set(plan.id, plan);
     });
+
+    // Seed Sample Profiles
+    const sampleProfilesData = [
+      {
+        id: randomUUID(),
+        documentType: 'CPF',
+        displayName: 'João Silva',
+        bio: 'Especialista em reparos domésticos e instalações elétricas. Mais de 10 anos de experiência no mercado.',
+        profession: 'Eletricista',
+        city: 'São Paulo',
+        state: 'SP',
+        specialties: ['Instalação Elétrica', 'Reparos', 'Manutenção'],
+        services: ['Instalação', 'Reparo', 'Manutenção preventiva'],
+        profileImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
+        rating: '4.8',
+        reviewCount: 156,
+        completedJobs: 89,
+        responseTime: 15,
+        verified: true,
+        available: true,
+        planType: 'A',
+        phone: '(11) 98765-4321',
+        socialLinks: {
+          whatsapp: '5511987654321',
+          instagram: 'https://instagram.com/joaoeletricista'
+        },
+        portfolioImages: []
+      },
+      {
+        id: randomUUID(),
+        documentType: 'CNPJ',
+        displayName: 'Construtora Alfa Ltda',
+        bio: 'Empresa especializada em construção civil e reformas residenciais e comerciais.',
+        companyName: 'Construtora Alfa Ltda',
+        tradeName: 'Alfa Construções',
+        profession: 'Construção Civil',
+        city: 'Rio de Janeiro',
+        state: 'RJ',
+        foundedYear: 2010,
+        employeeCount: 25,
+        companyDescription: 'Somos uma empresa consolidada no mercado de construção civil, oferecendo serviços completos de construção e reforma.',
+        specialties: ['Construção', 'Reforma', 'Acabamentos'],
+        services: ['Obra completa', 'Reforma', 'Acabamentos finos'],
+        profileImage: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=400&fit=crop',
+        rating: '4.9',
+        reviewCount: 234,
+        completedJobs: 145,
+        responseTime: 30,
+        verified: true,
+        available: true,
+        planType: 'B',
+        phone: '(21) 3456-7890',
+        website: 'https://alfaconstrucoes.com.br',
+        socialLinks: {
+          website: 'https://alfaconstrucoes.com.br',
+          instagram: 'https://instagram.com/alfaconstrucoes',
+          linkedin: 'https://linkedin.com/company/alfa-construcoes'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: randomUUID(),
+        documentType: 'CPF',
+        displayName: 'Maria Santos',
+        bio: 'Paisagista experiente, especializada em jardins residenciais e comerciais com foco em sustentabilidade.',
+        profession: 'Paisagista',
+        city: 'Belo Horizonte',
+        state: 'MG',
+        specialties: ['Jardins', 'Paisagismo', 'Plantas nativas'],
+        services: ['Projeto de jardim', 'Manutenção', 'Consultoria'],
+        profileImage: 'https://images.unsplash.com/photo-1494790108755-2616b612b632?w=400&h=400&fit=crop&crop=face',
+        rating: '4.7',
+        reviewCount: 89,
+        completedJobs: 67,
+        responseTime: 20,
+        verified: true,
+        available: false,
+        planType: 'A',
+        phone: '(31) 99876-5432',
+        socialLinks: {
+          instagram: 'https://instagram.com/mariapaisagista',
+          facebook: 'https://facebook.com/mariasantospaisagismo'
+        },
+        portfolioImages: [
+          'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&h=600&fit=crop'
+        ]
+      },
+      {
+        id: randomUUID(),
+        documentType: 'CPF',
+        displayName: 'Carlos Mendes',
+        bio: 'Encanador com mais de 15 anos de experiência em instalações hidráulicas e reparos de emergência.',
+        profession: 'Encanador',
+        city: 'Brasília',
+        state: 'DF',
+        specialties: ['Instalação hidráulica', 'Vazamentos', 'Desentupimento'],
+        services: ['Reparo urgente', 'Instalação', 'Manutenção preventiva'],
+        profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+        rating: '4.9',
+        reviewCount: 312,
+        completedJobs: 278,
+        responseTime: 5,
+        verified: true,
+        available: true,
+        planType: 'A',
+        phone: '(61) 99999-8888',
+        socialLinks: {
+          whatsapp: '556199999888'
+        },
+        portfolioImages: []
+      }
+    ];
+
+    this.sampleProfiles = sampleProfilesData;
   }
 
   // Properties
@@ -362,6 +494,49 @@ export class MemStorage implements IStorage {
     this.plans.set(id, plan);
     return plan;
   }
+
+  // Profile implementations
+  async getUser(id: string): Promise<any> {
+    return this.sampleUsers.find(u => u.id === id);
+  }
+
+  async upsertUser(user: any): Promise<any> {
+    return user;
+  }
+
+  async getUserProfiles(params?: { documentType?: string; city?: string }): Promise<any[]> {
+    let profiles = this.sampleProfiles;
+    
+    if (params?.documentType) {
+      profiles = profiles.filter(p => p.documentType === params.documentType);
+    }
+    
+    if (params?.city) {
+      profiles = profiles.filter(p => p.city?.includes(params.city) || false);
+    }
+    
+    return profiles;
+  }
+
+  async getUserProfile(id: string): Promise<any> {
+    return this.sampleProfiles.find(p => p.id === id);
+  }
+
+  async createUserProfile(profile: any): Promise<any> {
+    const newProfile = { ...profile, id: randomUUID() };
+    this.sampleProfiles.push(newProfile);
+    return newProfile;
+  }
+
+  async updateUserProfile(id: string, profile: any): Promise<any> {
+    const index = this.sampleProfiles.findIndex(p => p.id === id);
+    if (index >= 0) {
+      this.sampleProfiles[index] = { ...this.sampleProfiles[index], ...profile };
+      return this.sampleProfiles[index];
+    }
+    return undefined;
+  }
 }
 
+// Usar MemStorage temporariamente para teste
 export const storage = new MemStorage();
