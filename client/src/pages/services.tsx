@@ -81,11 +81,13 @@ export default function ServicesPage() {
       profile.profession?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       profile.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
     
+    const matchesCategory = selectedCategory === 'all' || profile.profession === selectedCategory;
+    
     const matchesCity = selectedCity === 'all' || profile.city.toLowerCase().includes(selectedCity.toLowerCase());
     
     const matchesRating = selectedRating === 'all' || parseFloat(profile.rating) >= parseFloat(selectedRating);
     
-    return matchesSearch && matchesCity && matchesRating;
+    return matchesSearch && matchesCategory && matchesCity && matchesRating;
   }).sort((a, b) => {
     // Primeiro por verificação, depois por rating, depois por trabalhos concluídos
     if (a.verified !== b.verified) return b.verified ? 1 : -1;
@@ -172,6 +174,12 @@ export default function ServicesPage() {
                 <SelectItem value="Pintor">Pintor</SelectItem>
                 <SelectItem value="Paisagista">Paisagista</SelectItem>
                 <SelectItem value="Construção Civil">Construção Civil</SelectItem>
+                <SelectItem value="Ar Condicionado">Ar Condicionado</SelectItem>
+                <SelectItem value="Assistência Técnica">Assistência Técnica</SelectItem>
+                <SelectItem value="Marceneiro">Marceneiro</SelectItem>
+                <SelectItem value="Limpeza">Limpeza</SelectItem>
+                <SelectItem value="Jardinagem">Jardinagem</SelectItem>
+                <SelectItem value="Serralheiro">Serralheiro</SelectItem>
               </SelectContent>
             </Select>
 
@@ -205,6 +213,42 @@ export default function ServicesPage() {
             </Button>
           </div>
         </div>
+
+        {/* Estatísticas */}
+        {!isLoading && filteredAndRankedProfiles && filteredAndRankedProfiles.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold mb-2">{filteredAndRankedProfiles.length}</div>
+                <div className="text-blue-100">Profissionais Encontrados</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold mb-2">
+                  {filteredAndRankedProfiles.filter(p => p.verified).length}
+                </div>
+                <div className="text-green-100">Verificados</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold mb-2">
+                  {(filteredAndRankedProfiles.reduce((sum, p) => sum + parseFloat(p.rating), 0) / filteredAndRankedProfiles.length).toFixed(1)}⭐
+                </div>
+                <div className="text-yellow-100">Avaliação Média</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold mb-2">
+                  {Object.keys(groupedProfiles).length}
+                </div>
+                <div className="text-purple-100">Categorias</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Lista de Profissionais por Categoria */}
         {isLoading ? (
@@ -303,11 +347,12 @@ export default function ServicesPage() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Link href={`/profile/${profile.id}`} className="flex-1">
-                            <Button className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white">
-                              Ver Perfil
-                            </Button>
-                          </Link>
+                          <Button 
+                            className="flex-1 bg-hive-gold hover:bg-hive-gold-dark text-white"
+                            onClick={() => window.location.href = `/profile/${profile.id}`}
+                          >
+                            Ver Perfil
+                          </Button>
                           {profile.socialLinks?.whatsapp && (
                             <Button
                               variant="outline"
