@@ -3,6 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { type Property } from "@shared/schema";
 
+// Declarar tipos Google Maps
+declare global {
+  interface Window {
+    google: any;
+    initMap: () => void;
+    GOOGLE_MAPS_API_KEY: string;
+  }
+}
+
 interface MapSearchProps {
   properties: Property[];
   onPropertySelect: (property: Property) => void;
@@ -31,13 +40,42 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
 
-  // Carregar Google Maps API (por enquanto usar fallback customizado)
+  // Carregar Google Maps API
   useEffect(() => {
-    // Para demonstração, vamos usar um mapa customizado estilizado
-    setIsGoogleMapsLoaded(false); // Forçar uso do mapa customizado
+    const loadGoogleMaps = async () => {
+      if (window.google && window.google.maps) {
+        setIsGoogleMapsLoaded(true);
+        return;
+      }
+
+      try {
+        // Usar a API key fornecida
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk';
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        
+        window.initMap = () => {
+          setIsGoogleMapsLoaded(true);
+        };
+        
+        script.onerror = () => {
+          console.error('Erro ao carregar Google Maps API');
+          setIsGoogleMapsLoaded(false);
+        };
+        
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error('Erro ao inicializar Google Maps:', error);
+        setIsGoogleMapsLoaded(false);
+      }
+    };
+
+    loadGoogleMaps();
   }, []);
 
-  // Buscar localizações baseado na query
+  // Buscar localizações usando Google Places API
   const searchLocation = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -46,26 +84,49 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
 
     setIsSearching(true);
     
-    // Simulação de busca de locais (normalmente seria uma API como Google Places)
-    const mockResults = [
-      { name: `${query} - Centro, Rio de Janeiro`, coords: [-22.9035, -43.2096] },
-      { name: `${query} - Copacabana, Rio de Janeiro`, coords: [-22.9711, -43.1822] },
-      { name: `${query} - Ipanema, Rio de Janeiro`, coords: [-22.9838, -43.2056] },
-      { name: `${query} - Barra da Tijuca, Rio de Janeiro`, coords: [-23.0175, -43.3212] },
-      { name: `${query} - Zona Norte, Rio de Janeiro`, coords: [-22.8747, -43.2436] }
-    ].filter(result => 
-      result.name.toLowerCase().includes(query.toLowerCase()) ||
-      query.toLowerCase().includes("centro") ||
-      query.toLowerCase().includes("copacabana") ||
-      query.toLowerCase().includes("ipanema") ||
-      query.toLowerCase().includes("barra") ||
-      query.toLowerCase().includes("zona")
-    );
-
-    setTimeout(() => {
-      setSearchResults(mockResults);
-      setIsSearching(false);
-    }, 500);
+    if (window.google && window.google.maps) {
+      const service = new window.google.maps.places.AutocompleteService();
+      
+      try {
+        service.getPlacePredictions(
+          {
+            input: query,
+            componentRestrictions: { country: 'BR' },
+            types: ['geocode']
+          },
+          (predictions: any, status: any) => {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+              const results = predictions.map((prediction: any) => ({
+                name: prediction.description,
+                placeId: prediction.place_id,
+                coords: null // Será obtido no geocoding
+              }));
+              setSearchResults(results);
+            } else {
+              console.warn('Erro na busca de locais:', status);
+              setSearchResults([]);
+            }
+            setIsSearching(false);
+          }
+        );
+      } catch (error) {
+        console.error('Erro ao buscar locais:', error);
+        setIsSearching(false);
+      }
+    } else {
+      // Fallback se Google Maps não estiver disponível
+      const mockResults = [
+        { name: `${query} - Centro, Rio de Janeiro`, coords: [-22.9035, -43.2096] },
+        { name: `${query} - Copacabana, Rio de Janeiro`, coords: [-22.9711, -43.1822] },
+        { name: `${query} - Ipanema, Rio de Janeiro`, coords: [-22.9838, -43.2056] },
+        { name: `${query} - Barra da Tijuca, Rio de Janeiro`, coords: [-23.0175, -43.3212] }
+      ];
+      
+      setTimeout(() => {
+        setSearchResults(mockResults);
+        setIsSearching(false);
+      }, 500);
+    }
   };
 
   // Buscar propriedades próximas a um ponto clicado
@@ -81,20 +142,28 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
   };
 
   // Handle map click
-  const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    // Converter posição do clique em coordenadas aproximadas
-    const coords: [number, number] = [
-      mapCenter[0] + (y - rect.height/2) / rect.height * 0.05,
-      mapCenter[1] + (x - rect.width/2) / rect.width * 0.05
-    ];
-    
-    setClickedLocation(coords);
-    findNearbyProperties(coords);
-    setSelectedProperty(null);
+  const handleMapClick = (event: any) => {
+    if (isGoogleMapsLoaded && event.latLng) {
+      // Para Google Maps real
+      const coords: [number, number] = [event.latLng.lat(), event.latLng.lng()];
+      setClickedLocation(coords);
+      findNearbyProperties(coords);
+      setSelectedProperty(null);
+    } else {
+      // Para mapa customizado (fallback)
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      
+      const coords: [number, number] = [
+        mapCenter[0] + (y - rect.height/2) / rect.height * 0.05,
+        mapCenter[1] + (x - rect.width/2) / rect.width * 0.05
+      ];
+      
+      setClickedLocation(coords);
+      findNearbyProperties(coords);
+      setSelectedProperty(null);
+    }
   };
 
   // Handle search input
@@ -104,13 +173,40 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
   };
 
   // Handle search result selection
-  const handleSearchSelect = (result: any) => {
-    setMapCenter(result.coords);
+  const handleSearchSelect = async (result: any) => {
     setSearchQuery(result.name);
     setSearchResults([]);
-    setClickedLocation(result.coords);
-    findNearbyProperties(result.coords);
-    onLocationSearch?.(result.name, result.coords);
+    
+    if (window.google && window.google.maps && result.placeId) {
+      const geocoder = new window.google.maps.Geocoder();
+      
+      geocoder.geocode(
+        { placeId: result.placeId },
+        (results: any, status: any) => {
+          if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            const coords: [number, number] = [location.lat(), location.lng()];
+            
+            setMapCenter(coords);
+            setClickedLocation(coords);
+            findNearbyProperties(coords);
+            onLocationSearch?.(result.name, coords);
+            
+            // Atualizar mapa Google se disponível
+            if (googleMapRef.current) {
+              googleMapRef.current.setCenter({ lat: coords[0], lng: coords[1] });
+              googleMapRef.current.setZoom(15);
+            }
+          }
+        }
+      );
+    } else if (result.coords) {
+      // Fallback para coordenadas já conhecidas
+      setMapCenter(result.coords);
+      setClickedLocation(result.coords);
+      findNearbyProperties(result.coords);
+      onLocationSearch?.(result.name, result.coords);
+    }
   };
 
   const getPropertyCoords = (property: Property): [number, number] => {
@@ -145,6 +241,48 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
     }));
   };
 
+  // Inicializar mapa Google quando disponível
+  useEffect(() => {
+    if (isGoogleMapsLoaded && mapRef.current && !googleMapRef.current) {
+      googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+        center: { lat: mapCenter[0], lng: mapCenter[1] },
+        zoom: 13,
+        styles: [
+          {
+            featureType: "poi",
+            elementType: "labels.icon",
+            stylers: [{ visibility: "off" }]
+          }
+        ]
+      });
+
+      // Adicionar listener para cliques no mapa
+      googleMapRef.current.addListener('click', handleMapClick);
+
+      // Adicionar marcadores das propriedades
+      properties.forEach((property) => {
+        const coords = getPropertyCoords(property);
+        const marker = new window.google.maps.Marker({
+          position: { lat: coords[0], lng: coords[1] },
+          map: googleMapRef.current,
+          title: property.title,
+          icon: {
+            url: 'data:image/svg+xml;base64,' + btoa(`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+                <circle cx="12" cy="12" r="10" fill="#D4AF37" stroke="#fff" stroke-width="2"/>
+                <path d="M12 6l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z" fill="#fff"/>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(32, 32)
+          }
+        });
+
+        // Adicionar listener para clique no marcador
+        marker.addListener('click', () => handlePropertyClick(property));
+      });
+    }
+  }, [isGoogleMapsLoaded, properties, mapCenter]);
+
   const handlePropertyClick = (property: Property) => {
     setSelectedProperty(property);
     onPropertySelect(property);
@@ -152,6 +290,12 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
     const coords = getPropertyCoords(property);
     setMapCenter(coords);
     setNearbyPlaces(generateNearbyPlaces(property));
+    
+    // Atualizar mapa Google se disponível
+    if (googleMapRef.current) {
+      googleMapRef.current.setCenter({ lat: coords[0], lng: coords[1] });
+      googleMapRef.current.setZoom(16);
+    }
   };
 
   const getPlaceIcon = (type: string) => {
@@ -234,10 +378,13 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
         {/* Mapa */}
         <div className="flex-1 relative">
           <div className="h-96 relative overflow-hidden">
-            <div 
-              className="bg-gradient-to-br from-blue-50 to-green-50 h-full flex items-center justify-center relative overflow-hidden cursor-pointer"
-              onClick={handleMapClick}
-            >
+            {isGoogleMapsLoaded ? (
+              <div ref={mapRef} className="w-full h-full" />
+            ) : (
+              <div 
+                className="bg-gradient-to-br from-blue-50 to-green-50 h-full flex items-center justify-center relative overflow-hidden cursor-pointer"
+                onClick={handleMapClick}
+              >
             {/* Simulação de mapa com grid */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
               <div className="absolute inset-0" style={{
@@ -312,17 +459,18 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
               {searchQuery || "Rio de Janeiro, RJ"}
             </div>
             
-            {/* Indicações de interação */}
-            <div className="absolute top-4 right-4 bg-white p-2 rounded shadow-md text-xs max-w-xs">
-              <div className="flex items-center mb-1">
-                <i className="fas fa-info-circle text-blue-500 mr-1"></i>
-                <span>Clique no mapa para encontrar propriedades próximas</span>
-              </div>
-              <div className="text-xs text-gray-500">
-                Use a busca acima para navegar para qualquer local
+              {/* Indicações de interação */}
+              <div className="absolute top-4 right-4 bg-white p-2 rounded shadow-md text-xs max-w-xs">
+                <div className="flex items-center mb-1">
+                  <i className="fas fa-info-circle text-blue-500 mr-1"></i>
+                  <span>Clique no mapa para encontrar propriedades próximas</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  Use a busca acima para navegar para qualquer local
+                </div>
               </div>
             </div>
-          </div>
+            )}
           </div>
         </div>
 
@@ -423,19 +571,24 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
                 className="mt-4 bg-hive-gold hover:bg-hive-gold-dark text-white text-xs"
                 onClick={() => {
                   // Simular locais de interesse na área clicada
-                  const mockProperty = {
+                  const mockProperty: Property = {
                     id: 'temp',
                     title: 'Área Selecionada',
-                    location: searchQuery || 'Local no mapa',
+                    description: 'Local selecionado no mapa',
                     price: '0',
-                    imageUrl: '',
-                    bedrooms: 0,
-                    bathrooms: 0,
-                    area: '0',
-                    businessType: 'residential' as const,
-                    propertyType: 'house' as const,
+                    priceType: 'sale',
+                    propertyType: 'house',
+                    location: searchQuery || 'Local no mapa',
+                    bedrooms: null,
+                    bathrooms: null,
+                    parkingSpaces: null,
+                    area: null,
+                    businessType: 'residential',
                     agency: { name: '', phone: '', email: '' },
-                    amenities: []
+                    amenities: [],
+                    images: [],
+                    isFeatured: false,
+                    views: 0
                   };
                   const places = generateNearbyPlaces(mockProperty);
                   setNearbyPlaces(places);
