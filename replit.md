@@ -51,9 +51,11 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 - **User Types**: Two-tier plan system (Plan A for individuals/CPF, Plan B for companies/CNPJ)
 
 ### Search & Discovery
-- **Property Search**: Multi-criteria filtering by location, property type, price range, and business type
-- **Interactive Map**: Visual property search with nearby amenities and places of interest
-- **Location Insights**: Shows hospitals, schools, supermarkets, and other important places near properties
+- **Location Search**: Complete search system with text input for any location with autocomplete suggestions
+- **Interactive Map**: Click anywhere on map to find nearby properties and points of interest
+- **Property Discovery**: Visual search with property markers and detailed property cards
+- **Location Insights**: Shows hospitals, schools, supermarkets, and other important places near any selected area
+- **Nearby Properties**: Click on map to discover properties in the selected region
 - **Service Discovery**: Category-based browsing with rating-based sorting and location filtering
 - **Featured Content**: Highlighted properties and top-rated service providers
 - **Chat Support**: Intelligent chat widget with contextual responses about properties and services
