@@ -1,0 +1,54 @@
+Crie um projeto web completo responsivo no Replit com as seguintes características:
+
+🔶 Nome do site/app: Hive
+
+🔶 Estrutura geral: 
+- HTML, CSS (TailwindCSS) e JavaScript.
+- Arquivos separados para cada parte (index.html, style.css, script.js).
+- Layout responsivo estilo iFood, com foco em experiência mobile e desktop.
+
+🔶 Funcionalidades do app:
+
+1. **Home (Página Inicial)**:
+- Banner chamativo com slogan: "Conectando imóveis a quem realmente precisa."
+- Seção de imóveis em destaque (casas, apartamentos, eventos, salões etc.).
+  - Cada imóvel mostra: imagem, nome, valor, status (aluguel ou venda), nome da imobiliária responsável (já com negócio fechado).
+- Seção de categorias de serviços (estilo iFood), exemplo:
+  - Encanador, Eletricista, Pintor, Gesseiro, Fotógrafo, Decorador, Limpeza etc.
+  - Ícones ou cards clicáveis levando para os perfis mais bem avaliados da categoria.
+  
+2. **Perfis dos prestadores de serviço**:
+- Cada perfil mostra: nome, tipo (CPF ou CNPJ), especialidade, localização, avaliações, imagens de trabalhos realizados e botão "Contratar".
+- Dividido por planos:
+  - Plano A (CPF): Autônomos com categorias e subcategorias predefinidas (todas já inclusas no mercado de prestação de serviço).
+  - Plano B (CNPJ): Imobiliárias, construtoras e empresas do ramo imobiliário com perfil de empresa e imóveis listados.
+
+3. **Sistema de planos**:
+- Apenas dois planos:
+  - Plano A – Autônomos (CPF).
+  - Plano B – Empresas (CNPJ).
+- Layout com apresentação dos planos e botão "Assinar" (integração com pagamento pode ser feita depois).
+
+4. **Sistema de exibição inteligente**:
+- Mostrar primeiro os perfis mais bem avaliados.
+- Imóveis mais vistos.
+- Categorias clicáveis redirecionando para listagem de perfis daquela área.
+
+🔶 Estilo visual:
+- Estilo iFood ou Airbnb.
+- Cores modernas: branco, dourado, preto.
+- Cards com cantos arredondados, sombra suave, animações leves.
+- Layout grid responsivo.
+
+🔶 Extras:
+- Use apenas tecnologias gratuitas.
+- Estrutura de navegação com SPA simples usando JS (sem frameworks).
+- Possibilidade de futura integração com backend (Firebase, Node.js, Supabase).
+- Responsivo para celular, tablet e desktop.
+
+🔶 Organização dos arquivos:
+- index.html
+- style.css (Tailwind configurado)
+- script.js
+
+Crie o projeto já com exemplos visuais de imóveis, prestadores, categorias e um rodapé com: "© Hive 2025 - Todos os direitos reservados".
