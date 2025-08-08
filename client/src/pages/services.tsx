@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, MapPin, Phone, Users, Clock, CheckCircle, Search, Zap, Wrench, Paintbrush, TreePine, HardHat, Wind, Monitor, Hammer, Sparkles, Leaf, Shield, MessageCircle } from "lucide-react";
-import ChatWidget from "@/components/chat/ChatWidget";
+import ChatManager from "@/components/chat/ChatManager";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ServiceCategory {
@@ -373,11 +373,14 @@ export default function ServicesPage() {
                           >
                             Ver Perfil
                           </Button>
-                          <ChatWidget
-                            providerId={profile.id}
-                            providerName={profile.displayName}
-                            providerImage={profile.profileImage}
-                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => (window as any).openProviderChat?.(profile.id, profile.displayName, profile.profileImage)}
+                            className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            Conversar
+                          </Button>
                           {profile.socialLinks?.whatsapp && (
                             <Button
                               variant="outline"
@@ -409,6 +412,7 @@ export default function ServicesPage() {
             )}
           </div>
         )}
+
       </div>
     </div>
   );

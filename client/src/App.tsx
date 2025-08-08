@@ -11,7 +11,7 @@ import Plans from "./pages/plans";
 import ProfilePage from "./pages/profile";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
-import ChatWidget from "./components/chat-widget";
+import ChatManager from "./components/chat/ChatManager";
 
 function Router() {
   return (
@@ -37,7 +37,7 @@ function App() {
             <Router />
           </main>
           <Footer />
-          <ChatWidget />
+          <ChatManager />
           <Toaster />
         </div>
       </TooltipProvider>
