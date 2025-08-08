@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "@/components/property-card";
-import PropertyMapView from "@/components/property-map-view";
+import PropertyMapView from "@/components/property-map-view-simple";
 import { type Property } from "@shared/schema";
 
 export default function Properties() {

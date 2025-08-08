@@ -86,8 +86,20 @@ export default function MapSearch({ properties, onPropertySelect, className = ""
           delete window[callbackName];
         };
 
-        // Usar a chave do ambiente secreto do Replit
-        const apiKey = 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk'; // Chave pública para desenvolvimento
+        // Obter a chave da API do servidor
+        let apiKey = '';
+        try {
+          const response = await fetch('/api/config/maps-key');
+          if (response.ok) {
+            apiKey = await response.text();
+            console.log('Chave da API obtida do servidor:', apiKey ? 'OK' : 'VAZIA');
+          } else {
+            throw new Error('API key not available from server');
+          }
+        } catch (error) {
+          console.log('Usando chave de fallback para desenvolvimento');
+          apiKey = 'AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk';
+        }
         
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;

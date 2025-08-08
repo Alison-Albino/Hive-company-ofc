@@ -79,6 +79,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Config endpoint for maps key
+  app.get('/api/config/maps-key', (req, res) => {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (apiKey) {
+      res.send(apiKey);
+    } else {
+      res.status(404).send('API key not found');
+    }
+  });
+
+  // Chat endpoint
+  app.post("/api/chat", (req, res) => {
+    const { message } = req.body;
+
+    // Simular resposta do chat baseada na mensagem
+    const responses = {
+      ola: "Olá! Como posso ajudá-lo hoje? Está procurando por alguma propriedade específica?",
+      ajuda:
+        "Estou aqui para ajudar! Você pode buscar propriedades por localização, ver detalhes de imóveis ou encontrar prestadores de serviços.",
+      propriedades:
+        "Temos várias propriedades disponíveis! Use o mapa para explorar diferentes regiões ou digite uma localização específica na busca.",
+      default:
+        "Interessante! Como posso ajudá-lo com propriedades ou serviços? Digite sua dúvida e eu terei prazer em ajudar.",
+    };
+
+    const lowerMessage = message.toLowerCase();
+    let response = responses.default;
+
+    for (const [key, value] of Object.entries(responses)) {
+      if (key !== "default" && lowerMessage.includes(key)) {
+        response = value;
+        break;
+      }
+    }
+
+    res.json({
+      message: response,
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
