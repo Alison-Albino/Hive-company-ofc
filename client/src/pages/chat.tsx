@@ -309,13 +309,12 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Mensagens */}
-              <div className="flex-1 overflow-hidden min-h-0">
-                <ScrollArea className="h-full">
-                  <div className="px-4 pt-2 pb-1 space-y-2">
-                    {messages.map((message) => {
-                      const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
-                      const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
-                      return (
+              <div className="flex-1 overflow-y-auto">
+                <div className="px-4 pt-2 pb-1 space-y-2">
+                  {messages.map((message) => {
+                    const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
+                    const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
+                    return (
                         <div
                           key={message.id}
                           className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'}`}
@@ -352,13 +351,12 @@ export default function ChatPage() {
                         </div>
                       );
                     })}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
 
               {/* Área de Input - Fixa na parte inferior */}
-              <div className="border-t bg-white dark:bg-gray-800 px-4 py-1.5 flex-shrink-0">
+              <div className="border-t bg-white dark:bg-gray-800 px-4 py-1 flex-shrink-0">
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -371,14 +369,14 @@ export default function ChatPage() {
                       placeholder="Digite uma mensagem..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold h-9"
+                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold h-8"
                       disabled={sendMessageMutation.isPending}
                     />
                   </div>
                   <Button
                     type="submit"
                     disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                    className="rounded-full w-9 h-9 p-0 bg-hive-gold hover:bg-hive-gold-dark"
+                    className="rounded-full w-8 h-8 p-0 bg-hive-gold hover:bg-hive-gold-dark"
                     size="sm"
                   >
                     {sendMessageMutation.isPending ? (
