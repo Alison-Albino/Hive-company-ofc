@@ -409,6 +409,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para completar configuração do perfil do prestador
+  app.post("/api/complete-provider-setup", requireAuth, async (req, res) => {
+    try {
+      const { categoryId, subcategories, biography, profileImage, portfolioImages } = req.body;
+      const user = (req as any).user;
+      
+      // Validar dados obrigatórios
+      if (!categoryId || !subcategories || subcategories.length === 0 || !biography) {
+        return res.status(400).json({ error: "Dados obrigatórios não fornecidos" });
+      }
+      
+      if (subcategories.length > 3) {
+        return res.status(400).json({ error: "Máximo de 3 subcategorias permitidas" });
+      }
+      
+      // Buscar categoria para validar
+      const category = await storage.getServiceCategoryById(categoryId);
+      if (!category) {
+        return res.status(400).json({ error: "Categoria não encontrada" });
+      }
+      
+      // Validar se as subcategorias pertencem à categoria
+      const invalidSubcategories = subcategories.filter(sub => 
+        !category.subcategories.includes(sub)
+      );
+      if (invalidSubcategories.length > 0) {
+        return res.status(400).json({ error: "Subcategorias inválidas para esta categoria" });
+      }
+      
+      // Criar/atualizar perfil detalhado do prestador
+      await storage.createOrUpdateProviderProfile({
+        userId: user.id,
+        categoryId,
+        subcategories,
+        biography,
+        profileImage,
+        portfolioImages: portfolioImages || [],
+      });
+      
+      // Atualizar categorias do usuário
+      const updatedUser = await storage.updateUserCategories(user.id, [category.slug]);
+      
+      // Update session with new user data
+      const sessionId = req.headers.authorization?.replace('Bearer ', '');
+      if (sessionId && sessions.has(sessionId)) {
+        sessions.set(sessionId, { userId: updatedUser.id, user: updatedUser });
+      }
+      
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("Complete provider setup error:", error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   // Properties routes
   app.get("/api/properties", async (req, res) => {
     try {

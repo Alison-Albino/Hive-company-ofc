@@ -64,6 +64,7 @@ export const serviceCategories = pgTable("service_categories", {
   icon: text("icon").notNull(), // Font Awesome class
   slug: text("slug").notNull().unique(),
   providerCount: integer("provider_count").default(0),
+  subcategories: text("subcategories").array().default([]),
 });
 
 export const plans = pgTable("plans", {

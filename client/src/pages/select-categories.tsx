@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { toast, useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { CheckCircle, Building2, ArrowRight } from "lucide-react";
+import { CheckCircle, Building2, ArrowRight, Camera, Upload, User, FileText } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 
 export default function SelectCategories() {
@@ -18,7 +19,11 @@ export default function SelectCategories() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
+  const [biography, setBiography] = useState("");
+  const [profileImage, setProfileImage] = useState<string>("");
+  const [portfolioImages, setPortfolioImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refresh auth data on component mount
@@ -63,211 +68,411 @@ export default function SelectCategories() {
     }
   }, [user, isAuthenticated, authState.isLoading, setLocation, toast]);
 
-  const { data: categories, isLoading } = useQuery({
+  const { data: categories, isLoading: categoriesLoading } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/service-categories"],
   });
 
-  const updateCategoriesMutation = useMutation({
-    mutationFn: async (categoryIds: string[]) => {
-      const response = await apiRequest("PUT", "/api/user/categories", {
-        categoryIds
-      });
+  const completeMutation = useMutation({
+    mutationFn: async (data: {
+      categoryId: string;
+      subcategories: string[];
+      biography: string;
+      profileImage?: string;
+      portfolioImages: string[];
+    }) => {
+      const response = await apiRequest("POST", "/api/complete-provider-setup", data);
       if (!response.ok) {
-        throw new Error('Falha ao atualizar categorias');
+        throw new Error("Falha ao salvar configurações");
       }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
-        title: "Categorias Salvas!",
-        description: "Seu perfil empresarial foi configurado com sucesso.",
+        title: "Configuração Concluída!",
+        description: "Seu perfil de prestador foi configurado com sucesso.",
       });
-      setLocation('/dashboard');
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1500);
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
         title: "Erro",
-        description: error.message || "Falha ao salvar categorias",
+        description: "Não foi possível salvar as configurações.",
         variant: "destructive",
       });
     },
   });
 
-  const handleCategoryToggle = (categoryId: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
+  const handleCategorySelect = (category: ServiceCategory) => {
+    setSelectedCategory(category);
+    setSelectedSubcategories([]);
   };
 
-  const handleSubmit = async () => {
-    if (selectedCategories.length === 0) {
+  const handleSubcategoryToggle = (subcategory: string) => {
+    setSelectedSubcategories(prev => {
+      if (prev.includes(subcategory)) {
+        return prev.filter(s => s !== subcategory);
+      } else if (prev.length < 3) {
+        return [...prev, subcategory];
+      } else {
+        toast({
+          title: "Limite Atingido",
+          description: "Você pode selecionar no máximo 3 subcategorias.",
+          variant: "destructive",
+        });
+        return prev;
+      }
+    });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'portfolio') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Simulação de upload - em produção seria um upload real
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageData = event.target?.result as string;
+      
+      if (type === 'profile') {
+        setProfileImage(imageData);
+      } else {
+        if (portfolioImages.length < 5) {
+          setPortfolioImages(prev => [...prev, imageData]);
+        } else {
+          toast({
+            title: "Limite de Imagens",
+            description: "Você pode adicionar no máximo 5 imagens ao portfólio.",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePortfolioImage = (index: number) => {
+    setPortfolioImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    if (!selectedCategory) {
       toast({
-        title: "Selecione pelo menos uma categoria",
-        description: "É necessário escolher ao menos uma categoria de serviço.",
+        title: "Categoria Obrigatória",
+        description: "Selecione uma categoria principal.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedSubcategories.length === 0) {
+      toast({
+        title: "Subcategoria Obrigatória", 
+        description: "Selecione pelo menos uma subcategoria.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!biography.trim()) {
+      toast({
+        title: "Biografia Obrigatória",
+        description: "Escreva uma breve biografia sobre seus serviços.",
         variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-    try {
-      await updateCategoriesMutation.mutateAsync(selectedCategories);
-    } finally {
-      setIsSubmitting(false);
-    }
+    completeMutation.mutate({
+      categoryId: selectedCategory.id,
+      subcategories: selectedSubcategories,
+      biography: biography.trim(),
+      profileImage,
+      portfolioImages,
+    });
   };
 
-  if (isLoading) {
+  if (authState.isLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <Skeleton className="h-12 w-96 mx-auto mb-4" />
-            <Skeleton className="h-6 w-64 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-lg p-4">
-                <Skeleton className="h-12 w-12 rounded-lg mb-3" />
-                <Skeleton className="h-5 w-24 mb-2" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
+  const isBusinessPlan = user?.planType === 'B' || user?.providerPlan === 'B';
+  const availableCategories = categories?.filter(category => {
+    // Para planos CNPJ, mostrar todas as categorias
+    // Para planos CPF, filtrar categorias básicas
+    if (isBusinessPlan) {
+      return true;
+    } else {
+      // CPF só vê categorias de serviços básicos
+      return !category.slug.startsWith('imobiliaria') && 
+             !category.slug.startsWith('incorporacao') &&
+             !category.slug.startsWith('administracao') &&
+             !category.slug.startsWith('avaliacao') &&
+             !category.slug.startsWith('corretagem') &&
+             !category.slug.startsWith('regularizacao');
+    }
+  }) || [];
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Building2 className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Building2 className="h-10 w-10 text-amber-600" />
           </div>
-          
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Complete seu Perfil de Prestador
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Configure seu Perfil Profissional
           </h1>
-          
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Selecione as categorias de serviços que você oferece. Isso ajudará os clientes a encontrarem você mais facilmente na plataforma Hive.
+          <p className="text-gray-600">
+            Escolha sua categoria principal e até 3 subcategorias de especialização
           </p>
-          
-          <div className="mt-6">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              {user?.planType === 'A' || user?.providerPlan === 'A' ? 'Plano BE HIVE Ativado' : 'Plano HIVE GOLD Ativado'}
+          <div className="mt-4">
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+              {isBusinessPlan ? 'HIVE GOLD (CNPJ)' : 'BE HIVE (CPF)'} - Todas as categorias disponíveis
             </Badge>
           </div>
         </div>
 
-        {/* Categories Grid */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-center">
-              Escolha as Categorias de Serviço
-              {selectedCategories.length > 0 && (
-                <Badge className="ml-3 bg-amber-100 text-amber-700">
-                  {selectedCategories.length} selecionada{selectedCategories.length > 1 ? 's' : ''}
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {!selectedCategory ? (
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-semibold mb-6 text-center">
+              Escolha sua Categoria Principal
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categories?.map((category: ServiceCategory) => (
-                <div
+              {availableCategories.map((category) => (
+                <Card 
                   key={category.id}
-                  onClick={() => handleCategoryToggle(category.id)}
-                  className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    selectedCategories.includes(category.id)
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'border-gray-200 bg-white hover:border-amber-200'
-                  }`}
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-amber-300"
+                  onClick={() => handleCategorySelect(category)}
                 >
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      checked={selectedCategories.includes(category.id)}
-                      className="mt-1"
-                    />
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className={`text-2xl p-2 rounded-lg ${
-                          selectedCategories.includes(category.id)
-                            ? 'bg-amber-100'
-                            : 'bg-gray-100'
-                        }`}>
-                          {category.icon}
-                        </div>
-                        
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            {category.name}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {category.providerCount} prestadores
-                          </p>
-                        </div>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <i className={`${category.icon} text-amber-600 text-xl`} />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{category.name}</CardTitle>
+                        <Badge variant="outline" className="text-xs">
+                          {category.providerCount} prestadores
+                        </Badge>
                       </div>
                     </div>
-                  </div>
-                  
-                  {selectedCategories.includes(category.id) && (
-                    <div className="absolute -top-2 -right-2">
-                      <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
-                        <CheckCircle className="h-4 w-4 text-white" />
-                      </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-1">
+                      {category.subcategories.slice(0, 3).map((sub) => (
+                        <Badge key={sub} variant="secondary" className="text-xs">
+                          {sub}
+                        </Badge>
+                      ))}
+                      {category.subcategories.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{category.subcategories.length - 3} mais
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <i className={`${selectedCategory.icon} text-amber-600 text-xl`} />
+                    </div>
+                    <div>
+                      <CardTitle>{selectedCategory.name}</CardTitle>
+                      <CardDescription>Selecione de 1 a 3 subcategorias</CardDescription>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSelectedCategory(null)}
+                  >
+                    Trocar Categoria
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Seleção de Subcategorias */}
+                <div>
+                  <Label className="text-lg font-semibold mb-4 block">
+                    Subcategorias de Especialização
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {selectedCategory.subcategories.map((subcategory) => (
+                      <div
+                        key={subcategory}
+                        className={`
+                          p-3 border-2 rounded-lg cursor-pointer transition-all
+                          ${selectedSubcategories.includes(subcategory)
+                            ? 'border-amber-500 bg-amber-50 text-amber-900'
+                            : 'border-gray-200 hover:border-amber-300'
+                          }
+                        `}
+                        onClick={() => handleSubcategoryToggle(subcategory)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {selectedSubcategories.includes(subcategory) && (
+                            <CheckCircle className="h-5 w-5 text-amber-600" />
+                          )}
+                          <span className="text-sm font-medium">{subcategory}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Selecionadas: {selectedSubcategories.length}/3
+                  </p>
+                </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => setLocation('/dashboard')}
-            disabled={isSubmitting}
-            className="px-8"
-          >
-            Pular por Agora
-          </Button>
-          
-          <Button
-            onClick={handleSubmit}
-            disabled={selectedCategories.length === 0 || isSubmitting}
-            className="px-8 bg-amber-500 hover:bg-amber-600"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Salvando...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                Finalizar Cadastro
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            )}
-          </Button>
-        </div>
+                {/* Biografia */}
+                <div>
+                  <Label htmlFor="biography" className="text-lg font-semibold mb-4 block">
+                    <FileText className="inline h-5 w-5 mr-2" />
+                    Biografia Profissional
+                  </Label>
+                  <Textarea
+                    id="biography"
+                    placeholder="Conte sobre sua experiência, especialidades e diferenciais. Exemplo: 'Sou eletricista com mais de 10 anos de experiência em instalações residenciais e comerciais. Especializado em sistemas de automação e energia solar...'"
+                    value={biography}
+                    onChange={(e) => setBiography(e.target.value)}
+                    rows={4}
+                    className="resize-none"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {biography.length}/500 caracteres
+                  </p>
+                </div>
 
-        {/* Help Text */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            💡 Você pode alterar essas categorias a qualquer momento no seu dashboard
-          </p>
-        </div>
+                {/* Upload de Imagem de Perfil */}
+                <div>
+                  <Label className="text-lg font-semibold mb-4 block">
+                    <User className="inline h-5 w-5 mr-2" />
+                    Foto de Perfil (Opcional)
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    {profileImage ? (
+                      <div className="relative">
+                        <img 
+                          src={profileImage} 
+                          alt="Perfil" 
+                          className="w-20 h-20 rounded-full object-cover border-4 border-amber-200"
+                        />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+                          onClick={() => setProfileImage("")}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center">
+                        <Camera className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                    <div>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, 'profile')}
+                        className="hidden"
+                        id="profile-upload"
+                      />
+                      <Label htmlFor="profile-upload" className="cursor-pointer">
+                        <Button variant="outline" asChild>
+                          <span>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Escolher Foto
+                          </span>
+                        </Button>
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upload de Imagens do Portfólio */}
+                <div>
+                  <Label className="text-lg font-semibold mb-4 block">
+                    <Camera className="inline h-5 w-5 mr-2" />
+                    Portfólio de Trabalhos (Opcional)
+                  </Label>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {portfolioImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img 
+                            src={image} 
+                            alt={`Portfolio ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removePortfolioImage(index)}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                      {portfolioImages.length < 5 && (
+                        <div className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-amber-300">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, 'portfolio')}
+                            className="hidden"
+                            id={`portfolio-upload-${portfolioImages.length}`}
+                          />
+                          <Label htmlFor={`portfolio-upload-${portfolioImages.length}`} className="cursor-pointer flex flex-col items-center">
+                            <Upload className="h-6 w-6 text-gray-400 mb-1" />
+                            <span className="text-xs text-gray-500">Adicionar</span>
+                          </Label>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Imagens: {portfolioImages.length}/5 • Mostre seus melhores trabalhos
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting || selectedSubcategories.length === 0 || !biography.trim()}
+                    className="flex-1"
+                  >
+                    {isSubmitting ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                    )}
+                    Finalizar Configuração
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

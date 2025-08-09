@@ -20,6 +20,7 @@ export interface IStorage {
   // Service Categories
   getServiceCategories(): Promise<ServiceCategory[]>;
   getServiceCategory(slug: string): Promise<ServiceCategory | undefined>;
+  getServiceCategoryById(id: string): Promise<ServiceCategory | undefined>;
   createServiceCategory(category: InsertServiceCategory): Promise<ServiceCategory>;
   
   // Plans
@@ -39,6 +40,14 @@ export interface IStorage {
   updateUserProfile(id: string, profileData: any): Promise<AuthUser | null>;
   updateUserCategories(userId: string, categoryIds: string[]): Promise<AuthUser | null>;
   upgradeToProvider(userId: string, providerData: any): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
+  createOrUpdateProviderProfile(profileData: {
+    userId: string;
+    categoryId: string;
+    subcategories: string[];
+    biography: string;
+    profileImage?: string;
+    portfolioImages: string[];
+  }): Promise<void>;
   
   // Property operations for providers
   createPropertyAsProvider(userId: string, property: CreatePropertyData): Promise<Property | null>;
@@ -383,21 +392,177 @@ export class MemStorage implements IStorage {
       this.properties.set(property.id, property);
     });
 
-    // Seed Service Categories
+    // Seed Service Categories with subcategories
     const categories: ServiceCategory[] = [
-      { id: randomUUID(), name: "Encanador", icon: "fas fa-wrench", slug: "plumber", providerCount: 156 },
-      { id: randomUUID(), name: "Eletricista", icon: "fas fa-bolt", slug: "electrician", providerCount: 89 },
-      { id: randomUUID(), name: "Pintor", icon: "fas fa-paint-roller", slug: "painter", providerCount: 203 },
-      { id: randomUUID(), name: "Gesseiro", icon: "fas fa-hammer", slug: "plasterer", providerCount: 67 },
-      { id: randomUUID(), name: "Fotógrafo", icon: "fas fa-camera", slug: "photographer", providerCount: 42 },
-      { id: randomUUID(), name: "Decorador", icon: "fas fa-paint-brush", slug: "decorator", providerCount: 38 },
-      { id: randomUUID(), name: "Limpeza", icon: "fas fa-broom", slug: "cleaning", providerCount: 124 },
-      { id: randomUUID(), name: "Segurança", icon: "fas fa-shield-alt", slug: "security", providerCount: 73 },
-      { id: randomUUID(), name: "Jardinagem", icon: "fas fa-seedling", slug: "gardening", providerCount: 95 },
-      { id: randomUUID(), name: "Reforma", icon: "fas fa-tools", slug: "renovation", providerCount: 167 },
-      { id: randomUUID(), name: "Arquitetura", icon: "fas fa-drafting-compass", slug: "architecture", providerCount: 29 },
-      { id: randomUUID(), name: "Mudanças", icon: "fas fa-truck", slug: "moving", providerCount: 81 },
-      { id: randomUUID(), name: "Imobiliária", icon: "fas fa-building", slug: "imobiliaria", providerCount: 5 }
+      { 
+        id: randomUUID(), 
+        name: "Encanador", 
+        icon: "fas fa-wrench", 
+        slug: "plumber", 
+        providerCount: 156,
+        subcategories: ["Desentupimento", "Instalação Hidráulica", "Vazamentos", "Aquecedores"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Eletricista", 
+        icon: "fas fa-bolt", 
+        slug: "electrician", 
+        providerCount: 89,
+        subcategories: ["Instalação Residencial", "Manutenção Industrial", "Iluminação", "Tomadas e Interruptores"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Pintor", 
+        icon: "fas fa-paint-roller", 
+        slug: "painter", 
+        providerCount: 203,
+        subcategories: ["Pintura Residencial", "Pintura Comercial", "Textura", "Verniz e Lacas"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Gesseiro", 
+        icon: "fas fa-hammer", 
+        slug: "plasterer", 
+        providerCount: 67,
+        subcategories: ["Reboco", "Sanca", "Divisórias", "Molduras"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Fotógrafo", 
+        icon: "fas fa-camera", 
+        slug: "photographer", 
+        providerCount: 42,
+        subcategories: ["Eventos", "Produtos", "Arquitetural", "Retratos"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Decorador", 
+        icon: "fas fa-paint-brush", 
+        slug: "decorator", 
+        providerCount: 38,
+        subcategories: ["Design de Interiores", "Ambientação", "Móveis Planejados", "Feng Shui"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Limpeza", 
+        icon: "fas fa-broom", 
+        slug: "cleaning", 
+        providerCount: 124,
+        subcategories: ["Limpeza Residencial", "Limpeza Pós-Obra", "Limpeza de Vidros", "Impermeabilização"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Segurança", 
+        icon: "fas fa-shield-alt", 
+        slug: "security", 
+        providerCount: 73,
+        subcategories: ["Câmeras de Segurança", "Sistemas de Alarme", "Portaria Eletrônica", "Controle de Acesso"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Jardinagem", 
+        icon: "fas fa-seedling", 
+        slug: "gardening", 
+        providerCount: 95,
+        subcategories: ["Paisagismo", "Manutenção de Jardins", "Irrigação", "Poda de Árvores"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Reforma", 
+        icon: "fas fa-tools", 
+        slug: "renovation", 
+        providerCount: 167,
+        subcategories: ["Reforma Completa", "Ampliação", "Cozinha e Banheiro", "Fachadas"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Arquitetura", 
+        icon: "fas fa-drafting-compass", 
+        slug: "architecture", 
+        providerCount: 29,
+        subcategories: ["Projetos Residenciais", "Projetos Comerciais", "Regularização", "Aprovação de Obras"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Mudanças", 
+        icon: "fas fa-truck", 
+        slug: "moving", 
+        providerCount: 81,
+        subcategories: ["Mudanças Residenciais", "Mudanças Comerciais", "Transporte de Móveis", "Embalagem"]
+      },
+      // Categorias expandidas para o setor imobiliário (CNPJ)
+      { 
+        id: randomUUID(), 
+        name: "Imobiliária Residencial", 
+        icon: "fas fa-home", 
+        slug: "imobiliaria-residencial", 
+        providerCount: 156,
+        subcategories: ["Apartamentos", "Casas", "Coberturas", "Kitinets", "Lofts"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Imobiliária Comercial", 
+        icon: "fas fa-building", 
+        slug: "imobiliaria-comercial", 
+        providerCount: 89,
+        subcategories: ["Escritórios", "Lojas", "Galpões", "Salas Comerciais", "Shopping Centers"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Incorporação", 
+        icon: "fas fa-city", 
+        slug: "incorporacao", 
+        providerCount: 45,
+        subcategories: ["Lançamentos", "Plantas na Planta", "Financiamento", "Construtoras Parceiras"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Locação de Temporada", 
+        icon: "fas fa-calendar-alt", 
+        slug: "locacao-temporada", 
+        providerCount: 78,
+        subcategories: ["Airbnb", "Casas de Praia", "Apartamentos Mobiliados", "Hospedagem Corporativa"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Administração Predial", 
+        icon: "fas fa-clipboard-list", 
+        slug: "administracao-predial", 
+        providerCount: 34,
+        subcategories: ["Condomínios", "Síndicos Profissionais", "Zeladoria", "Manutenção Predial"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Avaliação Imobiliária", 
+        icon: "fas fa-calculator", 
+        slug: "avaliacao-imobiliaria", 
+        providerCount: 23,
+        subcategories: ["Laudo de Avaliação", "Perícia Técnica", "Vistoria", "Consultoria Imobiliária"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Corretagem Especializada", 
+        icon: "fas fa-handshake", 
+        slug: "corretagem-especializada", 
+        providerCount: 67,
+        subcategories: ["Imóveis de Luxo", "Investimentos", "Leilões", "Permuta"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Regularização Imobiliária", 
+        icon: "fas fa-file-contract", 
+        slug: "regularizacao-imobiliaria", 
+        providerCount: 29,
+        subcategories: ["Documentação", "Cartório", "ITBI", "Escrituras"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Espaços para Eventos", 
+        icon: "fas fa-glass-cheers", 
+        slug: "espacos-eventos", 
+        providerCount: 56,
+        subcategories: ["Salões de Festa", "Casamentos", "Eventos Corporativos", "Formaturas"]
+      }
     ];
 
     categories.forEach(category => {
@@ -1098,6 +1263,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.serviceCategories.values()).find(cat => cat.slug === slug);
   }
 
+  async getServiceCategoryById(id: string): Promise<ServiceCategory | undefined> {
+    return this.serviceCategories.get(id);
+  }
+
   async createServiceCategory(insertCategory: InsertServiceCategory): Promise<ServiceCategory> {
     const id = randomUUID();
     const category: ServiceCategory = { ...insertCategory, id, providerCount: 0 };
@@ -1300,6 +1469,65 @@ export class MemStorage implements IStorage {
     }
 
     return this.buildAuthUser(user);
+  }
+
+  // Provider profile management
+  private providerProfiles: Map<string, any> = new Map();
+
+  async createOrUpdateProviderProfile(profileData: {
+    userId: string;
+    categoryId: string;
+    subcategories: string[];
+    biography: string;
+    profileImage?: string;
+    portfolioImages: string[];
+  }): Promise<void> {
+    const profile = {
+      ...profileData,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Store provider profile details
+    this.providerProfiles.set(profileData.userId, profile);
+
+    // Update user profile in sampleProfiles to include this data
+    const existingProfileIndex = this.sampleProfiles.findIndex(p => p.id === profileData.userId);
+    if (existingProfileIndex >= 0) {
+      this.sampleProfiles[existingProfileIndex] = {
+        ...this.sampleProfiles[existingProfileIndex],
+        bio: profileData.biography,
+        profileImage: profileData.profileImage || this.sampleProfiles[existingProfileIndex].profileImage,
+        portfolioImages: profileData.portfolioImages,
+        subcategories: profileData.subcategories,
+        categoryId: profileData.categoryId
+      };
+    } else {
+      // Create new profile if doesn't exist
+      const newProfile = {
+        id: profileData.userId,
+        displayName: 'Prestador Hive',
+        bio: profileData.biography,
+        profileImage: profileData.profileImage,
+        portfolioImages: profileData.portfolioImages,
+        subcategories: profileData.subcategories,
+        categoryId: profileData.categoryId,
+        documentType: 'CPF',
+        profession: 'Prestador de Serviços',
+        city: 'São Paulo',
+        state: 'SP',
+        verified: false,
+        available: true,
+        planType: 'A',
+        rating: '0.0',
+        reviewCount: 0,
+        completedJobs: 0,
+        responseTime: 60,
+        socialLinks: {}
+      };
+      this.sampleProfiles.push(newProfile);
+    }
   }
 
   // User management operations
