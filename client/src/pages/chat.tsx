@@ -243,11 +243,11 @@ export default function ChatPage() {
         </div>
 
         {/* Área de Chat Principal */}
-        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800 h-full`}>
+        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800 h-full max-h-screen overflow-hidden`}>
           {selectedConversation && selectedConvData ? (
             <>
               {/* Header do Chat */}
-              <div className="p-4 border-b bg-white dark:bg-gray-800 flex items-center justify-between">
+              <div className="px-4 py-3 border-b bg-white dark:bg-gray-800 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Button
                     variant="ghost"
@@ -311,7 +311,7 @@ export default function ChatPage() {
               {/* Área de Mensagens */}
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  <div className="p-4 space-y-4 min-h-full">
+                  <div className="px-4 py-3 space-y-4 min-h-full">
                     {messages.map((message) => {
                       const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
                       const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
@@ -358,7 +358,7 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Input - Fixa na parte inferior */}
-              <div className="border-t bg-white dark:bg-gray-800 p-4 flex-shrink-0">
+              <div className="border-t bg-white dark:bg-gray-800 px-4 py-3 flex-shrink-0">
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
