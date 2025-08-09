@@ -66,7 +66,7 @@ export default function ChatWindow({
     }
   });
 
-  // Buscar mensagens da conversa
+  // Buscar mensagens da conversa - usando a mesma query key da página de chat
   const { data: messages, refetch: refetchMessages } = useQuery<ChatMessage[]>({
     queryKey: ['/api', 'chat', 'conversations', conversationId, 'messages'],
     enabled: !!conversationId,
@@ -85,7 +85,13 @@ export default function ChatWindow({
     },
     onSuccess: () => {
       setNewMessage('');
-      refetchMessages();
+      // Invalidar com as mesmas query keys da página de chat para sincronização
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations', conversationId, 'messages'] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations'] 
+      });
       queryClient.invalidateQueries({ queryKey: ['/api', 'notifications'] });
     }
   });

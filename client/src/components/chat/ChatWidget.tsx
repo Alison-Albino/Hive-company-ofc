@@ -52,9 +52,17 @@ export default function ChatWidget({ providerId, providerName, providerImage }: 
     }
   });
 
-  // Buscar mensagens da conversa
+  // Inicializar conversa automaticamente para o assistente
+  useEffect(() => {
+    if (!providerId && isOpen) {
+      // Para o assistente, usar ID fixo 'conv-assistant'
+      setConversationId('conv-assistant');
+    }
+  }, [providerId, isOpen]);
+
+  // Buscar mensagens da conversa - usando a mesma query key da página de chat
   const { data: messages, refetch: refetchMessages } = useQuery<ChatMessage[]>({
-    queryKey: ['/api/chat/conversations', conversationId, 'messages'],
+    queryKey: ['/api', 'chat', 'conversations', conversationId, 'messages'],
     enabled: !!conversationId,
     refetchInterval: 3000, // Atualizar a cada 3 segundos
   });
@@ -71,7 +79,13 @@ export default function ChatWidget({ providerId, providerName, providerImage }: 
     },
     onSuccess: () => {
       setNewMessage('');
-      refetchMessages();
+      // Invalidar com as mesmas query keys da página de chat para sincronização
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations', conversationId, 'messages'] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations'] 
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
     }
   });
@@ -83,7 +97,7 @@ export default function ChatWidget({ providerId, providerName, providerImage }: 
   });
 
   useEffect(() => {
-    if (notificationData && 'count' in notificationData) {
+    if (notificationData && typeof notificationData === 'object' && notificationData !== null && 'count' in notificationData) {
       setUnreadCount((notificationData as { count: number }).count);
     }
   }, [notificationData]);
@@ -103,11 +117,29 @@ export default function ChatWidget({ providerId, providerName, providerImage }: 
   };
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && providerId) {
-      sendMessageMutation.mutate({
-        message: newMessage,
-        receiverId: providerId
-      });
+    if (newMessage.trim()) {
+      if (providerId) {
+        // Envio para prestador
+        sendMessageMutation.mutate({
+          message: newMessage,
+          receiverId: providerId
+        });
+      } else {
+        // Envio para assistente - usar endpoint específico
+        const assistantMutation = {
+          mutationFn: async () => {
+            const response = await apiRequest('POST', '/api/chat', { message: newMessage });
+            return response.json();
+          },
+          onSuccess: () => {
+            setNewMessage('');
+            queryClient.invalidateQueries({ 
+              queryKey: ['/api', 'chat', 'conversations', 'conv-assistant', 'messages'] 
+            });
+          }
+        };
+        assistantMutation.mutationFn().then(assistantMutation.onSuccess);
+      }
     }
   };
 
