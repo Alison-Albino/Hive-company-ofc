@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useChatContext } from '@/context/ChatContext';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,13 @@ export default function ChatPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { setIsChatPageOpen } = useChatContext();
+
+  // Desabilitar popups quando a página de chat estiver aberta
+  useEffect(() => {
+    setIsChatPageOpen(true);
+    return () => setIsChatPageOpen(false);
+  }, [setIsChatPageOpen]);
 
   // Buscar todas as conversas
   const { data: conversations = [] } = useQuery<Conversation[]>({

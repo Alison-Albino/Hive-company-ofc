@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Users, Bot, X } from 'lucide-react';
+import { useChatContext } from '@/context/ChatContext';
 import ChatWindow from './ChatWindow';
 import AssistantChat from './AssistantChat';
 
@@ -29,6 +30,12 @@ export default function ChatManager() {
     persistedChats: []
   });
   const [unreadCount, setUnreadCount] = useState(0);
+  const { isChatPageOpen } = useChatContext();
+
+  // Não renderizar popups se a página de chat estiver aberta
+  if (isChatPageOpen) {
+    return null;
+  }
 
   // Buscar contagem de notificações não lidas
   const { data: notificationData } = useQuery({
