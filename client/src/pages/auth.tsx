@@ -131,7 +131,8 @@ export default function AuthPage() {
           title: "Cadastro realizado com sucesso!",
           description: "Bem-vindo ao Hive!",
         });
-        setLocation("/dashboard");
+        // Force page refresh to ensure auth state is updated
+        window.location.href = "/dashboard";
       } else {
         toast({
           title: "Erro no cadastro",

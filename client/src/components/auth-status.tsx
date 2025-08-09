@@ -14,13 +14,13 @@ export function AuthStatus() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return (
       <Button size="sm" asChild className="bg-amber-600 hover:bg-amber-700 text-white">
-        <a href="/auth">
+        <Link href="/auth">
           <LogIn className="w-4 h-4 mr-2" />
           Entrar
-        </a>
+        </Link>
       </Button>
     );
   }

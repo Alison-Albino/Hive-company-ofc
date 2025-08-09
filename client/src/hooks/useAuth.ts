@@ -47,6 +47,8 @@ export function useAuth() {
       const response = await res.json();
 
       if (response.user) {
+        // Update localStorage with fresh user data
+        localStorage.setItem("hive_user", JSON.stringify(response.user));
         setAuthState({
           user: response.user,
           isLoading: false,
@@ -82,9 +84,12 @@ export function useAuth() {
       isLoading: false,
       isAuthenticated: true,
     });
+    // Force re-check to ensure consistency
+    setTimeout(() => checkAuth(), 100);
   };
 
   const refreshAuth = () => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
     checkAuth();
   };
 

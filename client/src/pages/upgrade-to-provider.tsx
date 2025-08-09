@@ -101,12 +101,12 @@ export default function UpgradeToProviderPage() {
   };
 
   if (!user) {
-    setLocation("/auth");
+    window.location.href = "/auth";
     return null;
   }
 
   if (user.userType === "provider") {
-    setLocation("/dashboard");
+    window.location.href = "/dashboard";
     return null;
   }
 
