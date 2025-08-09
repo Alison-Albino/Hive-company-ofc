@@ -309,7 +309,7 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Mensagens */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto max-h-96">
                 <div className="px-3 pt-1 pb-0 space-y-1">
                   {messages.map((message) => {
                     const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
@@ -356,27 +356,27 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Input - Fixa na parte inferior */}
-              <div className="border-t bg-white dark:bg-gray-800 px-3 py-0.5 flex-shrink-0">
+              <div className="border-t bg-white dark:bg-gray-800 px-4 py-3 flex-shrink-0">
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSendMessage();
                   }}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-3"
                 >
                   <div className="flex-1">
                     <Input
                       placeholder="Digite uma mensagem..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold h-7"
+                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold h-10"
                       disabled={sendMessageMutation.isPending}
                     />
                   </div>
                   <Button
                     type="submit"
                     disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                    className="rounded-full w-7 h-7 p-0 bg-hive-gold hover:bg-hive-gold-dark"
+                    className="rounded-full w-10 h-10 p-0 bg-hive-gold hover:bg-hive-gold-dark"
                     size="sm"
                   >
                     {sendMessageMutation.isPending ? (
