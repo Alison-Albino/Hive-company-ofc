@@ -161,8 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoints
   app.get('/api/chat/conversations', async (req, res) => {
     try {
-      const userId = 'mock-user-id'; // Mock user ID for demo
-      const conversations = await storage.getConversationsByUserId(userId);
+      const conversations = await storage.getAllConversations();
       res.json(conversations);
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -197,17 +196,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/chat/conversations/:id/messages', async (req, res) => {
     try {
-      const { message, receiverId } = req.body;
-      if (!message || !receiverId) {
-        return res.status(400).json({ message: 'Message and receiverId are required' });
+      const { message } = req.body;
+      if (!message) {
+        return res.status(400).json({ message: 'Message is required' });
       }
-      const senderId = 'mock-user-id'; // Mock user ID for demo
       const newMessage = await storage.createMessage({
         conversationId: req.params.id,
-        senderId,
-        receiverId,
+        sender: 'user',
         message,
-        messageType: 'text'
+        timestamp: new Date().toISOString(),
+        isRead: false
       });
       res.json(newMessage);
     } catch (error) {

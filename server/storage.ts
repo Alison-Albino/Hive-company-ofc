@@ -589,6 +589,99 @@ export class MemStorage implements IStorage {
     ];
 
     this.sampleProfiles = sampleProfilesData;
+    
+    // Seed some example conversations
+    this.seedConversations();
+  }
+
+  private seedConversations() {
+    // Create sample conversations
+    const conversations = [
+      {
+        id: 'conv-assistant',
+        participantId: 'assistant',
+        participantName: 'Assistente Hive',
+        participantType: 'assistant',
+        lastMessage: 'Olá! Como posso ajudá-lo hoje?',
+        lastMessageAt: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+        unreadCount: 0,
+        isOnline: true
+      },
+      {
+        id: 'conv-joao',
+        participantId: 'cfe135d3-a1bc-451e-87ac-45ab1c584f25',
+        participantName: 'João Santos',
+        participantImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+        participantType: 'provider',
+        lastMessage: 'Oi! Posso ajudar com sua demanda de elétrica.',
+        lastMessageAt: new Date(Date.now() - 120000).toISOString(), // 2 minutes ago
+        unreadCount: 2,
+        isOnline: true
+      },
+      {
+        id: 'conv-maria',
+        participantId: '61cfe2ef-bb3b-4960-bb1d-111492d7d997',
+        participantName: 'Ana Costa',
+        participantImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+        participantType: 'provider',
+        lastMessage: 'Enviei o orçamento por WhatsApp',
+        lastMessageAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+        unreadCount: 0,
+        isOnline: false
+      }
+    ];
+
+    conversations.forEach(conv => {
+      this.conversations.set(conv.id, conv);
+    });
+
+    // Create sample messages
+    const messages = [
+      {
+        id: 'msg1',
+        conversationId: 'conv-assistant',
+        sender: 'assistant',
+        message: 'Olá! Bem-vindo ao Hive. Como posso ajudá-lo hoje?',
+        timestamp: new Date(Date.now() - 300000).toISOString(),
+        isRead: true
+      },
+      {
+        id: 'msg2',
+        conversationId: 'conv-joao',
+        sender: 'provider',
+        message: 'Oi! Vi que você está procurando um eletricista.',
+        timestamp: new Date(Date.now() - 180000).toISOString(),
+        isRead: true
+      },
+      {
+        id: 'msg3',
+        conversationId: 'conv-joao',
+        sender: 'provider',
+        message: 'Posso ajudar com sua demanda de elétrica. Qual o problema?',
+        timestamp: new Date(Date.now() - 120000).toISOString(),
+        isRead: false
+      },
+      {
+        id: 'msg4',
+        conversationId: 'conv-maria',
+        sender: 'user',
+        message: 'Preciso de um orçamento para pintura da casa',
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        isRead: true
+      },
+      {
+        id: 'msg5',
+        conversationId: 'conv-maria',
+        sender: 'provider',
+        message: 'Enviei o orçamento por WhatsApp. Dê uma olhada!',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        isRead: true
+      }
+    ];
+
+    messages.forEach(msg => {
+      this.chatMessages.set(msg.id, msg);
+    });
   }
 
   // Properties
@@ -648,7 +741,7 @@ export class MemStorage implements IStorage {
       description: insertProvider.description || null,
       phone: insertProvider.phone || null,
       email: insertProvider.email || null,
-      portfolioImages: insertProvider.portfolioImages || []
+      portfolioImages: (insertProvider.portfolioImages as string[]) || []
     };
     this.serviceProviders.set(id, provider);
     return provider;
@@ -725,91 +818,84 @@ export class MemStorage implements IStorage {
   }
 
   // Chat and notifications methods
-  private conversations: any[] = [];
-  private chatMessages: any[] = [];
-  private notifications: any[] = [];
+  private conversations: Map<string, any> = new Map();
+  private chatMessages: Map<string, any> = new Map();
+  private notifications: Map<string, any> = new Map();
+
+  async getAllConversations(): Promise<any[]> {
+    return Array.from(this.conversations.values());
+  }
 
   async getConversationsByUserId(userId: string): Promise<any[]> {
-    return this.conversations.filter(c => c.participantIds.includes(userId));
+    return Array.from(this.conversations.values()).filter(c => c.participantIds?.includes(userId));
   }
 
   async getOrCreateConversation(userId: string, providerId: string): Promise<any> {
-    const existingConversation = this.conversations.find(c => 
-      c.participantIds.includes(userId) && c.participantIds.includes(providerId)
+    const existingConversation = Array.from(this.conversations.values()).find(c => 
+      c.participantIds?.includes(userId) && c.participantIds?.includes(providerId)
     );
     
     if (existingConversation) {
       return existingConversation;
     }
 
-    const userProfile = this.sampleProfiles.find(p => p.id === userId);
     const providerProfile = this.sampleProfiles.find(p => p.id === providerId);
     
     const newConversation = {
       id: randomUUID(),
-      participantIds: [userId, providerId],
-      lastMessage: null,
-      lastMessageAt: new Date(),
-      createdAt: new Date(),
-      title: `Conversa com ${providerProfile?.displayName || 'Profissional'}`
+      participantId: providerId,
+      participantName: providerProfile?.displayName || 'Profissional',
+      participantImage: providerProfile?.profileImage,
+      participantType: 'provider',
+      lastMessage: 'Conversa iniciada',
+      lastMessageAt: new Date().toISOString(),
+      unreadCount: 0,
+      isOnline: Math.random() > 0.5
     };
 
-    this.conversations.push(newConversation);
+    this.conversations.set(newConversation.id, newConversation);
     return newConversation;
   }
 
   async getMessagesByConversationId(conversationId: string): Promise<any[]> {
-    return this.chatMessages
+    return Array.from(this.chatMessages.values())
       .filter(m => m.conversationId === conversationId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }
 
   async createMessage(message: any): Promise<any> {
     const newMessage = {
       id: randomUUID(),
       conversationId: message.conversationId,
-      senderId: message.senderId,
-      receiverId: message.receiverId,
+      sender: message.sender,
       message: message.message,
-      messageType: message.messageType || "text",
-      attachments: message.attachments || [],
-      read: false,
-      createdAt: new Date(),
+      timestamp: message.timestamp,
+      isRead: message.isRead
     };
 
-    this.chatMessages.push(newMessage);
+    this.chatMessages.set(newMessage.id, newMessage);
 
     // Update conversation last message
-    const conversation = this.conversations.find(c => c.id === message.conversationId);
+    const conversation = this.conversations.get(message.conversationId);
     if (conversation) {
       conversation.lastMessage = message.message;
-      conversation.lastMessageAt = new Date();
+      conversation.lastMessageAt = message.timestamp;
     }
-
-    // Create notification for receiver
-    const senderProfile = this.sampleProfiles.find(p => p.id === message.senderId);
-    await this.createNotification({
-      userId: message.receiverId,
-      type: 'message',
-      title: 'Nova mensagem',
-      content: `${senderProfile?.displayName || 'Usuário'} enviou: ${message.message.substring(0, 50)}${message.message.length > 50 ? '...' : ''}`,
-      relatedId: message.conversationId
-    });
 
     return newMessage;
   }
 
   async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
-    this.chatMessages.forEach(message => {
-      if (message.conversationId === conversationId && message.receiverId === userId) {
-        message.read = true;
+    Array.from(this.chatMessages.values()).forEach(message => {
+      if (message.conversationId === conversationId && message.sender !== 'user') {
+        message.isRead = true;
       }
     });
   }
 
   // Notifications methods
   async getNotificationsByUserId(userId: string): Promise<any[]> {
-    return this.notifications
+    return Array.from(this.notifications.values())
       .filter(n => n.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -826,19 +912,19 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
 
-    this.notifications.push(newNotification);
+    this.notifications.set(newNotification.id, newNotification);
     return newNotification;
   }
 
   async markNotificationAsRead(id: string): Promise<void> {
-    const notification = this.notifications.find(n => n.id === id);
+    const notification = this.notifications.get(id);
     if (notification) {
       notification.isRead = true;
     }
   }
 
   async getUnreadNotificationCount(userId: string): Promise<number> {
-    return this.notifications.filter(n => n.userId === userId && !n.isRead).length;
+    return Array.from(this.notifications.values()).filter((n: any) => n.userId === userId && !n.isRead).length;
   }
 
   async updateUserProfile(id: string, profile: any): Promise<any> {

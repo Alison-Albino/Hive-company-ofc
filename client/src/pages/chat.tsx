@@ -88,7 +88,7 @@ export default function ChatPage() {
 
   // Filtrar conversas por busca
   const filteredConversations = conversations.filter(conv =>
-    conv.participantName.toLowerCase().includes(searchTerm.toLowerCase())
+    conv.participantName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSendMessage = () => {
@@ -170,7 +170,7 @@ export default function ChatPage() {
                           <>
                             <AvatarImage src={conversation.participantImage} />
                             <AvatarFallback className="bg-hive-gold text-white">
-                              {conversation.participantName.charAt(0).toUpperCase()}
+                              {(conversation.participantName || 'U').charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </>
                         )}
@@ -183,7 +183,7 @@ export default function ChatPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                          {conversation.participantName}
+                          {conversation.participantName || 'Usuário'}
                         </h3>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           {formatTime(conversation.lastMessageAt)}
@@ -243,7 +243,7 @@ export default function ChatPage() {
                         <>
                           <AvatarImage src={selectedConvData.participantImage} />
                           <AvatarFallback className="bg-hive-gold text-white">
-                            {selectedConvData.participantName.charAt(0).toUpperCase()}
+                            {(selectedConvData.participantName || 'U').charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </>
                       )}
@@ -255,7 +255,7 @@ export default function ChatPage() {
                   
                   <div>
                     <h2 className="font-semibold text-gray-900 dark:text-white">
-                      {selectedConvData.participantName}
+                      {selectedConvData.participantName || 'Usuário'}
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {selectedConvData.isOnline ? 'Online agora' : 'Visto por último há algum tempo'}
