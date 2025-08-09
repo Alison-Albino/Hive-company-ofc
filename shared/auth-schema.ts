@@ -74,6 +74,7 @@ export interface AuthUser {
   reviewCount?: number;
   isVerified?: boolean;
   planType?: "A" | "B";
+  providerPlan?: "A" | "B";
   planStatus?: "inactive" | "pending" | "active";
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;

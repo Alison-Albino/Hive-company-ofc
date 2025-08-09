@@ -27,7 +27,7 @@ export default function SelectCategories() {
       return;
     }
     
-    if (user?.userType !== "provider" || user?.providerPlan !== "B") {
+    if (user?.userType !== "provider" || (user?.planType !== "B" && user?.providerPlan !== "B")) {
       toast({
         title: "Acesso Negado",
         description: "Esta página é apenas para prestadores empresariais.",

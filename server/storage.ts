@@ -1596,6 +1596,7 @@ export class MemStorage implements IStorage {
       isActive: user.isActive,
       categories: provider?.categories as string[] || [],
       planType: provider?.planType as "A" | "B" || undefined,
+      providerPlan: provider?.planType as "A" | "B" || undefined,
       planStatus: provider?.planActive ? "active" : (user.userType === "provider" ? "inactive" : undefined),
       isVerified: provider?.verified || false,
       completionPercentage: this.calculateCompletionPercentage(user, provider),
