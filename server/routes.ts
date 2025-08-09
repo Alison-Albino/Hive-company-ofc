@@ -52,7 +52,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-01-27.acacia",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -301,6 +301,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { paymentIntentId, planType } = req.body;
       const user = (req as any).user;
+      
+      console.log(`Processing payment success for user ${user.id} with plan ${planType}`);
 
       // Verify payment intent with Stripe
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);

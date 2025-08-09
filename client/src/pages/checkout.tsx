@@ -129,23 +129,31 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
 export default function Checkout() {
   const [location] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
+  const { toast } = useToast();
   const planType = new URLSearchParams(location.split('?')[1] || '').get('plan') || 'A';
 
   useEffect(() => {
-    // Create subscription intent
+    console.log('Creating subscription for plan type:', planType);
+    
+    // Create subscription intent with specific plan type
     apiRequest("POST", "/api/create-subscription", { planType })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
+      .then((response) => {
+        console.log('Subscription response:', response);
+        if (response.clientSecret) {
+          setClientSecret(response.clientSecret);
         } else {
-          throw new Error('Failed to create subscription');
+          throw new Error('Failed to create subscription - no client secret');
         }
       })
       .catch((error) => {
         console.error('Error creating subscription:', error);
+        toast({
+          title: "Erro na Assinatura",
+          description: "Não foi possível processar sua assinatura. Tente novamente.",
+          variant: "destructive",
+        });
       });
-  }, [planType]);
+  }, [planType, toast]);
 
   if (!clientSecret) {
     return (
