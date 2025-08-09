@@ -1,5 +1,7 @@
 import { type Property, type InsertProperty, type ServiceProvider, type InsertServiceProvider, type ServiceCategory, type InsertServiceCategory, type Plan, type InsertPlan } from "@shared/schema";
+import type { AuthUser, LoginData, RegisterData, ProviderRegistrationData, CreatePropertyData } from "@shared/auth-schema";
 import { randomUUID } from "crypto";
+import bcrypt from "bcrypt";
 
 export interface IStorage {
   // Properties
@@ -25,15 +27,36 @@ export interface IStorage {
   getPlan(id: string): Promise<Plan | undefined>;
   createPlan(plan: InsertPlan): Promise<Plan>;
 
-  // User operations (required for auth)
-  getUser(id: string): Promise<any>;
-  upsertUser(user: any): Promise<any>;
+  // Authentication operations
+  login(data: LoginData): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
+  register(data: RegisterData): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
+  registerProvider(data: ProviderRegistrationData): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
+  
+  // User operations
+  getUser(id: string): Promise<AuthUser | undefined>;
+  getUserByEmail(email: string): Promise<AuthUser | undefined>;
+  
+  // Property operations for providers
+  createPropertyAsProvider(userId: string, property: CreatePropertyData): Promise<Property | null>;
+  canCreateProperty(userId: string): Promise<boolean>;
 
-  // User profile operations
+  // User profile operations (legacy, keeping for compatibility)
   getUserProfiles(params?: { documentType?: string; city?: string }): Promise<any[]>;
   getUserProfile(id: string): Promise<any>;
   createUserProfile(profile: any): Promise<any>;
   updateUserProfile(id: string, profile: any): Promise<any>;
+  upsertUser(user: any): Promise<any>;
+}
+
+// Simple in-memory user interface for authentication
+interface SimpleUser {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  userType: "viewer" | "provider";
+  isActive: boolean;
+  providerId?: string;
 }
 
 export class MemStorage implements IStorage {
@@ -41,6 +64,7 @@ export class MemStorage implements IStorage {
   private serviceProviders: Map<string, ServiceProvider>;
   private serviceCategories: Map<string, ServiceCategory>;
   private plans: Map<string, Plan>;
+  private users: Map<string, SimpleUser>;
   private sampleProfiles: any[];
   private sampleUsers: any[];
 
@@ -49,6 +73,7 @@ export class MemStorage implements IStorage {
     this.serviceProviders = new Map();
     this.serviceCategories = new Map();
     this.plans = new Map();
+    this.users = new Map();
     this.sampleProfiles = [];
     this.sampleUsers = [];
     this.seedData();
@@ -1286,6 +1311,193 @@ export class MemStorage implements IStorage {
       return this.sampleProfiles[index];
     }
     return undefined;
+  }
+
+  // Authentication operations
+  async login(data: LoginData): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+    const user = Array.from(this.users.values()).find(u => u.email === data.email);
+    
+    if (!user) {
+      return { success: false, message: "Email ou senha incorretos" };
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, message: "Email ou senha incorretos" };
+    }
+
+    if (!user.isActive) {
+      return { success: false, message: "Conta desativada" };
+    }
+
+    const authUser = await this.buildAuthUser(user);
+    return { success: true, user: authUser };
+  }
+
+  async register(data: RegisterData): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+    // Check if email already exists
+    const existingUser = Array.from(this.users.values()).find(u => u.email === data.email);
+    if (existingUser) {
+      return { success: false, message: "Email já está em uso" };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Create user
+    const userId = randomUUID();
+    const user: SimpleUser = {
+      id: userId,
+      email: data.email,
+      password: hashedPassword,
+      name: data.name,
+      userType: data.userType,
+      isActive: true,
+    };
+
+    this.users.set(userId, user);
+
+    const authUser = await this.buildAuthUser(user);
+    return { success: true, user: authUser };
+  }
+
+  async registerProvider(data: ProviderRegistrationData): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+    // Check if email already exists
+    const existingUser = Array.from(this.users.values()).find(u => u.email === data.email);
+    if (existingUser) {
+      return { success: false, message: "Email já está em uso" };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    // Create user
+    const userId = randomUUID();
+    const user: SimpleUser = {
+      id: userId,
+      email: data.email,
+      password: hashedPassword,
+      name: data.name,
+      userType: "provider",
+      isActive: true,
+    };
+
+    // Create service provider profile
+    const providerId = randomUUID();
+    const provider: ServiceProvider = {
+      id: providerId,
+      userId: userId,
+      name: data.name,
+      speciality: data.speciality,
+      description: data.description,
+      documentType: data.documentType,
+      documentNumber: data.documentNumber,
+      location: data.location,
+      rating: "0.0",
+      reviewCount: 0,
+      imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+      portfolioImages: [],
+      categories: data.categories,
+      phone: data.phone,
+      email: data.email,
+      planType: data.planType,
+      planActive: false, // Will be activated after payment
+      verified: false,
+    };
+
+    user.providerId = providerId;
+    
+    this.users.set(userId, user);
+    this.serviceProviders.set(providerId, provider);
+
+    const authUser = await this.buildAuthUser(user);
+    return { success: true, user: authUser };
+  }
+
+  async getUserByEmail(email: string): Promise<AuthUser | undefined> {
+    const user = Array.from(this.users.values()).find(u => u.email === email);
+    if (!user) return undefined;
+    return this.buildAuthUser(user);
+  }
+
+  async canCreateProperty(userId: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user || user.userType !== "provider" || !user.providerId) {
+      return false;
+    }
+
+    const provider = this.serviceProviders.get(user.providerId);
+    if (!provider || !provider.planActive) {
+      return false;
+    }
+
+    // Only real estate agencies can create properties
+    return provider.categories.includes("imobiliaria");
+  }
+
+  async createPropertyAsProvider(userId: string, propertyData: CreatePropertyData): Promise<Property | null> {
+    const canCreate = await this.canCreateProperty(userId);
+    if (!canCreate) {
+      return null;
+    }
+
+    const user = this.users.get(userId);
+    const provider = this.serviceProviders.get(user!.providerId!);
+
+    const propertyId = randomUUID();
+    const property: Property = {
+      id: propertyId,
+      title: propertyData.title,
+      description: propertyData.description,
+      price: propertyData.price,
+      priceType: propertyData.priceType,
+      propertyType: propertyData.propertyType,
+      location: propertyData.location,
+      bedrooms: propertyData.bedrooms,
+      bathrooms: propertyData.bathrooms,
+      parkingSpaces: propertyData.parkingSpaces,
+      area: propertyData.area,
+      imageUrl: propertyData.imageUrl,
+      images: propertyData.images,
+      amenities: propertyData.amenities,
+      agencyName: provider!.name,
+      agencyId: provider!.id,
+      agencyPhone: provider!.phone,
+      agencyEmail: provider!.email,
+      agencyLogo: provider!.imageUrl,
+      status: "available",
+      featured: false,
+      views: 0,
+      createdBy: userId,
+    };
+
+    this.properties.set(propertyId, property);
+    return property;
+  }
+
+  private async buildAuthUser(user: SimpleUser): Promise<AuthUser> {
+    const authUser: AuthUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isActive: user.isActive,
+    };
+
+    if (user.userType === "provider" && user.providerId) {
+      const provider = this.serviceProviders.get(user.providerId);
+      if (provider) {
+        authUser.provider = {
+          id: provider.id,
+          categories: provider.categories,
+          planType: provider.planType,
+          planActive: provider.planActive,
+          verified: provider.verified,
+        };
+      }
+    }
+
+    return authUser;
   }
 }
 

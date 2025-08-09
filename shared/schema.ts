@@ -4,6 +4,17 @@ import { pgTable, text, varchar, integer, decimal, boolean, jsonb, timestamp, in
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Users table for authentication
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  userType: varchar("user_type", { length: 20 }).notNull(), // 'viewer', 'provider'
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const properties = pgTable("properties", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -20,21 +31,24 @@ export const properties = pgTable("properties", {
   images: jsonb("images").$type<string[]>().default([]),
   amenities: jsonb("amenities").$type<string[]>().default([]),
   agencyName: text("agency_name").notNull(),
-  agencyId: varchar("agency_id"), // Reference to service provider (real estate agency)
+  agencyId: varchar("agency_id").references(() => serviceProviders.id), // Reference to service provider (real estate agency)
   agencyPhone: text("agency_phone"),
   agencyEmail: text("agency_email"),
   agencyLogo: text("agency_logo"),
   status: varchar("status", { length: 20 }).default("available"), // 'available', 'sold', 'rented'
   featured: boolean("featured").default(false),
   views: integer("views").default(0),
+  createdBy: varchar("created_by").references(() => users.id),
 });
 
 export const serviceProviders = pgTable("service_providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
   name: text("name").notNull(),
   speciality: text("speciality").notNull(),
   description: text("description"),
   documentType: varchar("document_type", { length: 10 }).notNull(), // 'CPF', 'CNPJ'
+  documentNumber: text("document_number").notNull(),
   location: text("location").notNull(),
   rating: decimal("rating", { precision: 2, scale: 1 }).default("0.0"),
   reviewCount: integer("review_count").default(0),
@@ -44,6 +58,7 @@ export const serviceProviders = pgTable("service_providers", {
   phone: text("phone"),
   email: text("email"),
   planType: varchar("plan_type", { length: 10 }).default("A"), // 'A' or 'B'
+  planActive: boolean("plan_active").default(false),
   verified: boolean("verified").default(false),
 });
 

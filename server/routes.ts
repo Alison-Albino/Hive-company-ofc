@@ -1,8 +1,150 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { loginSchema, registerSchema, providerRegistrationSchema, createPropertySchema } from "@shared/auth-schema";
+import type { AuthUser } from "@shared/auth-schema";
+
+// Simple session storage (in production, use proper session management)
+interface Session {
+  userId: string;
+  user: AuthUser;
+}
+
+const sessions = new Map<string, Session>();
+
+// Middleware to check authentication
+function requireAuth(req: any, res: any, next: any) {
+  const sessionId = req.headers.authorization?.replace('Bearer ', '');
+  if (!sessionId || !sessions.has(sessionId)) {
+    return res.status(401).json({ message: "Não autorizado" });
+  }
+  
+  const session = sessions.get(sessionId)!;
+  req.user = session.user;
+  req.userId = session.userId;
+  next();
+}
+
+// Middleware to check if user is a provider
+function requireProvider(req: any, res: any, next: any) {
+  if (req.user.userType !== "provider") {
+    return res.status(403).json({ message: "Acesso restrito a prestadores de serviços" });
+  }
+  next();
+}
+
+// Middleware to check if user is a real estate provider
+function requireRealEstateProvider(req: any, res: any, next: any) {
+  if (!req.user.provider || !req.user.provider.categories.includes("imobiliaria")) {
+    return res.status(403).json({ message: "Apenas imobiliárias podem cadastrar propriedades" });
+  }
+  
+  if (!req.user.provider.planActive) {
+    return res.status(403).json({ message: "Plano inativo. Assine um plano para cadastrar propriedades" });
+  }
+  
+  next();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication endpoints
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      const result = await storage.login(validatedData);
+      
+      if (result.success && result.user) {
+        const sessionId = `session_${Date.now()}_${Math.random()}`;
+        sessions.set(sessionId, { userId: result.user.id, user: result.user });
+        
+        res.json({
+          success: true,
+          user: result.user,
+          sessionId: sessionId
+        });
+      } else {
+        res.status(401).json(result);
+      }
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message || "Dados inválidos" });
+    }
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const validatedData = registerSchema.parse(req.body);
+      const result = await storage.register(validatedData);
+      
+      if (result.success && result.user) {
+        const sessionId = `session_${Date.now()}_${Math.random()}`;
+        sessions.set(sessionId, { userId: result.user.id, user: result.user });
+        
+        res.json({
+          success: true,
+          user: result.user,
+          sessionId: sessionId
+        });
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message || "Dados inválidos" });
+    }
+  });
+
+  app.post("/api/auth/register-provider", async (req, res) => {
+    try {
+      const validatedData = providerRegistrationSchema.parse(req.body);
+      const result = await storage.registerProvider(validatedData);
+      
+      if (result.success && result.user) {
+        const sessionId = `session_${Date.now()}_${Math.random()}`;
+        sessions.set(sessionId, { userId: result.user.id, user: result.user });
+        
+        res.json({
+          success: true,
+          user: result.user,
+          sessionId: sessionId,
+          message: "Cadastro realizado! Complete o pagamento do plano para ativar sua conta."
+        });
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message || "Dados inválidos" });
+    }
+  });
+
+  app.post("/api/auth/logout", requireAuth, (req, res) => {
+    const sessionId = req.headers.authorization?.replace('Bearer ', '');
+    if (sessionId) {
+      sessions.delete(sessionId);
+    }
+    res.json({ success: true });
+  });
+
+  app.get("/api/auth/me", requireAuth, (req, res) => {
+    res.json({ user: req.user });
+  });
+
+  // Provider property creation endpoint
+  app.post("/api/properties", requireAuth, requireRealEstateProvider, async (req, res) => {
+    try {
+      const validatedData = createPropertySchema.parse(req.body);
+      const property = await storage.createPropertyAsProvider(req.userId, validatedData);
+      
+      if (property) {
+        res.status(201).json({ success: true, property });
+      } else {
+        res.status(403).json({ 
+          success: false, 
+          message: "Não foi possível criar a propriedade. Verifique suas permissões e plano ativo." 
+        });
+      }
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message || "Dados inválidos" });
+    }
+  });
   // Properties routes
   app.get("/api/properties", async (req, res) => {
     try {

@@ -12,6 +12,10 @@ import Plans from "./pages/plans";
 import ProfilePage from "./pages/profile";
 import ChatPage from "./pages/chat";
 import PropertyDetail from "./pages/property-detail";
+import Login from "./pages/login";
+import Register from "./pages/register";
+import RegisterProvider from "./pages/register-provider";
+import AuthTest from "./pages/auth-test";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatManager from "./components/chat/ChatManager";
@@ -27,6 +31,10 @@ function Router() {
       <Route path="/profile/:profileId" component={ProfilePage} />
       <Route path="/plans" component={Plans} />
       <Route path="/chat" component={ChatPage} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/register-provider" component={RegisterProvider} />
+      <Route path="/auth-test" component={AuthTest} />
       <Route component={NotFound} />
     </Switch>
   );
