@@ -233,17 +233,13 @@ export default function AuthPage() {
         
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
               <TabsTrigger value="login" className="text-base">
                 Entrar
               </TabsTrigger>
-              <TabsTrigger value="register-viewer" className="text-base">
+              <TabsTrigger value="register" className="text-base">
                 <User className="w-4 h-4 mr-2" />
-                Buscar Imóveis
-              </TabsTrigger>
-              <TabsTrigger value="register-provider" className="text-base">
-                <Building2 className="w-4 h-4 mr-2" />
-                Oferecer Serviços
+                Criar Conta
               </TabsTrigger>
             </TabsList>
 
@@ -299,13 +295,22 @@ export default function AuthPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="register-viewer" className="space-y-6">
+            <TabsContent value="register" className="space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Crie sua conta no Hive
+                </h3>
+                <p className="text-gray-600">
+                  Comece como cliente e depois você pode se tornar prestador de serviços
+                </p>
+              </div>
+              
               <form onSubmit={handleRegisterViewer} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="viewer-name">Nome Completo</Label>
+                    <Label htmlFor="user-name">Nome Completo</Label>
                     <Input
-                      id="viewer-name"
+                      id="user-name"
                       value={registerData.name}
                       onChange={(e) => setRegisterData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Seu nome completo"
@@ -314,9 +319,9 @@ export default function AuthPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="viewer-email">Email</Label>
+                    <Label htmlFor="user-email">Email</Label>
                     <Input
-                      id="viewer-email"
+                      id="user-email"
                       type="email"
                       value={registerData.email}
                       onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
@@ -328,9 +333,9 @@ export default function AuthPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="viewer-password">Senha</Label>
+                    <Label htmlFor="user-password">Senha</Label>
                     <Input
-                      id="viewer-password"
+                      id="user-password"
                       type="password"
                       value={registerData.password}
                       onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
@@ -340,9 +345,9 @@ export default function AuthPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="viewer-confirm">Confirmar Senha</Label>
+                    <Label htmlFor="user-confirm">Confirmar Senha</Label>
                     <Input
-                      id="viewer-confirm"
+                      id="user-confirm"
                       type="password"
                       value={registerData.confirmPassword}
                       onChange={(e) => setRegisterData(prev => ({ ...prev, confirmPassword: e.target.value }))}
@@ -352,187 +357,28 @@ export default function AuthPage() {
                   </div>
                 </div>
 
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <User className="w-5 h-5 text-amber-600 mt-0.5 mr-3" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-800">
+                        Sua conta será criada como cliente
+                      </p>
+                      <p className="text-sm text-amber-700 mt-1">
+                        Após o cadastro, você poderá assinar um plano para se tornar prestador de serviços
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Criando conta..." : "Criar Conta de Visualizador"}
+                  {loading ? "Criando conta..." : "Criar Minha Conta"}
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="register-provider" className="space-y-6">
-              <form onSubmit={handleRegisterProvider} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-name">Nome/Empresa</Label>
-                    <Input
-                      id="provider-name"
-                      value={providerData.name}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Nome ou razão social"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-email">Email</Label>
-                    <Input
-                      id="provider-email"
-                      type="email"
-                      value={providerData.email}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="contato@empresa.com"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-password">Senha</Label>
-                    <Input
-                      id="provider-password"
-                      type="password"
-                      value={providerData.password}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="••••••••"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-confirm">Confirmar Senha</Label>
-                    <Input
-                      id="provider-confirm"
-                      type="password"
-                      value={providerData.confirmPassword}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      placeholder="••••••••"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tipo de Documento</Label>
-                    <Select
-                      value={providerData.documentType}
-                      onValueChange={(value: "CPF" | "CNPJ") => 
-                        setProviderData(prev => ({ ...prev, documentType: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CPF">CPF</SelectItem>
-                        <SelectItem value="CNPJ">CNPJ</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-document">
-                      {providerData.documentType}
-                    </Label>
-                    <Input
-                      id="provider-document"
-                      value={providerData.documentNumber}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, documentNumber: e.target.value }))}
-                      placeholder={providerData.documentType === "CPF" ? "000.000.000-00" : "00.000.000/0000-00"}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-phone">Telefone</Label>
-                    <Input
-                      id="provider-phone"
-                      value={providerData.phone}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="(11) 99999-9999"
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-speciality">Especialidade Principal</Label>
-                    <Input
-                      id="provider-speciality"
-                      value={providerData.speciality}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, speciality: e.target.value }))}
-                      placeholder="Ex: Instalações elétricas residenciais"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="provider-location">Localização</Label>
-                    <Input
-                      id="provider-location"
-                      value={providerData.location}
-                      onChange={(e) => setProviderData(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder="Cidade, Estado"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="provider-description">Descrição dos Serviços</Label>
-                  <Textarea
-                    id="provider-description"
-                    value={providerData.description}
-                    onChange={(e) => setProviderData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Descreva os serviços que você oferece..."
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Categorias de Serviços</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {serviceCategories.map((category) => (
-                      <Badge
-                        key={category}
-                        variant={providerData.categories.includes(category) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => toggleCategory(category)}
-                      >
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Selecionadas: {providerData.categories.join(", ") || "Nenhuma"}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Plano de Assinatura</Label>
-                  <Select
-                    value={providerData.planType}
-                    onValueChange={(value: "A" | "B") => 
-                      setProviderData(prev => ({ ...prev, planType: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A">Plano A - CPF Individual (R$ 29/mês)</SelectItem>
-                      <SelectItem value="B">Plano B - CNPJ Empresa (R$ 59/mês)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Criando conta..." : "Criar Conta de Prestador"}
-                </Button>
-              </form>
-            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

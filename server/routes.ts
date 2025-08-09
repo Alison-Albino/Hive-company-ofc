@@ -127,6 +127,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ user: (req as any).user });
   });
 
+  // Upgrade user to provider
+  app.post("/api/auth/upgrade-to-provider", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "Usuário não encontrado" });
+      }
+
+      if (user.userType === "provider") {
+        return res.status(400).json({ success: false, message: "Usuário já é prestador" });
+      }
+
+      const providerData = {
+        ...req.body,
+        name: user.name,
+        email: user.email,
+      };
+
+      const result = await storage.upgradeToProvider(userId, providerData);
+      
+      if (result.success) {
+        res.json({ success: true, user: result.user, message: "Upgrade realizado com sucesso" });
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error: any) {
+      console.error("Upgrade to provider error:", error);
+      res.status(500).json({ success: false, message: "Erro interno do servidor" });
+    }
+  });
+
   // Profile management routes
   app.get("/api/profile", requireAuth, async (req, res) => {
     try {

@@ -37,6 +37,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<AuthUser | undefined>;
   getUserById(id: string): Promise<AuthUser | undefined>;
   updateUserProfile(id: string, profileData: any): Promise<AuthUser | null>;
+  upgradeToProvider(userId: string, providerData: any): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
   
   // Property operations for providers
   createPropertyAsProvider(userId: string, property: CreatePropertyData): Promise<Property | null>;
@@ -1355,6 +1356,56 @@ export class MemStorage implements IStorage {
       isVerified: user.userType === 'provider',
       documentsVerified: false,
     };
+  }
+
+  async upgradeToProvider(userId: string, providerData: any): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return { success: false, message: "Usuário não encontrado" };
+    }
+
+    if (user.userType === "provider") {
+      return { success: false, message: "Usuário já é prestador" };
+    }
+
+    try {
+      // Update user type to provider
+      user.userType = "provider";
+
+      // Create service provider profile
+      const providerId = randomUUID();
+      const provider: ServiceProvider = {
+        id: providerId,
+        userId: userId,
+        name: providerData.name,
+        speciality: providerData.speciality,
+        description: providerData.description,
+        documentType: providerData.documentType,
+        documentNumber: providerData.documentNumber,
+        location: providerData.location,
+        rating: "0.0",
+        reviewCount: 0,
+        imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+        portfolioImages: [],
+        categories: providerData.categories,
+        phone: providerData.phone,
+        email: providerData.email,
+        planType: providerData.planType,
+        planActive: true, // Activated immediately for demo
+        verified: false,
+      };
+
+      user.providerId = providerId;
+      
+      this.users.set(userId, user);
+      this.serviceProviders.set(providerId, provider);
+
+      const authUser = await this.buildAuthUser(user);
+      return { success: true, user: authUser };
+    } catch (error) {
+      console.error("Error upgrading user to provider:", error);
+      return { success: false, message: "Erro ao fazer upgrade para prestador" };
+    }
   }
 
   // Authentication operations

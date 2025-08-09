@@ -15,7 +15,10 @@ import {
   Plus,
   TrendingUp,
   Users,
-  Calendar
+  Calendar,
+  Crown,
+  CheckCircle,
+  BarChart3
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -94,7 +97,7 @@ export default function Dashboard() {
           <CardTitle>Ações Rápidas</CardTitle>
           <CardDescription>O que você gostaria de fazer hoje?</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link href="/properties">
             <Button variant="outline" className="w-full h-20 flex flex-col">
               <Home className="w-6 h-6 mb-2" />
@@ -105,6 +108,12 @@ export default function Dashboard() {
             <Button variant="outline" className="w-full h-20 flex flex-col">
               <Users className="w-6 h-6 mb-2" />
               Encontrar Prestadores
+            </Button>
+          </Link>
+          <Link href="/upgrade-to-provider">
+            <Button variant="outline" className="w-full h-20 flex flex-col border-amber-200 text-amber-700 hover:bg-amber-50">
+              <Crown className="w-6 h-6 mb-2" />
+              Tornar-se Prestador
             </Button>
           </Link>
         </CardContent>

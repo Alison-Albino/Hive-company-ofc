@@ -14,6 +14,7 @@ import ChatPage from "./pages/chat";
 import PropertyDetail from "./pages/property-detail";
 import AuthPage from "./pages/auth";
 import Dashboard from "./pages/dashboard";
+import UpgradeToProvider from "./pages/upgrade-to-provider";
 import AuthTest from "./pages/auth-test";
 import LoginGuide from "./pages/login-guide";
 import Navigation from "./components/navigation";
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/plans" component={Plans} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/upgrade-to-provider" component={UpgradeToProvider} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/login" component={AuthPage} />
       <Route path="/register" component={AuthPage} />
