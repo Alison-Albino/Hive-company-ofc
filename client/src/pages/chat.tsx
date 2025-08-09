@@ -312,42 +312,46 @@ export default function ChatPage() {
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-4 min-h-full">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`max-w-[70%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
-                          <div
-                            className={`p-3 rounded-2xl ${
-                              message.sender === 'user'
-                                ? 'bg-hive-gold text-white rounded-br-md'
-                                : message.sender === 'assistant'
-                                ? 'bg-blue-100 text-blue-900 rounded-bl-md'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
-                            }`}
-                          >
-                            <p className="text-sm">{message.message}</p>
-                          </div>
-                          <div className={`flex items-center mt-1 space-x-1 ${
-                            message.sender === 'user' ? 'justify-end' : 'justify-start'
-                          }`}>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {formatTime(message.timestamp)}
-                            </span>
-                            {message.sender === 'user' && (
-                              <div className="text-gray-500">
-                                {message.isRead ? (
-                                  <CheckCheck className="w-3 h-3 text-blue-500" />
-                                ) : (
-                                  <Check className="w-3 h-3" />
-                                )}
-                              </div>
-                            )}
+                    {messages.map((message) => {
+                      const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
+                      const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
+                      return (
+                        <div
+                          key={message.id}
+                          className={`flex ${isUserMessage ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className={`max-w-[70%] ${isUserMessage ? 'order-2' : 'order-1'}`}>
+                            <div
+                              className={`p-3 rounded-2xl ${
+                                isUserMessage
+                                  ? 'bg-hive-gold text-white rounded-br-md'
+                                  : isAssistant
+                                  ? 'bg-blue-100 text-blue-900 rounded-bl-md'
+                                  : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
+                              }`}
+                            >
+                              <p className="text-sm">{message.message}</p>
+                            </div>
+                            <div className={`flex items-center mt-1 space-x-1 ${
+                              isUserMessage ? 'justify-end' : 'justify-start'
+                            }`}>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatTime(message.timestamp || message.createdAt)}
+                              </span>
+                              {isUserMessage && (
+                                <div className="text-gray-500">
+                                  {(message.isRead || message.read) ? (
+                                    <CheckCheck className="w-3 h-3 text-blue-500" />
+                                  ) : (
+                                    <Check className="w-3 h-3" />
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
