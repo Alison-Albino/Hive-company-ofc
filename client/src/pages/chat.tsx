@@ -96,12 +96,13 @@ export default function ChatPage() {
     }
   });
 
-  // Auto scroll para última mensagem apenas quando a conversa muda ou nova mensagem é enviada
+  // Auto scroll para última mensagem apenas quando nova mensagem é enviada (não ao selecionar conversa)
   useEffect(() => {
-    if (selectedConversation && messages.length > 0) {
+    // Só faz scroll automático se uma mensagem foi enviada recentemente
+    if (messages.length > 0 && sendMessageMutation.isSuccess) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [selectedConversation, messages.length]);
+  }, [messages.length, sendMessageMutation.isSuccess]);
 
   // Filtrar conversas por busca
   const filteredConversations = conversations.filter(conv =>
