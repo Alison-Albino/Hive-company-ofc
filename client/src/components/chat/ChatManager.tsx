@@ -6,9 +6,10 @@ import { MessageCircle, Users, Bot, X } from 'lucide-react';
 import ChatWindow from './ChatWindow';
 import AssistantChat from './AssistantChat';
 
-interface ChatManager {
-  activeChats: Map<string, any>;
+interface ChatManagerState {
+  activeChats: Map<string, ChatWindowData>;
   assistantOpen: boolean;
+  persistedChats: string[]; // IDs das conversas que devem ser mantidas
 }
 
 interface ChatWindowData {
@@ -21,9 +22,10 @@ interface ChatWindowData {
 }
 
 export default function ChatManager() {
-  const [chatState, setChatState] = useState<ChatManager>({
+  const [chatState, setChatState] = useState<ChatManagerState>({
     activeChats: new Map(),
-    assistantOpen: false
+    assistantOpen: false,
+    persistedChats: []
   });
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -42,6 +44,8 @@ export default function ChatManager() {
   const openProviderChat = (providerId: string, providerName: string, providerImage?: string) => {
     setChatState(prev => {
       const newActiveChats = new Map(prev.activeChats);
+      const newPersistedChats = [...prev.persistedChats];
+      
       if (!newActiveChats.has(providerId)) {
         newActiveChats.set(providerId, {
           id: providerId,
@@ -51,8 +55,18 @@ export default function ChatManager() {
           providerImage,
           position: newActiveChats.size
         });
+        
+        // Adicionar à lista de chats persistidos
+        if (!newPersistedChats.includes(providerId)) {
+          newPersistedChats.push(providerId);
+        }
       }
-      return { ...prev, activeChats: newActiveChats };
+      
+      return { 
+        ...prev, 
+        activeChats: newActiveChats,
+        persistedChats: newPersistedChats
+      };
     });
   };
 
@@ -63,6 +77,8 @@ export default function ChatManager() {
   const closeProviderChat = (providerId: string) => {
     setChatState(prev => {
       const newActiveChats = new Map(prev.activeChats);
+      const newPersistedChats = prev.persistedChats.filter(id => id !== providerId);
+      
       newActiveChats.delete(providerId);
       
       // Reajustar posições dos chats restantes
@@ -71,7 +87,11 @@ export default function ChatManager() {
         chat.position = position++;
       }
       
-      return { ...prev, activeChats: newActiveChats };
+      return { 
+        ...prev, 
+        activeChats: newActiveChats,
+        persistedChats: newPersistedChats
+      };
     });
   };
 
@@ -84,11 +104,73 @@ export default function ChatManager() {
     (window as any).openProviderChat = openProviderChat;
   }, []);
 
+  // Persistir estado dos chats no localStorage
+  useEffect(() => {
+    const savedChats = localStorage.getItem('hive-chat-state');
+    if (savedChats) {
+      try {
+        const parsedChats = JSON.parse(savedChats);
+        if (parsedChats.persistedChats && parsedChats.persistedChats.length > 0) {
+          setChatState(prev => ({
+            ...prev,
+            persistedChats: parsedChats.persistedChats
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading persisted chats:', error);
+      }
+    }
+  }, []);
+
+  // Salvar estado dos chats no localStorage
+  useEffect(() => {
+    if (chatState.persistedChats.length > 0) {
+      localStorage.setItem('hive-chat-state', JSON.stringify({
+        persistedChats: chatState.persistedChats
+      }));
+    }
+  }, [chatState.persistedChats]);
+
   return (
     <>
-      {/* Botão flutuante principal */}
+      {/* Sistema de bolinhas horizontais */}
       <div className="fixed bottom-4 right-4 z-40">
-        <div className="flex flex-col items-end space-y-2">
+        <div className="flex items-center space-x-3">
+          {/* Bolinhas dos chats ativos dos prestadores */}
+          {Array.from(chatState.activeChats.entries()).map(([id, chat]: [string, ChatWindowData], index) => (
+            <div key={id} className="relative">
+              <Button
+                onClick={() => {
+                  // Chat já está aberto, apenas focar (scroll para ele)
+                  const chatElement = document.querySelector(`[data-chat-id="${id}"]`);
+                  if (chatElement) {
+                    chatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+                className="rounded-full w-12 h-12 bg-hive-gold hover:bg-hive-gold-dark text-white shadow-lg relative"
+              >
+                {chat.providerImage ? (
+                  <img 
+                    src={chat.providerImage} 
+                    alt={chat.providerName} 
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <MessageCircle className="w-5 h-5" />
+                )}
+                {/* Indicador de mensagens não lidas */}
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center p-0">
+                    <span className="text-xs font-bold">!</span>
+                  </Badge>
+                )}
+              </Button>
+              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 bg-white px-2 py-1 rounded shadow whitespace-nowrap">
+                {chat.providerName}
+              </div>
+            </div>
+          ))}
+          
           {/* Botão do Assistente */}
           {!chatState.assistantOpen && (
             <Button
@@ -96,7 +178,7 @@ export default function ChatManager() {
               className="rounded-full w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white shadow-lg relative"
             >
               <Bot className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
+              <Badge className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 text-white text-xs flex items-center justify-center p-0">
                 <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
               </Badge>
             </Button>
@@ -109,7 +191,7 @@ export default function ChatManager() {
                 openAssistant();
               }
             }}
-            className="rounded-full w-14 h-14 bg-hive-gold hover:bg-hive-gold-dark text-white shadow-lg"
+            className="rounded-full w-14 h-14 bg-hive-gold hover:bg-hive-gold-dark text-white shadow-lg relative"
           >
             <MessageCircle className="w-6 h-6" />
             {unreadCount > 0 && (
@@ -118,14 +200,6 @@ export default function ChatManager() {
               </Badge>
             )}
           </Button>
-
-          {/* Indicador de chats ativos */}
-          {chatState.activeChats.size > 0 && (
-            <div className="flex items-center space-x-1 bg-white rounded-full px-3 py-1 shadow-md border">
-              <Users className="w-4 h-4 text-hive-gold" />
-              <span className="text-sm text-gray-700">{chatState.activeChats.size}</span>
-            </div>
-          )}
         </div>
       </div>
 

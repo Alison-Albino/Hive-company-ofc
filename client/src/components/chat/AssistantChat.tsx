@@ -80,7 +80,7 @@ export default function AssistantChat({ onClose }: AssistantChatProps) {
 
   return (
     <div 
-      className={`fixed bottom-20 right-20 z-50 w-80 ${isMinimized ? 'h-14' : 'h-96'} transition-all duration-300`}
+      className={`fixed bottom-80 right-20 z-50 w-80 ${isMinimized ? 'h-14' : 'h-96'} transition-all duration-300`}
     >
       <Card className="w-full h-full shadow-xl border-2 border-blue-200">
         <CardHeader className="p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">

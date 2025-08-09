@@ -48,9 +48,9 @@ export default function ChatWindow({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  // Calcular posição do chat (empilhado da direita para esquerda)
-  const rightOffset = 20 + (position * 320); // 20px base + 320px por chat (300px largura + 20px espaço)
-  const bottomOffset = 20;
+  // Calcular posição do chat (empilhado verticalmente na lateral direita)
+  const rightOffset = 20;
+  const bottomOffset = 80 + (position * 410); // 80px base (espaço das bolinhas) + 410px por chat (400px altura + 10px espaço)
 
   // Buscar ou criar conversa com o provedor
   const createConversationMutation = useMutation({
@@ -115,6 +115,7 @@ export default function ChatWindow({
         right: `${rightOffset}px`, 
         bottom: `${bottomOffset}px`
       }}
+      data-chat-id={providerId}
     >
       <Card className="w-full h-full shadow-xl border-2 border-hive-gold/20">
         <CardHeader className="p-3 bg-hive-gold text-white rounded-t-lg">
