@@ -8,16 +8,22 @@ The application uses a modern full-stack architecture with React frontend, Expre
 
 ## Recent Changes (January 2025)
 
-### Authentication Requirements for Chat System
-- **Mandatory Login for All Provider Chats**: Chat functionality now requires user authentication across all interfaces:
-  - Property detail pages: "Iniciar conversa" button checks authentication before allowing contact with real estate agencies
-  - Profiles page: Chat buttons for service providers require login
-  - Services page: "Conversar" buttons enforce authentication
-  - All chat endpoints protected with `requireAuth` middleware on backend
-- **Plan Pricing Corrections**: Updated plan names and pricing to match brand identity:
+### Complete Implementation of Hive-First Contact Policy
+- **Mandatory Chat Platform**: All user contact now exclusively through Hive platform:
+  - Removed all phone numbers and email addresses from provider profiles and property listings
+  - Implemented authentication-required chat system across all user interactions
+  - Added informative messages about "primeiro contato via Hive" policy on all pages
+  - Property detail pages, profiles, and services require login before chat initiation
+- **Functional Chat System**: Real-time messaging platform fully operational:
+  - Fixed React hooks ordering issues in ChatPage component
+  - Chat conversations load properly for authenticated users
+  - All chat endpoints protected with authentication middleware
+- **Stripe Payment Integration**: Subscription system working correctly:
+  - Backend processing subscriptions successfully (clientSecret generation confirmed)
   - Plan A: "BE HIVE" - R$ 29/mês (CPF individuals)
   - Plan B: "HIVE GOLD" - R$ 59/mês (CNPJ companies)
-- **Enhanced Error Handling**: Clear toast notifications guide unauthenticated users to login page
+  - Improved error handling for payment processing
+- **Platform Policy Enforcement**: Complete removal of direct contact methods ensures all communication flows through Hive marketplace
 
 ## User Preferences
 

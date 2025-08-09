@@ -58,6 +58,12 @@ export default function ChatPage() {
   const { setIsChatPageOpen } = useChatContext();
   const { user, isAuthenticated, isLoading } = useAuth();
 
+  // Desabilitar popups quando a página de chat estiver aberta
+  useEffect(() => {
+    setIsChatPageOpen(true);
+    return () => setIsChatPageOpen(false);
+  }, [setIsChatPageOpen]);
+
   // Show loading state while checking authentication
   if (isLoading) {
     return (
@@ -97,28 +103,24 @@ export default function ChatPage() {
     );
   }
 
-  // Desabilitar popups quando a página de chat estiver aberta
-  useEffect(() => {
-    setIsChatPageOpen(true);
-    return () => setIsChatPageOpen(false);
-  }, [setIsChatPageOpen]);
-
   // Buscar todas as conversas
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ['/api', 'chat', 'conversations'],
     refetchInterval: 5000,
+    enabled: isAuthenticated, // Apenas buscar se autenticado
   });
 
   // Buscar mensagens da conversa selecionada
   const { data: messages = [] } = useQuery<ChatMessage[]>({
     queryKey: ['/api', 'chat', 'conversations', selectedConversation, 'messages'],
-    enabled: !!selectedConversation,
+    enabled: !!selectedConversation && isAuthenticated,
     refetchInterval: 3000,
   });
 
   // Buscar perfis de prestadores para exibir informações
   const { data: providers = [] } = useQuery<any[]>({
     queryKey: ['/api', 'profiles'],
+    enabled: isAuthenticated, // Apenas buscar se autenticado
   });
 
   // Enviar mensagem
