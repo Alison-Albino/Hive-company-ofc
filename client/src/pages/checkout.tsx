@@ -137,6 +137,11 @@ export default function Checkout() {
   const [clientSecret, setClientSecret] = useState("");
   const { toast } = useToast();
   const planType = new URLSearchParams(location.split('?')[1] || '').get('plan') || 'A';
+  
+  // Debug para verificar o parâmetro do plano
+  console.log('URL atual:', location);
+  console.log('Parâmetros da URL:', new URLSearchParams(location.split('?')[1] || ''));
+  console.log('Tipo de plano extraído:', planType);
 
   useEffect(() => {
     console.log('Creating subscription for plan type:', planType);
