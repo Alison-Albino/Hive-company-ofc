@@ -606,9 +606,9 @@ export class MemStorage implements IStorage {
     const plans: Plan[] = [
       {
         id: randomUUID(),
-        name: "Plano A - Autônomos",
+        name: "BE HIVE",
         type: "A",
-        price: "49.00",
+        price: "29.00",
         features: [
           "Perfil profissional completo",
           "Galeria de trabalhos (até 20 fotos)",
@@ -623,9 +623,9 @@ export class MemStorage implements IStorage {
       },
       {
         id: randomUUID(),
-        name: "Plano B - Empresas",
+        name: "HIVE GOLD",
         type: "B",
-        price: "149.00",
+        price: "59.00",
         features: [
           "Tudo do Plano A, mais:",
           "Perfil de empresa completo",
