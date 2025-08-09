@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoPath from "@assets/logo hive_1754700716189.png";
+import hiveBackground from "@assets/hero-hive-background.svg";
 
 export default function HeroSection() {
   const [location, setLocation] = useState("");
@@ -15,12 +16,12 @@ export default function HeroSection() {
 
   return (
     <section className="relative py-20 lg:py-32" style={{
-        backgroundImage: `url(https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=1)`,
+        backgroundImage: `url(${hiveBackground})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}>
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-hive-gold/10 to-transparent"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="flex flex-col items-center mb-8">
           <img 
@@ -28,10 +29,10 @@ export default function HeroSection() {
             alt="Hive Company Logo" 
             className="h-16 w-auto mb-4 opacity-90"
           />
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold text-hive-black mb-6 leading-tight">
             Conectando imóveis a<br />quem realmente precisa
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             A plataforma completa para encontrar imóveis e serviços especializados em um só lugar
           </p>
         </div>

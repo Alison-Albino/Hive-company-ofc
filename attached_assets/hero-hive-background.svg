@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <!-- Gradientes -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F8F8F8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F0F0;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:0.05" />
+    </linearGradient>
+    
+    <!-- Padrão hexagonal sutil -->
+    <pattern id="hexPattern" x="0" y="0" width="120" height="104" patternUnits="userSpaceOnUse">
+      <polygon points="30,4 90,4 120,54 90,104 30,104 0,54" 
+               fill="none" 
+               stroke="#D4AF37" 
+               stroke-width="0.5" 
+               stroke-opacity="0.15"/>
+    </pattern>
+    
+    <!-- Hexágonos dourados sutis -->
+    <pattern id="goldHexPattern" x="0" y="0" width="80" height="69" patternUnits="userSpaceOnUse">
+      <polygon points="20,2 60,2 80,36 60,70 20,70 0,36" 
+               fill="#D4AF37" 
+               fill-opacity="0.03"/>
+    </pattern>
+    
+    <!-- Filtro de sombra suave -->
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.1"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background principal -->
+  <rect width="1920" height="1080" fill="url(#mainGradient)"/>
+  
+  <!-- Padrão hexagonal sutil no fundo -->
+  <rect width="1920" height="1080" fill="url(#hexPattern)" opacity="1"/>
+  
+  <!-- Camada de hexágonos dourados -->
+  <rect width="1920" height="1080" fill="url(#goldHexPattern)" opacity="1"/>
+  
+  <!-- Formas geométricas modernas e minimalistas -->
+  <g opacity="0.6">
+    <!-- Hexágono grande no canto superior direito -->
+    <polygon points="1600,100 1720,100 1780,186 1720,272 1600,272 1540,186" 
+             fill="none" 
+             stroke="#D4AF37" 
+             stroke-width="2" 
+             stroke-opacity="0.3"/>
+    
+    <!-- Hexágono médio no canto inferior esquerdo -->
+    <polygon points="200,800 280,800 320,869 280,938 200,938 160,869" 
+             fill="#D4AF37" 
+             fill-opacity="0.08"/>
+    
+    <!-- Pequenos hexágonos decorativos -->
+    <polygon points="100,300 130,300 145,326 130,352 100,352 85,326" 
+             fill="#D4AF37" 
+             fill-opacity="0.15"/>
+             
+    <polygon points="1750,600 1780,600 1795,626 1780,652 1750,652 1735,626" 
+             fill="#D4AF37" 
+             fill-opacity="0.12"/>
+  </g>
+  
+  <!-- Elementos arquitetônicos sutis -->
+  <g opacity="0.4">
+    <!-- Linhas arquitetônicas modernas -->
+    <line x1="0" y1="300" x2="400" y2="250" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.2"/>
+    <line x1="1520" y1="400" x2="1920" y2="350" stroke="#D4AF37" stroke-width="1" stroke-opacity="0.2"/>
+    
+    <!-- Retângulos minimalistas -->
+    <rect x="50" y="150" width="100" height="3" fill="#D4AF37" fill-opacity="0.25"/>
+    <rect x="1720" y="250" width="150" height="2" fill="#D4AF37" fill-opacity="0.2"/>
+  </g>
+  
+  <!-- Overlay sutil para suavizar -->
+  <rect width="1920" height="1080" fill="url(#goldGradient)"/>
+  
+  <!-- Detalhes finais - pontos de luz sutis -->
+  <g opacity="0.3">
+    <circle cx="300" cy="200" r="2" fill="#D4AF37"/>
+    <circle cx="1500" cy="300" r="1.5" fill="#D4AF37"/>
+    <circle cx="800" cy="150" r="1" fill="#D4AF37"/>
+    <circle cx="1200" cy="200" r="1.5" fill="#D4AF37"/>
+  </g>
+</svg>
