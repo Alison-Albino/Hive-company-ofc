@@ -3,14 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Plan } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 export default function Plans() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  
   const { data: plans, isLoading } = useQuery({
     queryKey: ["/api/plans"],
   });
 
   const handleSubscribe = (planType: string) => {
-    window.location.href = `/checkout?plan=${planType}`;
+    // Se não estiver autenticado, redireciona para cadastro
+    if (!isAuthenticated) {
+      setLocation('/register');
+      return;
+    }
+    
+    // Se já for prestador, não permite contratar novamente
+    if (user?.userType === "provider") {
+      alert("Você já é um prestador Hive!");
+      setLocation('/dashboard');
+      return;
+    }
+    
+    // Redireciona para checkout
+    setLocation(`/checkout?plan=${planType}`);
   };
 
   const formatPrice = (price: string) => {
@@ -23,7 +42,7 @@ export default function Plans() {
     }).format(numPrice);
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="py-16 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,6 +82,20 @@ export default function Plans() {
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-hive-black mb-4">Escolha seu Plano</h1>
           <p className="text-gray-600 text-lg">Planos flexíveis para autônomos e empresas</p>
+          {!isAuthenticated && (
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg max-w-md mx-auto">
+              <p className="text-amber-800 text-sm">
+                📝 <strong>Primeiro acesso?</strong> Você será direcionado para criar sua conta antes da contratação.
+              </p>
+            </div>
+          )}
+          {user?.userType === "provider" && (
+            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg max-w-md mx-auto">
+              <p className="text-green-800 text-sm">
+                ✅ <strong>Você já é prestador!</strong> Acesse seu dashboard para gerenciar seu plano.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -117,7 +150,9 @@ export default function Plans() {
                   onClick={() => handleSubscribe(plan.type)}
                   className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-bold py-4 rounded-lg transition-colors duration-300"
                 >
-                  Assinar {plan.name}
+                  {!isAuthenticated ? 'Criar Conta e Assinar' : 
+                   user?.userType === "provider" ? 'Plano Já Ativo' : 
+                   `Assinar ${plan.name}`}
                 </Button>
                 
                 <p className="text-xs text-gray-500 text-center mt-4">
