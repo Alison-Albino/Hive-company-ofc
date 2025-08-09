@@ -53,6 +53,11 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
         const data = await response.json();
         
         if (data.success) {
+          // Update local user data to avoid auth check failure
+          if (data.user) {
+            localStorage.setItem("hive_user", JSON.stringify(data.user));
+          }
+          
           toast({
             title: "Pagamento Realizado com Sucesso!",
             description: planType === 'B' ? "Agora escolha as categorias da sua empresa." : "Você agora é um prestador Hive. Redirecionando...",
@@ -75,7 +80,13 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
           title: "Pagamento Processado",
           description: "Seu pagamento foi processado. Redirecionando para o dashboard...",
         });
-        setTimeout(() => setLocation('/dashboard'), 2000);
+        setTimeout(() => {
+          if (planType === 'B') {
+            setLocation('/select-categories');
+          } else {
+            setLocation('/dashboard');
+          }
+        }, 2000);
       }
     }
 

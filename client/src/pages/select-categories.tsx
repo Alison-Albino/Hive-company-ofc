@@ -13,12 +13,17 @@ import { CheckCircle, Building2, ArrowRight } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 
 export default function SelectCategories() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refresh } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Refresh auth data on component mount
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   // Verificar se o usuário é empresarial
   useEffect(() => {
@@ -28,12 +33,21 @@ export default function SelectCategories() {
     }
     
     if (user?.userType !== "provider" || (user?.planType !== "B" && user?.providerPlan !== "B")) {
-      toast({
-        title: "Acesso Negado",
-        description: "Esta página é apenas para prestadores empresariais.",
-        variant: "destructive",
+      console.log('User access check:', { 
+        userType: user?.userType, 
+        planType: user?.planType, 
+        providerPlan: user?.providerPlan 
       });
-      setLocation('/dashboard');
+      
+      // Aguardar um pouco para permitir atualização dos dados
+      setTimeout(() => {
+        toast({
+          title: "Acesso Negado",
+          description: "Esta página é apenas para prestadores empresariais.",
+          variant: "destructive",
+        });
+        setLocation('/dashboard');
+      }, 1000);
       return;
     }
   }, [user, isAuthenticated, setLocation, toast]);
