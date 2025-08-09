@@ -15,6 +15,7 @@ import PropertyDetail from "./pages/property-detail";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import RegisterProvider from "./pages/register-provider";
+import Dashboard from "./pages/dashboard";
 import AuthTest from "./pages/auth-test";
 import LoginGuide from "./pages/login-guide";
 import Navigation from "./components/navigation";
@@ -30,8 +31,10 @@ function Router() {
       <Route path="/services" component={Services} />
       <Route path="/services/:category" component={Services} />
       <Route path="/profile/:profileId" component={ProfilePage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route path="/plans" component={Plans} />
       <Route path="/chat" component={ChatPage} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/register-provider" component={RegisterProvider} />

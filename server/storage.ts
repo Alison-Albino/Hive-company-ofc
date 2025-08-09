@@ -35,6 +35,8 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<AuthUser | undefined>;
   getUserByEmail(email: string): Promise<AuthUser | undefined>;
+  getUserById(id: string): Promise<AuthUser | undefined>;
+  updateUserProfile(id: string, profileData: any): Promise<AuthUser | null>;
   
   // Property operations for providers
   createPropertyAsProvider(userId: string, property: CreatePropertyData): Promise<Property | null>;
@@ -1314,6 +1316,47 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  // User management operations
+  async getUserById(id: string): Promise<AuthUser | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isActive: user.isActive,
+      completionPercentage: user.userType === 'provider' ? 65 : 45,
+      planStatus: user.userType === 'provider' ? 'active' : undefined,
+      isVerified: user.userType === 'provider',
+      documentsVerified: false,
+    };
+  }
+
+  async updateUserProfile(id: string, profileData: any): Promise<AuthUser | null> {
+    const user = this.users.get(id);
+    if (!user) return null;
+
+    // Update basic user data
+    if (profileData.name) user.name = profileData.name;
+    if (profileData.email) user.email = profileData.email;
+
+    // For now, return the updated user with additional profile data
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isActive: user.isActive,
+      ...profileData,
+      completionPercentage: user.userType === 'provider' ? 75 : 65,
+      planStatus: user.userType === 'provider' ? 'active' : undefined,
+      isVerified: user.userType === 'provider',
+      documentsVerified: false,
+    };
+  }
+
   // Authentication operations
   async login(data: LoginData): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
     const user = Array.from(this.users.values()).find(u => u.email === data.email);
@@ -1477,16 +1520,23 @@ export class MemStorage implements IStorage {
   }
 
   private async buildAuthUser(user: SimpleUser): Promise<AuthUser> {
+    const provider = user.providerId ? this.serviceProviders.get(user.providerId) : undefined;
+    
     const authUser: AuthUser = {
       id: user.id,
       email: user.email,
       name: user.name,
       userType: user.userType,
       isActive: user.isActive,
+      categories: provider?.categories as string[] || [],
+      planType: provider?.planType as "A" | "B" || undefined,
+      planStatus: provider?.planActive ? "active" : (user.userType === "provider" ? "inactive" : undefined),
+      isVerified: provider?.verified || false,
+      completionPercentage: provider ? 65 : 30,
+      documentsVerified: false,
     };
 
     if (user.userType === "provider" && user.providerId) {
-      const provider = this.serviceProviders.get(user.providerId);
       if (provider) {
         authUser.provider = {
           id: provider.id,

@@ -117,12 +117,11 @@ export function useAuth() {
       return false;
     }
 
-    const provider = authState.user.provider;
-    if (!provider || !provider.planActive) {
+    if (authState.user.planStatus !== "active") {
       return false;
     }
 
-    return provider.categories.includes("imobiliaria");
+    return authState.user.categories?.includes("imobiliaria") || false;
   };
 
   return {

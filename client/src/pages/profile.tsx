@@ -1,574 +1,723 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { apiRequest } from '@/lib/queryClient';
-import { useParams } from 'wouter';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  User, 
+  Camera, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Calendar,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Upload,
+  Save,
+  Eye
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-interface UserProfile {
-  id: string;
-  documentType: 'CPF' | 'CNPJ';
-  displayName: string;
-  bio?: string;
-  phone?: string;
-  city?: string;
-  state?: string;
-  profession?: string;
-  specialties: string[];
-  services: string[];
-  profileImage?: string;
-  coverImage?: string;
-  portfolioImages: string[];
-  rating: string;
-  reviewCount: number;
-  completedJobs: number;
-  responseTime: number;
-  verified: boolean;
-  available: boolean;
-  planType: string;
-  socialLinks: {
-    instagram?: string;
-    facebook?: string;
-    linkedin?: string;
-    whatsapp?: string;
-    website?: string;
-  };
-  // Campos específicos para CNPJ
-  companyName?: string;
-  tradeName?: string;
-  foundedYear?: number;
-  employeeCount?: number;
-  companyDescription?: string;
-  website?: string;
-}
+// Schema para perfil de visualizador
+const viewerProfileSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  phoneNumber: z.string().optional(),
+  address: z.string().min(5, "Endereço deve ter pelo menos 5 caracteres"),
+  city: z.string().min(2, "Cidade obrigatória"),
+  state: z.string().min(2, "Estado obrigatório"),
+  zipCode: z.string().min(8, "CEP inválido"),
+  documentType: z.enum(["CPF"]),
+  documentNumber: z.string().min(11, "CPF inválido"),
+});
 
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  serviceType: string;
-  createdAt: string;
-  reviewerId: string;
-  reviewerName: string;
-}
+// Schema para perfil de prestador
+const providerProfileSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  phoneNumber: z.string().min(10, "Telefone obrigatório"),
+  address: z.string().min(5, "Endereço deve ter pelo menos 5 caracteres"),
+  city: z.string().min(2, "Cidade obrigatória"),
+  state: z.string().min(2, "Estado obrigatório"),
+  zipCode: z.string().min(8, "CEP inválido"),
+  description: z.string().min(20, "Descrição deve ter pelo menos 20 caracteres"),
+  businessHours: z.string().optional(),
+  documentType: z.enum(["CPF", "CNPJ"]),
+  documentNumber: z.string().min(11, "Documento inválido"),
+});
 
-export default function ProfilePage() {
-  const params = useParams();
-  const profileId = params.profileId;
-  const [isEditing, setIsEditing] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const queryClient = useQueryClient();
+type ViewerProfileData = z.infer<typeof viewerProfileSchema>;
+type ProviderProfileData = z.infer<typeof providerProfileSchema>;
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: [`/api/profiles/${profileId}`],
-    enabled: !!profileId,
-  });
+export default function Profile() {
+  const { user, isAuthenticated, canCreateProperty } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
 
-  const { data: reviews } = useQuery({
-    queryKey: [`/api/profiles/${profileId}/reviews`],
-    enabled: !!profileId,
-  });
-
-  const updateProfileMutation = useMutation({
-    mutationFn: (updatedProfile: Partial<UserProfile>) =>
-      apiRequest(`/api/profiles/${profileId}`, 'PATCH', updatedProfile),
-    onSuccess: () => {
-      queryClient.invalidateQueries([`/api/profiles/${profileId}`]);
-      setIsEditing(false);
+  const viewerForm = useForm<ViewerProfileData>({
+    resolver: zodResolver(viewerProfileSchema),
+    defaultValues: {
+      name: user?.name || "",
+      email: user?.email || "",
+      phoneNumber: user?.phoneNumber || "",
+      address: user?.address || "",
+      city: user?.city || "",
+      state: user?.state || "",
+      zipCode: user?.zipCode || "",
+      documentType: "CPF",
+      documentNumber: user?.documentNumber || "",
     },
   });
 
-  const createChatMutation = useMutation({
-    mutationFn: (receiverId: string) =>
-      apiRequest('/api/chat/conversations', 'POST', { receiverId }),
-    onSuccess: (conversation) => {
-      // Redirect to chat or open chat dialog
-      setIsChatOpen(true);
+  const providerForm = useForm<ProviderProfileData>({
+    resolver: zodResolver(providerProfileSchema),
+    defaultValues: {
+      name: user?.name || "",
+      email: user?.email || "",
+      phoneNumber: user?.phoneNumber || "",
+      address: user?.address || "",
+      city: user?.city || "",
+      state: user?.state || "",
+      zipCode: user?.zipCode || "",
+      description: user?.description || "",
+      businessHours: user?.businessHours || "",
+      documentType: (user?.documentType as "CPF" | "CNPJ") || "CPF",
+      documentNumber: user?.documentNumber || "",
     },
   });
 
-  if (isLoading) {
+  if (!isAuthenticated || !user) {
     return (
-      <div className="py-16 bg-gray-50 min-h-screen">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse space-y-8">
-            <div className="bg-white rounded-xl h-64"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-xl h-48"></div>
-                <div className="bg-white rounded-xl h-32"></div>
-              </div>
-              <div className="bg-white rounded-xl h-96"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="py-16 bg-gray-50 min-h-screen">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-xl p-12">
-            <i className="fas fa-user-slash text-6xl text-gray-400 mb-4"></i>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Perfil não encontrado</h1>
-            <p className="text-gray-600">O perfil que você está procurando não existe ou foi removido.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="py-16 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header com foto de capa */}
-        <Card className="mb-8 overflow-hidden">
-          <div 
-            className="h-64 bg-gradient-to-r from-hive-gold to-hive-gold-dark relative"
-            style={profile.coverImage ? { 
-              backgroundImage: `url(${profile.coverImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            } : {}}
-          >
-            <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="flex items-end space-x-6">
-                <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                  <AvatarImage src={profile.profileImage} />
-                  <AvatarFallback className="text-2xl bg-hive-gold text-white">
-                    {profile.displayName.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 pb-2">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h1 className="text-3xl font-bold text-white">{profile.displayName}</h1>
-                    {profile.verified && (
-                      <Badge className="bg-blue-500 hover:bg-blue-600">
-                        <i className="fas fa-check-circle mr-1"></i>
-                        Verificado
-                      </Badge>
-                    )}
-                    <Badge variant={profile.available ? "default" : "secondary"}>
-                      <i className={`fas fa-circle mr-1 ${profile.available ? 'text-green-400' : 'text-gray-400'}`}></i>
-                      {profile.available ? 'Disponível' : 'Indisponível'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center space-x-4 text-white">
-                    <div className="flex items-center">
-                      <i className="fas fa-star text-yellow-400 mr-1"></i>
-                      <span className="font-semibold">{profile.rating}</span>
-                      <span className="ml-1">({profile.reviewCount} avaliações)</span>
-                    </div>
-                    <div className="flex items-center">
-                      <i className="fas fa-briefcase mr-2"></i>
-                      <span>{profile.completedJobs} trabalhos realizados</span>
-                    </div>
-                    <div className="flex items-center">
-                      <i className="fas fa-clock mr-2"></i>
-                      <span>Responde em {profile.responseTime}min</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex space-x-3">
-                  <Button 
-                    onClick={() => createChatMutation.mutate(profile.id)}
-                    className="bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-2"
-                    disabled={createChatMutation.isPending}
-                  >
-                    <i className="fas fa-comment-dots mr-2"></i>
-                    {createChatMutation.isPending ? 'Conectando...' : 'Conversar'}
-                  </Button>
-                  {/* TODO: Add edit button for own profile */}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-gray-600 mb-4">Você precisa fazer login para acessar o perfil</p>
+            <Link href="/login">
+              <Button>Fazer Login</Button>
+            </Link>
+          </CardContent>
         </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Conteúdo principal */}
-          <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="sobre" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="sobre">Sobre</TabsTrigger>
-                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                <TabsTrigger value="avaliacoes">Avaliações</TabsTrigger>
-                <TabsTrigger value="contato">Contato</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="sobre">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>
-                      {profile.documentType === 'CNPJ' ? 'Sobre a Empresa' : 'Sobre o Profissional'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {profile.bio && (
-                      <div>
-                        <h3 className="font-semibold mb-2">Descrição</h3>
-                        <p className="text-gray-700 whitespace-pre-line">{profile.bio}</p>
-                      </div>
-                    )}
-
-                    {profile.documentType === 'CNPJ' && (
-                      <>
-                        {profile.companyDescription && (
-                          <div>
-                            <h3 className="font-semibold mb-2">Sobre a Empresa</h3>
-                            <p className="text-gray-700">{profile.companyDescription}</p>
-                          </div>
-                        )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {profile.companyName && (
-                            <div>
-                              <h4 className="font-medium text-gray-600">Razão Social</h4>
-                              <p className="text-gray-800">{profile.companyName}</p>
-                            </div>
-                          )}
-                          {profile.tradeName && (
-                            <div>
-                              <h4 className="font-medium text-gray-600">Nome Fantasia</h4>
-                              <p className="text-gray-800">{profile.tradeName}</p>
-                            </div>
-                          )}
-                          {profile.foundedYear && (
-                            <div>
-                              <h4 className="font-medium text-gray-600">Ano de Fundação</h4>
-                              <p className="text-gray-800">{profile.foundedYear}</p>
-                            </div>
-                          )}
-                          {profile.employeeCount && (
-                            <div>
-                              <h4 className="font-medium text-gray-600">Número de Funcionários</h4>
-                              <p className="text-gray-800">{profile.employeeCount}</p>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-
-                    {profile.specialties.length > 0 && (
-                      <div>
-                        <h3 className="font-semibold mb-2">Especialidades</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.specialties.map((specialty, index) => (
-                            <Badge key={index} variant="outline">
-                              {specialty}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {profile.services.length > 0 && (
-                      <div>
-                        <h3 className="font-semibold mb-2">Serviços Oferecidos</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.services.map((service, index) => (
-                            <Badge key={index} className="bg-hive-gold hover:bg-hive-gold-dark text-white">
-                              {service}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="portfolio">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Portfolio</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {profile.portfolioImages.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {profile.portfolioImages.map((image, index) => (
-                          <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                            <img 
-                              src={image} 
-                              alt={`Portfolio ${index + 1}`}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <i className="fas fa-images text-4xl text-gray-400 mb-4"></i>
-                        <p className="text-gray-600">Nenhuma imagem de portfolio disponível</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="avaliacoes">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Avaliações dos Clientes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {reviews && reviews.length > 0 ? (
-                      <div className="space-y-6">
-                        {reviews.map((review: Review) => (
-                          <div key={review.id} className="border-b pb-6 last:border-b-0">
-                            <div className="flex items-start space-x-3">
-                              <Avatar>
-                                <AvatarFallback>{review.reviewerName?.slice(0, 2) || '??'}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <span className="font-medium">{review.reviewerName || 'Cliente'}</span>
-                                  <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => (
-                                      <i 
-                                        key={i}
-                                        className={`fas fa-star text-sm ${
-                                          i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                                        }`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <span className="text-sm text-gray-500">
-                                    {new Date(review.createdAt).toLocaleDateString()}
-                                  </span>
-                                </div>
-                                {review.serviceType && (
-                                  <Badge variant="outline" className="mb-2">
-                                    {review.serviceType}
-                                  </Badge>
-                                )}
-                                <p className="text-gray-700">{review.comment}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <i className="fas fa-star text-4xl text-gray-400 mb-4"></i>
-                        <p className="text-gray-600">Ainda não há avaliações</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="contato">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Informações de Contato</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {profile.phone && (
-                      <div className="flex items-center space-x-3">
-                        <i className="fas fa-phone text-hive-gold w-5"></i>
-                        <span>{profile.phone}</span>
-                        <Button size="sm" variant="outline">
-                          <i className="fas fa-copy mr-1"></i>
-                          Copiar
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {profile.city && profile.state && (
-                      <div className="flex items-center space-x-3">
-                        <i className="fas fa-map-marker-alt text-hive-gold w-5"></i>
-                        <span>{profile.city}, {profile.state}</span>
-                      </div>
-                    )}
-
-                    {Object.entries(profile.socialLinks).filter(([_, url]) => url).length > 0 && (
-                      <div>
-                        <h3 className="font-semibold mb-3">Redes Sociais</h3>
-                        <div className="space-y-2">
-                          {profile.socialLinks.instagram && (
-                            <a 
-                              href={profile.socialLinks.instagram} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-3 text-pink-600 hover:text-pink-700"
-                            >
-                              <i className="fab fa-instagram w-5"></i>
-                              <span>Instagram</span>
-                            </a>
-                          )}
-                          {profile.socialLinks.facebook && (
-                            <a 
-                              href={profile.socialLinks.facebook} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-3 text-blue-600 hover:text-blue-700"
-                            >
-                              <i className="fab fa-facebook w-5"></i>
-                              <span>Facebook</span>
-                            </a>
-                          )}
-                          {profile.socialLinks.linkedin && (
-                            <a 
-                              href={profile.socialLinks.linkedin} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-3 text-blue-800 hover:text-blue-900"
-                            >
-                              <i className="fab fa-linkedin w-5"></i>
-                              <span>LinkedIn</span>
-                            </a>
-                          )}
-                          {profile.socialLinks.whatsapp && (
-                            <a 
-                              href={`https://wa.me/${profile.socialLinks.whatsapp.replace(/[^\d]/g, '')}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-3 text-green-600 hover:text-green-700"
-                            >
-                              <i className="fab fa-whatsapp w-5"></i>
-                              <span>WhatsApp</span>
-                            </a>
-                          )}
-                          {profile.socialLinks.website && (
-                            <a 
-                              href={profile.socialLinks.website} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-3 text-gray-600 hover:text-gray-700"
-                            >
-                              <i className="fas fa-globe w-5"></i>
-                              <span>Website</span>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Card de plano */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <i className="fas fa-crown text-hive-gold mr-2"></i>
-                  Plano {profile.planType}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-hive-gold mb-2">
-                    {profile.documentType === 'CNPJ' ? 'EMPRESA' : 'PROFISSIONAL'}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {profile.documentType === 'CNPJ' 
-                      ? 'Perfil empresarial com recursos avançados'
-                      : 'Perfil individual com recursos básicos'
-                    }
-                  </p>
-                  <Button className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white">
-                    <i className="fas fa-star mr-2"></i>
-                    Ver Detalhes do Plano
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card de ação rápida */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Contato Rápido</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  onClick={() => createChatMutation.mutate(profile.id)}
-                  className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white"
-                  disabled={createChatMutation.isPending}
-                >
-                  <i className="fas fa-comment-dots mr-2"></i>
-                  Iniciar Conversa
-                </Button>
-                {profile.phone && (
-                  <Button variant="outline" className="w-full">
-                    <i className="fas fa-phone mr-2"></i>
-                    Ligar Agora
-                  </Button>
-                )}
-                {profile.socialLinks.whatsapp && (
-                  <Button variant="outline" className="w-full text-green-600 border-green-600 hover:bg-green-50">
-                    <i className="fab fa-whatsapp mr-2"></i>
-                    WhatsApp
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Card de estatísticas */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Estatísticas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Avaliação média</span>
-                  <div className="flex items-center">
-                    <i className="fas fa-star text-yellow-400 mr-1"></i>
-                    <span className="font-semibold">{profile.rating}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total de avaliações</span>
-                  <span className="font-semibold">{profile.reviewCount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Trabalhos concluídos</span>
-                  <span className="font-semibold">{profile.completedJobs}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tempo de resposta</span>
-                  <span className="font-semibold">{profile.responseTime} min</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </div>
+    );
+  }
 
-      {/* Chat Dialog */}
-      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Conversa com {profile.displayName}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <i className="fas fa-comments text-3xl text-hive-gold mb-2"></i>
-              <p className="text-gray-700">Sistema de chat será implementado em breve!</p>
+  const onViewerSubmit = async (data: ViewerProfileData) => {
+    setIsLoading(true);
+    try {
+      const res = await apiRequest("PUT", "/api/profile", data);
+      const response = await res.json();
+      
+      if (response.success) {
+        toast({
+          title: "Perfil Atualizado",
+          description: "Suas informações foram salvas com sucesso!",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: response.message || "Erro ao atualizar perfil",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro de conexão",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onProviderSubmit = async (data: ProviderProfileData) => {
+    setIsLoading(true);
+    try {
+      const res = await apiRequest("PUT", "/api/profile", data);
+      const response = await res.json();
+      
+      if (response.success) {
+        toast({
+          title: "Perfil Atualizado",
+          description: "Suas informações foram salvas com sucesso!",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: response.message || "Erro ao atualizar perfil",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro de conexão",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderViewerProfile = () => (
+    <form onSubmit={viewerForm.handleSubmit(onViewerSubmit)} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="w-5 h-5" />
+            Informações Pessoais
+          </CardTitle>
+          <CardDescription>
+            Dados básicos do seu perfil
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome Completo</Label>
+            <Input
+              id="name"
+              {...viewerForm.register("name")}
+              className={viewerForm.formState.errors.name ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.name && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.name.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              {...viewerForm.register("email")}
+              className={viewerForm.formState.errors.email ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.email && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Telefone</Label>
+            <Input
+              id="phoneNumber"
+              placeholder="(11) 99999-9999"
+              {...viewerForm.register("phoneNumber")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5" />
+            Endereço
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="address">Endereço</Label>
+            <Input
+              id="address"
+              {...viewerForm.register("address")}
+              className={viewerForm.formState.errors.address ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.address && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.address.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="city">Cidade</Label>
+            <Input
+              id="city"
+              {...viewerForm.register("city")}
+              className={viewerForm.formState.errors.city ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.city && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.city.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="state">Estado</Label>
+            <Input
+              id="state"
+              {...viewerForm.register("state")}
+              className={viewerForm.formState.errors.state ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.state && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.state.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="zipCode">CEP</Label>
+            <Input
+              id="zipCode"
+              placeholder="00000-000"
+              {...viewerForm.register("zipCode")}
+              className={viewerForm.formState.errors.zipCode ? "border-red-500" : ""}
+            />
+            {viewerForm.formState.errors.zipCode && (
+              <p className="text-sm text-red-500">{viewerForm.formState.errors.zipCode.message}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Documentação
+          </CardTitle>
+          <CardDescription>
+            Verificação de identidade
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="documentNumber">CPF</Label>
+              <Input
+                id="documentNumber"
+                placeholder="000.000.000-00"
+                {...viewerForm.register("documentNumber")}
+                className={viewerForm.formState.errors.documentNumber ? "border-red-500" : ""}
+              />
+              {viewerForm.formState.errors.documentNumber && (
+                <p className="text-sm text-red-500">{viewerForm.formState.errors.documentNumber.message}</p>
+              )}
             </div>
-            <Button 
-              onClick={() => setIsChatOpen(false)}
-              className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white"
-            >
-              Entendi
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user.documentsVerified ? (
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Documento Verificado
+              </Badge>
+            ) : (
+              <Badge variant="secondary">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Aguardando Verificação
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            "Salvando..."
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Perfil
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+
+  const renderProviderProfile = () => (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="profile">Perfil</TabsTrigger>
+        <TabsTrigger value="photos">Fotos</TabsTrigger>
+        <TabsTrigger value="categories">Categorias</TabsTrigger>
+        <TabsTrigger value="documents">Documentos</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="profile">
+        <form onSubmit={providerForm.handleSubmit(onProviderSubmit)} className="space-y-6">
+          {/* Plan Status Alert */}
+          {user.planStatus !== 'active' && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-amber-700">
+                Seu plano está {user.planStatus === 'pending' ? 'pendente de pagamento' : 'inativo'}. 
+                <Link href="/plans" className="ml-2 text-amber-800 underline">
+                  Ativar plano
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Informações do Prestador
+              </CardTitle>
+              <CardDescription>
+                Dados que aparecerão no seu perfil público
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome/Empresa</Label>
+                <Input
+                  id="name"
+                  {...providerForm.register("name")}
+                  className={providerForm.formState.errors.name ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.name && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.name.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...providerForm.register("email")}
+                  className={providerForm.formState.errors.email ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.email && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Telefone de Contato</Label>
+                <Input
+                  id="phoneNumber"
+                  placeholder="(11) 99999-9999"
+                  {...providerForm.register("phoneNumber")}
+                  className={providerForm.formState.errors.phoneNumber ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.phoneNumber && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.phoneNumber.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="businessHours">Horário de Funcionamento</Label>
+                <Input
+                  id="businessHours"
+                  placeholder="Seg-Sex: 8h-18h"
+                  {...providerForm.register("businessHours")}
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="description">Descrição dos Serviços</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Descreva seus serviços, experiência e diferenciais..."
+                  {...providerForm.register("description")}
+                  className={providerForm.formState.errors.description ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.description && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.description.message}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Área de Atendimento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Endereço Base</Label>
+                <Input
+                  id="address"
+                  {...providerForm.register("address")}
+                  className={providerForm.formState.errors.address ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.address && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.address.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  {...providerForm.register("city")}
+                  className={providerForm.formState.errors.city ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.city && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.city.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="state">Estado</Label>
+                <Input
+                  id="state"
+                  {...providerForm.register("state")}
+                  className={providerForm.formState.errors.state ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.state && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.state.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="zipCode">CEP</Label>
+                <Input
+                  id="zipCode"
+                  placeholder="00000-000"
+                  {...providerForm.register("zipCode")}
+                  className={providerForm.formState.errors.zipCode ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.zipCode && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.zipCode.message}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                "Salvando..."
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Perfil
+                </>
+              )}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </form>
+      </TabsContent>
+
+      <TabsContent value="photos">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Gerenciar Fotos
+            </CardTitle>
+            <CardDescription>
+              Adicione fotos do seu perfil e portfólio de trabalhos
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label>Foto de Perfil</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                    {user.profileImage ? (
+                      <img 
+                        src={user.profileImage} 
+                        alt="Perfil" 
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-8 h-8 text-gray-400" />
+                    )}
+                  </div>
+                  <Button variant="outline">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Alterar Foto
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label>Portfólio (até 10 fotos)</Label>
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Button variant="ghost" size="sm">
+                        <Upload className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  Adicione fotos dos seus trabalhos para mostrar a qualidade dos seus serviços
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="categories">
+        <Card>
+          <CardHeader>
+            <CardTitle>Categorias e Especialidades</CardTitle>
+            <CardDescription>
+              Escolha 1 categoria principal e até 3 subcategorias
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label>Categoria Principal</Label>
+                <div className="mt-2">
+                  {user.categories && user.categories.length > 0 ? (
+                    <Badge variant="default">{user.categories[0]}</Badge>
+                  ) : (
+                    <Badge variant="secondary">Nenhuma categoria selecionada</Badge>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label>Subcategorias ({(user.subcategories?.length || 0)}/3)</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {user.subcategories && user.subcategories.length > 0 ? (
+                    user.subcategories.map((sub, index) => (
+                      <Badge key={index} variant="outline">{sub}</Badge>
+                    ))
+                  ) : (
+                    <Badge variant="secondary">Nenhuma subcategoria selecionada</Badge>
+                  )}
+                </div>
+              </div>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Para alterar suas categorias, entre em contato com o suporte através do chat.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="documents">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Verificação de Documentos
+            </CardTitle>
+            <CardDescription>
+              Envie seus documentos para verificação da conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="documentType">Tipo de Documento</Label>
+                <Input
+                  id="documentType"
+                  value={providerForm.watch("documentType")}
+                  disabled
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="documentNumber">Número do Documento</Label>
+                <Input
+                  id="documentNumber"
+                  {...providerForm.register("documentNumber")}
+                  className={providerForm.formState.errors.documentNumber ? "border-red-500" : ""}
+                />
+                {providerForm.formState.errors.documentNumber && (
+                  <p className="text-sm text-red-500">{providerForm.formState.errors.documentNumber.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Status da Verificação</Label>
+                <div className="mt-2">
+                  {user.documentsVerified ? (
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Documentos Verificados
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      Aguardando Verificação
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {!user.documentsVerified && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Envie uma foto clara do seu documento (frente e verso) para verificação da conta.
+                    A verificação é obrigatória para prestadores de serviço.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
+      <div className="container mx-auto p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {user.userType === 'provider' ? 'Meu Perfil Profissional' : 'Meu Perfil'}
+              </h1>
+              <p className="text-gray-600">
+                {user.userType === 'provider' 
+                  ? 'Gerencie suas informações profissionais e apareça nas buscas'
+                  : 'Mantenha suas informações sempre atualizadas'
+                }
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Completude do Perfil</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div 
+                      className="h-full bg-amber-500 rounded-full transition-all"
+                      style={{ width: `${user.completionPercentage || 0}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium">{user.completionPercentage || 0}%</span>
+                </div>
+              </div>
+
+              <Link href="/dashboard">
+                <Button variant="outline">
+                  <Eye className="w-4 h-4 mr-2" />
+                  Ver Dashboard
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {user.userType === 'provider' ? renderProviderProfile() : renderViewerProfile()}
+      </div>
     </div>
   );
 }

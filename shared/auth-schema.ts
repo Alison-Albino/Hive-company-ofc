@@ -59,6 +59,28 @@ export interface AuthUser {
   name: string;
   userType: "viewer" | "provider";
   isActive: boolean;
+  categories?: string[];
+  subcategories?: string[];
+  description?: string;
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  profileImage?: string;
+  portfolioImages?: string[];
+  businessHours?: string;
+  rating?: string;
+  reviewCount?: number;
+  isVerified?: boolean;
+  planType?: "A" | "B";
+  planStatus?: "inactive" | "pending" | "active";
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  completionPercentage?: number;
+  documentsVerified?: boolean;
+  documentType?: string;
+  documentNumber?: string;
   provider?: {
     id: string;
     categories: string[];

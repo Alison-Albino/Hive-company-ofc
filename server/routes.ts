@@ -127,6 +127,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ user: (req as any).user });
   });
 
+  // Profile management routes
+  app.get("/api/profile", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "Usuário não encontrado" });
+      }
+
+      res.json({ success: true, profile: user });
+    } catch (error: any) {
+      console.error("Get profile error:", error);
+      res.status(500).json({ success: false, message: "Erro interno do servidor" });
+    }
+  });
+
+  app.put("/api/profile", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const profileData = req.body;
+      
+      const updatedUser = await storage.updateUserProfile(userId, profileData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: "Usuário não encontrado" });
+      }
+
+      res.json({ success: true, profile: updatedUser, message: "Perfil atualizado com sucesso" });
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ success: false, message: "Erro interno do servidor" });
+    }
+  });
+
   // Provider property creation endpoint
   app.post("/api/properties", requireAuth, requireRealEstateProvider, async (req, res) => {
     try {
