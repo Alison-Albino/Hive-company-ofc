@@ -73,7 +73,19 @@ export default function ChatManager() {
   };
 
   const openAssistant = () => {
-    setChatState(prev => ({ ...prev, assistantOpen: true }));
+    setChatState(prev => {
+      // Minimizar todos os chats dos prestadores quando abrir o assistente
+      const newActiveChats = new Map(prev.activeChats);
+      for (const [id, chat] of newActiveChats) {
+        chat.isMinimized = true;
+      }
+      
+      return { 
+        ...prev, 
+        assistantOpen: true,
+        activeChats: newActiveChats
+      };
+    });
   };
 
   const closeProviderChat = (providerId: string) => {
@@ -146,6 +158,9 @@ export default function ChatManager() {
                   setChatState(prev => {
                     const newActiveChats = new Map(prev.activeChats);
                     
+                    // Fechar o assistente se estiver aberto
+                    const assistantWasOpen = prev.assistantOpen;
+                    
                     // Minimizar todos os outros chats
                     for (const [otherId, otherChat] of newActiveChats) {
                       if (otherId !== id) {
@@ -159,7 +174,11 @@ export default function ChatManager() {
                       currentChat.isMinimized = !currentChat.isMinimized;
                     }
                     
-                    return { ...prev, activeChats: newActiveChats };
+                    return { 
+                      ...prev, 
+                      activeChats: newActiveChats,
+                      assistantOpen: false // Fechar assistente quando abrir chat de prestador
+                    };
                   });
                 }}
                 className={`rounded-full w-12 h-12 text-white shadow-lg relative transition-all duration-200 hover:scale-110 ${

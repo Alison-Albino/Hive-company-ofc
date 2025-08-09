@@ -80,7 +80,11 @@ export default function AssistantChat({ onClose }: AssistantChatProps) {
 
   return (
     <div 
-      className={`fixed bottom-80 right-20 z-50 w-80 ${isMinimized ? 'h-14' : 'h-96'} transition-all duration-300`}
+      className={`fixed bottom-20 right-20 z-50 w-80 ${isMinimized ? 'h-14' : 'h-96'} transition-all duration-300 ease-in-out transform ${
+        isMinimized 
+          ? 'scale-95 opacity-80' 
+          : 'scale-100 opacity-100'
+      }`}
     >
       <Card className="w-full h-full shadow-xl border-2 border-blue-200">
         <CardHeader className="p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
@@ -105,7 +109,7 @@ export default function AssistantChat({ onClose }: AssistantChatProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="text-white hover:bg-blue-600 w-6 h-6 p-0"
+                className="text-white hover:bg-blue-600 w-6 h-6 p-0 transition-transform duration-200 hover:scale-110"
               >
                 {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
               </Button>
