@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useParams, Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Star, MapPin, Phone, Users, Clock, CheckCircle, Search, Zap, Wrench, Paintbrush, TreePine, HardHat, Wind, Monitor, Hammer, Sparkles, Leaf, Shield, MessageCircle } from "lucide-react";
 import ChatManager from "@/components/chat/ChatManager";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ServiceCategory {
   id: string;
@@ -57,6 +60,54 @@ interface UserProfile {
 }
 
 export default function ServicesPage() {
+  const { user, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  
+  const startChatMutation = useMutation({
+    mutationFn: async (providerId: string) => {
+      return await apiRequest("POST", "/api/chat/conversations", {
+        providerId: providerId,
+      });
+    },
+    onSuccess: (conversation: any) => {
+      window.location.href = `/chat?conversation=${conversation.id}`;
+    },
+    onError: (error: any) => {
+      if (error.message.includes("401") || error.message.includes("Não autorizado")) {
+        toast({
+          title: "Acesso Restrito",
+          description: "Você precisa fazer login para conversar com prestadores.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation('/auth');
+        }, 1500);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível iniciar a conversa. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleStartChat = (providerId: string, providerName: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Necessário",
+        description: `Você precisa fazer login para conversar com ${providerName}.`,
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 1500);
+      return;
+    }
+    startChatMutation.mutate(providerId);
+  };
+
   // Função para mapear ícones das categorias
   const getCategoryIcon = (slug: string) => {
     const iconMap: Record<string, JSX.Element> = {
@@ -375,11 +426,13 @@ export default function ServicesPage() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => (window as any).openProviderChat?.(profile.id, profile.displayName, profile.profileImage)}
+                            onClick={() => handleStartChat(profile.id, profile.displayName)}
+                            disabled={startChatMutation.isPending}
                             className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                            title={!isAuthenticated ? "Fazer login para conversar" : "Iniciar conversa"}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
-                            Conversar
+                            {!isAuthenticated ? "Login" : "Conversar"}
                           </Button>
                           {profile.socialLinks?.whatsapp && (
                             <Button

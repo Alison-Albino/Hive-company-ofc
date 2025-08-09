@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface UserProfile {
   id: string;
@@ -35,6 +38,9 @@ export default function ProfilesPage() {
   const [documentType, setDocumentType] = useState<string>('all');
   const [city, setCity] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const { user, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: profiles, isLoading } = useQuery<UserProfile[]>({
     queryKey: ['/api/profiles', { documentType: documentType === 'all' ? '' : documentType, city, search: searchQuery }],
@@ -45,6 +51,50 @@ export default function ProfilesPage() {
     profile.profession?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const startChatMutation = useMutation({
+    mutationFn: async (providerId: string) => {
+      return await apiRequest("POST", "/api/chat/conversations", {
+        providerId: providerId,
+      });
+    },
+    onSuccess: (conversation: any) => {
+      window.location.href = `/chat?conversation=${conversation.id}`;
+    },
+    onError: (error: any) => {
+      if (error.message.includes("401") || error.message.includes("Não autorizado")) {
+        toast({
+          title: "Acesso Restrito",
+          description: "Você precisa fazer login para conversar com prestadores.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation('/auth');
+        }, 1500);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível iniciar a conversa. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleStartChat = (providerId: string, providerName: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Necessário",
+        description: `Você precisa fazer login para conversar com ${providerName}.`,
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 1500);
+      return;
+    }
+    startChatMutation.mutate(providerId);
+  };
 
   return (
     <div className="py-16 bg-gray-50 min-h-screen">
@@ -272,6 +322,13 @@ export default function ProfilesPage() {
                         variant="outline" 
                         size="sm"
                         className="px-3"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleStartChat(profile.id, profile.displayName);
+                        }}
+                        disabled={startChatMutation.isPending}
+                        title={!isAuthenticated ? "Fazer login para conversar" : "Iniciar conversa"}
                       >
                         <i className="fas fa-comment-dots"></i>
                       </Button>

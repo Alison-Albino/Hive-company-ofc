@@ -24,7 +24,9 @@ import {
   Building,
   Shield
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface Property {
   id: string;
@@ -56,6 +58,9 @@ export default function PropertyDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: property, isLoading } = useQuery<Property>({
     queryKey: ["/api/properties", params?.id],
@@ -74,15 +79,46 @@ export default function PropertyDetail() {
   const startChatMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/chat/conversations", {
-        participantId: property?.agencyId || "agency-" + property?.id,
-        participantType: "provider",
-        message: `Olá! Tenho interesse no imóvel: ${property?.title}`,
+        providerId: property?.agencyId || "agency-" + property?.id,
       });
     },
     onSuccess: (conversation: any) => {
       window.location.href = `/chat?conversation=${conversation.id}`;
     },
+    onError: (error: any) => {
+      if (error.message.includes("401") || error.message.includes("Não autorizado")) {
+        toast({
+          title: "Acesso Restrito",
+          description: "Você precisa fazer login para conversar com imobiliárias.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation('/auth');
+        }, 1500);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível iniciar a conversa. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+    },
   });
+
+  const handleStartChat = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Necessário",
+        description: "Você precisa fazer login para conversar com imobiliárias.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 1500);
+      return;
+    }
+    startChatMutation.mutate();
+  };
 
   useEffect(() => {
     if (property && !updateViewsMutation.data) {
@@ -355,12 +391,13 @@ export default function PropertyDetail() {
 
                 <div className="grid grid-cols-1 gap-3 pt-4">
                   <Button 
-                    onClick={() => startChatMutation.mutate()}
+                    onClick={handleStartChat}
                     disabled={startChatMutation.isPending}
                     className="bg-hive-gold hover:bg-hive-gold-dark"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    {startChatMutation.isPending ? "Iniciando..." : "Iniciar conversa"}
+                    {startChatMutation.isPending ? "Iniciando..." : 
+                     !isAuthenticated ? "Fazer login para conversar" : "Iniciar conversa"}
                   </Button>
                   
                   {property.agencyPhone && (

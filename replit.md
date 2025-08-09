@@ -6,6 +6,19 @@ Hive is a comprehensive web platform that connects properties to people who real
 
 The application uses a modern full-stack architecture with React frontend, Express.js backend, PostgreSQL database with Drizzle ORM, and is designed to be responsive across mobile, tablet, and desktop devices.
 
+## Recent Changes (January 2025)
+
+### Authentication Requirements for Chat System
+- **Mandatory Login for All Provider Chats**: Chat functionality now requires user authentication across all interfaces:
+  - Property detail pages: "Iniciar conversa" button checks authentication before allowing contact with real estate agencies
+  - Profiles page: Chat buttons for service providers require login
+  - Services page: "Conversar" buttons enforce authentication
+  - All chat endpoints protected with `requireAuth` middleware on backend
+- **Plan Pricing Corrections**: Updated plan names and pricing to match brand identity:
+  - Plan A: "BE HIVE" - R$ 29/mês (CPF individuals)
+  - Plan B: "HIVE GOLD" - R$ 59/mês (CNPJ companies)
+- **Enhanced Error Handling**: Clear toast notifications guide unauthenticated users to login page
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
