@@ -108,8 +108,12 @@ export default function ChatWidget() {
           {/* Header */}
           <div className="bg-hive-gold text-white p-4 rounded-t-lg flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <i className="fas fa-headset text-sm"></i>
+              <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center p-1">
+                <img 
+                  src="@assets/logo hive_1754700716189.png" 
+                  alt="Hive Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h3 className="font-semibold text-sm">Assistente Hive</h3>

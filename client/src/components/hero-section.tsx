@@ -16,12 +16,19 @@ export default function HeroSection() {
     <section className="relative bg-gradient-to-br from-hive-gold to-hive-gold-dark py-20 lg:py-32">
       <div className="absolute inset-0 bg-black/20"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Conectando imóveis a<br />quem realmente precisa
-        </h1>
-        <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-          A plataforma completa para encontrar imóveis e serviços especializados em um só lugar
-        </p>
+        <div className="flex flex-col items-center mb-8">
+          <img 
+            src="@assets/logo hive_1754700716189.png" 
+            alt="Hive Company Logo" 
+            className="h-16 w-auto mb-4 opacity-90"
+          />
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Conectando imóveis a<br />quem realmente precisa
+          </h1>
+          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            A plataforma completa para encontrar imóveis e serviços especializados em um só lugar
+          </p>
+        </div>
         
         <div className="bg-white p-6 rounded-2xl shadow-xl max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

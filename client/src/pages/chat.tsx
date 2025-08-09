@@ -184,8 +184,12 @@ export default function ChatPage() {
                     <div className="relative">
                       <Avatar className="w-12 h-12">
                         {conversation.participantType === 'assistant' ? (
-                          <div className="w-full h-full bg-blue-600 flex items-center justify-center">
-                            <Bot className="w-6 h-6 text-white" />
+                          <div className="w-full h-full bg-hive-gold flex items-center justify-center p-1">
+                            <img 
+                              src="@assets/logo hive_1754700716189.png" 
+                              alt="Hive Logo" 
+                              className="w-full h-full object-contain"
+                            />
                           </div>
                         ) : (
                           <>
@@ -257,8 +261,12 @@ export default function ChatPage() {
                   <div className="relative">
                     <Avatar className="w-10 h-10">
                       {selectedConvData.participantType === 'assistant' ? (
-                        <div className="w-full h-full bg-blue-600 flex items-center justify-center">
-                          <Bot className="w-5 h-5 text-white" />
+                        <div className="w-full h-full bg-hive-gold flex items-center justify-center p-1">
+                          <img 
+                            src="@assets/logo hive_1754700716189.png" 
+                            alt="Hive Logo" 
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                       ) : (
                         <>
@@ -308,8 +316,8 @@ export default function ChatPage() {
               <div className="flex-1 overflow-y-auto max-h-96">
                 <div className="px-3 pt-1 pb-0 space-y-1">
                   {messages.map((message) => {
-                    const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
-                    const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
+                    const isUserMessage = (message.sender === 'user');
+                    const isAssistant = (message.sender === 'assistant');
                     return (
                         <div
                           key={message.id}
@@ -331,11 +339,11 @@ export default function ChatPage() {
                               isUserMessage ? 'justify-end' : 'justify-start'
                             }`}>
                               <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {formatTime(message.timestamp || message.createdAt)}
+                                {formatTime(message.timestamp)}
                               </span>
                               {isUserMessage && (
                                 <div className="text-gray-500">
-                                  {(message.isRead || message.read) ? (
+                                  {message.isRead ? (
                                     <CheckCheck className="w-3 h-3 text-blue-500" />
                                   ) : (
                                     <Check className="w-3 h-3" />
