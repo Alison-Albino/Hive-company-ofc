@@ -150,10 +150,17 @@ export default function AssistantChat({ onClose }: AssistantChatProps) {
                       )}
                       <p>{message.message}</p>
                       <div className="text-xs mt-1 opacity-70">
-                        {new Date(message.timestamp).toLocaleTimeString('pt-BR', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {(() => {
+                          try {
+                            const date = new Date(message.timestamp);
+                            return isNaN(date.getTime()) ? 'Agora' : date.toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            });
+                          } catch {
+                            return 'Agora';
+                          }
+                        })()}
                       </div>
                     </div>
                   </div>

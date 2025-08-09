@@ -178,10 +178,17 @@ export default function ChatWindow({
                       >
                         <p>{message.message}</p>
                         <div className="text-xs mt-1 opacity-70">
-                          {new Date(message.createdAt).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          {(() => {
+                            try {
+                              const date = new Date(message.createdAt);
+                              return isNaN(date.getTime()) ? 'Agora' : date.toLocaleTimeString('pt-BR', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              });
+                            } catch {
+                              return 'Agora';
+                            }
+                          })()}
                         </div>
                       </div>
                     </div>
