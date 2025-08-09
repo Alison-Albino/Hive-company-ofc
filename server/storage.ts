@@ -6,6 +6,7 @@ export interface IStorage {
   getProperties(): Promise<Property[]>;
   getFeaturedProperties(): Promise<Property[]>;
   getProperty(id: string): Promise<Property | undefined>;
+  incrementPropertyViews(id: string): Promise<Property | undefined>;
   createProperty(property: InsertProperty): Promise<Property>;
   
   // Service Providers
@@ -72,6 +73,10 @@ export class MemStorage implements IStorage {
         images: [],
         amenities: ["Piscina", "Academia", "Varanda", "Ar condicionado"],
         agencyName: "Imobiliária Premium RJ",
+        agencyId: "agency-premium-rj",
+        agencyPhone: "(21) 3333-4444",
+        agencyEmail: "contato@premiumrj.com.br",
+        agencyLogo: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop",
         status: "available",
         featured: true,
         views: 0,
@@ -92,6 +97,10 @@ export class MemStorage implements IStorage {
         images: [],
         amenities: ["Jardim", "Churrasqueira", "Piscina", "Segurança 24h"],
         agencyName: "Barra Imóveis Ltda",
+        agencyId: "agency-barra-ltda",
+        agencyPhone: "(21) 2222-3333",
+        agencyEmail: "vendas@barraimoveis.com.br",
+        agencyLogo: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop",
         status: "available",
         featured: true,
         views: 0,
@@ -112,6 +121,10 @@ export class MemStorage implements IStorage {
         images: [],
         amenities: ["Cozinha", "Som profissional", "Iluminação", "Decoração"],
         agencyName: "Eventos & Celebrações",
+        agencyId: "agency-eventos-celebracoes",
+        agencyPhone: "(21) 1111-2222",
+        agencyEmail: "eventos@celebracoes.com.br",
+        agencyLogo: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop",
         status: "available",
         featured: true,
         views: 0,
@@ -132,6 +145,10 @@ export class MemStorage implements IStorage {
         images: [],
         amenities: ["Fibra óptica", "Ar condicionado", "Elevador", "Segurança"],
         agencyName: "Centro Business Imóveis",
+        agencyId: "agency-centro-business",
+        agencyPhone: "(21) 3000-1000",
+        agencyEmail: "comercial@centrobusiness.com.br",
+        agencyLogo: "https://images.unsplash.com/photo-1497366411874-c6010221eadc?w=400&h=400&fit=crop",
         status: "available",
         featured: true,
         views: 0,
@@ -695,6 +712,16 @@ export class MemStorage implements IStorage {
 
   async getProperty(id: string): Promise<Property | undefined> {
     return this.properties.get(id);
+  }
+
+  async incrementPropertyViews(id: string): Promise<Property | undefined> {
+    const property = this.properties.get(id);
+    if (property) {
+      property.views = (property.views || 0) + 1;
+      this.properties.set(id, property);
+      return property;
+    }
+    return undefined;
   }
 
   async createProperty(insertProperty: InsertProperty): Promise<Property> {

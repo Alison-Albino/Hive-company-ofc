@@ -11,6 +11,7 @@ import Services from "./pages/services";
 import Plans from "./pages/plans";
 import ProfilePage from "./pages/profile";
 import ChatPage from "./pages/chat";
+import PropertyDetail from "./pages/property-detail";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatManager from "./components/chat/ChatManager";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/properties" component={Properties} />
+      <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/services" component={Services} />
       <Route path="/services/:category" component={Services} />
       <Route path="/profile/:profileId" component={ProfilePage} />

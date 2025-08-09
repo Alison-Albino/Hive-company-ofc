@@ -20,6 +20,10 @@ export const properties = pgTable("properties", {
   images: jsonb("images").$type<string[]>().default([]),
   amenities: jsonb("amenities").$type<string[]>().default([]),
   agencyName: text("agency_name").notNull(),
+  agencyId: varchar("agency_id"), // Reference to service provider (real estate agency)
+  agencyPhone: text("agency_phone"),
+  agencyEmail: text("agency_email"),
+  agencyLogo: text("agency_logo"),
   status: varchar("status", { length: 20 }).default("available"), // 'available', 'sold', 'rented'
   featured: boolean("featured").default(false),
   views: integer("views").default(0),

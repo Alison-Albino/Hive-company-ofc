@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { type Property } from "@shared/schema";
+import { Link } from "wouter";
 
 interface PropertyCardProps {
   property: Property;
@@ -39,7 +40,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:scale-105">
+    <Link href={`/property/${property.id}`}>
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:scale-105">
       <img 
         src={property.imageUrl} 
         alt={property.title}
@@ -90,5 +92,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
       </div>
     </div>
+    </Link>
   );
 }

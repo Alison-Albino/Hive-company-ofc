@@ -79,6 +79,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Property views endpoint
+  app.post("/api/properties/:id/view", async (req, res) => {
+    try {
+      const property = await storage.incrementPropertyViews(req.params.id);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      res.json({ success: true, views: property.views });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating property views" });
+    }
+  });
+
   // Config endpoint for maps key
   app.get('/api/config/maps-key', (req, res) => {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
