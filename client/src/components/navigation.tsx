@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import logoPath from "@assets/logo hive_1754700716189.png";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -22,9 +23,10 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-3 group">
             <img 
-              src="@assets/logo hive_1754700716189.png" 
+              src={logoPath}
               alt="Hive Company Logo" 
-              className="h-8 w-auto opacity-80 group-hover:opacity-100 transition-opacity duration-300 filter brightness-0 saturate-0"
+              className="h-8 w-auto opacity-60 group-hover:opacity-80 transition-all duration-300"
+              style={{ filter: 'brightness(0) saturate(100%) invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' }}
             />
             <span className="text-2xl font-bold text-hive-black">Hive</span>
           </Link>

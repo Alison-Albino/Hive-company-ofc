@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import logoPath from "@assets/logo hive_1754700716189.png";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useChatContext } from '@/context/ChatContext';
@@ -186,7 +187,7 @@ export default function ChatPage() {
                         {conversation.participantType === 'assistant' ? (
                           <div className="w-full h-full bg-hive-gold flex items-center justify-center p-1">
                             <img 
-                              src="@assets/logo hive_1754700716189.png" 
+                              src={logoPath}
                               alt="Hive Logo" 
                               className="w-full h-full object-contain"
                             />
@@ -263,7 +264,7 @@ export default function ChatPage() {
                       {selectedConvData.participantType === 'assistant' ? (
                         <div className="w-full h-full bg-hive-gold flex items-center justify-center p-1">
                           <img 
-                            src="@assets/logo hive_1754700716189.png" 
+                            src={logoPath}
                             alt="Hive Logo" 
                             className="w-full h-full object-contain"
                           />

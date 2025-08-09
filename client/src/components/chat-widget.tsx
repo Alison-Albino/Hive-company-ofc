@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import logoPath from "@assets/logo hive_1754700716189.png";
 
 interface Message {
   id: string;
@@ -110,7 +111,7 @@ export default function ChatWidget() {
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center p-1">
                 <img 
-                  src="@assets/logo hive_1754700716189.png" 
+                  src={logoPath}
                   alt="Hive Logo" 
                   className="w-full h-full object-contain"
                 />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import logoPath from "@assets/logo hive_1754700716189.png";
 
 export default function HeroSection() {
   const [location, setLocation] = useState("");
@@ -18,7 +19,7 @@ export default function HeroSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="flex flex-col items-center mb-8">
           <img 
-            src="@assets/logo hive_1754700716189.png" 
+            src={logoPath}
             alt="Hive Company Logo" 
             className="h-16 w-auto mb-4 opacity-90"
           />
