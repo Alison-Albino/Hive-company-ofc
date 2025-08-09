@@ -15,6 +15,8 @@ export default function Plans() {
   });
 
   const handleSubscribe = (planType: string) => {
+    console.log('Handle subscribe called with planType:', planType);
+    
     // Se não estiver autenticado, redireciona para cadastro
     if (!isAuthenticated) {
       setLocation('/register');
@@ -28,8 +30,10 @@ export default function Plans() {
       return;
     }
     
-    // Redireciona para checkout
-    setLocation(`/checkout?plan=${planType}`);
+    // Redireciona para checkout com parâmetro correto
+    const checkoutUrl = `/checkout?plan=${planType}`;
+    console.log('Redirecting to:', checkoutUrl);
+    setLocation(checkoutUrl);
   };
 
   const formatPrice = (price: string) => {
