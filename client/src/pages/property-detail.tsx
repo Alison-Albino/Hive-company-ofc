@@ -64,7 +64,7 @@ export default function PropertyDetail() {
 
   const updateViewsMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/properties/${params?.id}/view`, "POST");
+      return await apiRequest("POST", `/api/properties/${params?.id}/view`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/properties", params?.id] });
@@ -73,7 +73,7 @@ export default function PropertyDetail() {
 
   const startChatMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/chat/conversations", "POST", {
+      return await apiRequest("POST", "/api/chat/conversations", {
         participantId: property?.agencyId || "agency-" + property?.id,
         participantType: "provider",
         message: `Olá! Tenho interesse no imóvel: ${property?.title}`,
