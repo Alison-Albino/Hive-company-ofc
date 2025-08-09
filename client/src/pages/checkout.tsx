@@ -147,11 +147,25 @@ export default function Checkout() {
       })
       .catch((error) => {
         console.error('Error creating subscription:', error);
-        toast({
-          title: "Erro na Assinatura",
-          description: "Não foi possível processar sua assinatura. Tente novamente.",
-          variant: "destructive",
-        });
+        
+        // Verificar se é um erro específico do Stripe
+        if (error.message && error.message.includes('401')) {
+          toast({
+            title: "Login Necessário",
+            description: "Você precisa fazer login para assinar um plano.",
+            variant: "destructive",
+          });
+          // Redirecionar para login
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 2000);
+        } else {
+          toast({
+            title: "Erro na Assinatura",
+            description: "Não foi possível processar sua assinatura. Verifique se você está logado e tente novamente.",
+            variant: "destructive",
+          });
+        }
       });
   }, [planType, toast]);
 
