@@ -48,21 +48,299 @@ export default function Dashboard() {
     );
   }
 
+  // PRESTADOR ONBOARDING - Guia o primeiro cadastro
+  const renderProviderOnboarding = () => (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="text-center">
+        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Crown className="h-10 w-10 text-amber-600" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Bem-vindo ao {user.planType === "A" ? "BE HIVE" : "HIVE GOLD"}!
+        </h2>
+        <p className="text-gray-600 text-lg mb-8">
+          Complete seu cadastro para começar a oferecer seus serviços
+        </p>
+        <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
+          <div 
+            className="bg-amber-500 h-3 rounded-full transition-all duration-300"
+            style={{ width: `${user.completionPercentage}%` }}
+          />
+        </div>
+        <p className="text-sm text-gray-600 mb-8">
+          {user.completionPercentage}% do perfil completo
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              1. Completar Perfil Básico
+            </CardTitle>
+            <CardDescription>Nome, foto, especialidade e descrição</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/profile">
+              <Button className="w-full">
+                Completar Agora
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              2. Definir Localização
+            </CardTitle>
+            <CardDescription>Onde você atende seus clientes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/profile">
+              <Button className="w-full" variant="outline">
+                Definir Local
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5" />
+              3. Escolher Categorias
+            </CardTitle>
+            <CardDescription>Que tipos de serviços você oferece</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/profile">
+              <Button className="w-full" variant="outline">
+                Escolher Categorias
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              4. Adicionar Fotos
+            </CardTitle>
+            <CardDescription>Foto de perfil e exemplos do seu trabalho</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button className="w-full" variant="outline">
+              Adicionar Fotos
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {user.planType === "B" && (
+        <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-800">
+              <Crown className="h-5 w-5" />
+              Recursos Exclusivos HIVE GOLD
+            </CardTitle>
+            <CardDescription className="text-amber-700">
+              Funcionalidades premium para empresas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800">Cadastro de propriedades (imobiliárias)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800">Relatórios avançados</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800">Gerenciamento de equipe</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800">Suporte prioritário</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  // PRESTADOR DASHBOARD COMPLETO - Após completar o cadastro
+  const renderProviderDashboard = () => {
+    const isCompany = user.planType === "B";
+    
+    return (
+      <div className="space-y-6">
+        {/* Provider Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Plano Ativo</CardTitle>
+              <Crown className="h-4 w-4 text-amber-500" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-amber-600">
+                {user.planType === "A" ? "BE HIVE" : "HIVE GOLD"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {user.planType === "A" ? "CPF - R$ 29/mês" : "CNPJ - R$ 59/mês"}
+              </p>
+              <Badge variant={user.planStatus === "active" ? "default" : "secondary"} className="mt-2">
+                {user.planStatus === "active" ? "Ativo" : "Inativo"}
+              </Badge>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Perfil</CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{user.completionPercentage}%</p>
+              <p className="text-xs text-muted-foreground">Completo</p>
+              <Link href="/profile">
+                <Button variant="outline" size="sm" className="mt-2">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Editar Perfil
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Visualizações</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">0</p>
+              <p className="text-xs text-muted-foreground">Este mês</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Contatos</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">0</p>
+              <p className="text-xs text-muted-foreground">Solicitações</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Provider Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ações Rápidas</CardTitle>
+              <CardDescription>Gerencie seu perfil e serviços</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Link href="/profile">
+                <Button className="w-full justify-start">
+                  <User className="w-4 h-4 mr-2" />
+                  Editar Perfil Completo
+                </Button>
+              </Link>
+              
+              <Button className="w-full justify-start" variant="outline">
+                <Camera className="w-4 h-4 mr-2" />
+                Gerenciar Fotos de Serviços
+              </Button>
+              
+              <Button className="w-full justify-start" variant="outline">
+                <MapPin className="w-4 h-4 mr-2" />
+                Atualizar Localização
+              </Button>
+            </CardContent>
+          </Card>
+
+          {isCompany && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Funcionalidades Empresariais</CardTitle>
+                <CardDescription>Recursos exclusivos do HIVE GOLD</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {canCreateProperty && (
+                  <Link href="/properties/create">
+                    <Button className="w-full justify-start">
+                      <Home className="w-4 h-4 mr-2" />
+                      Cadastrar Propriedade
+                    </Button>
+                  </Link>
+                )}
+                
+                <Button className="w-full justify-start" variant="outline">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Relatórios Avançados
+                </Button>
+                
+                <Button className="w-full justify-start" variant="outline">
+                  <Users className="w-4 h-4 mr-2" />
+                  Gerenciar Equipe
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Service Portfolio */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Meu Portfólio de Serviços</CardTitle>
+            <CardDescription>Gerencie seus serviços e categorias</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {user.categories && user.categories.length > 0 ? (
+                user.categories.map((category) => (
+                  <Badge key={category} variant="secondary">
+                    {category}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-muted-foreground">Nenhuma categoria selecionada</p>
+              )}
+            </div>
+            <Button variant="outline">
+              <Plus className="w-4 h-4 mr-2" />
+              Gerenciar Categorias
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  // DASHBOARD USUÁRIO VISUALIZADOR
   const renderViewerDashboard = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Meu Perfil</CardTitle>
+            <CardTitle className="text-sm font-medium">Perfil</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{user.completionPercentage || 0}%</p>
-            <p className="text-xs text-muted-foreground">Perfil completo</p>
+            <p className="text-2xl font-bold">👤</p>
+            <p className="text-xs text-muted-foreground mb-2">Usuário</p>
             <Link href="/profile">
-              <Button variant="outline" size="sm" className="mt-2">
+              <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
-                Editar Perfil
+                Editar
               </Button>
             </Link>
           </CardContent>
@@ -70,18 +348,12 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Propriedades Favoritas</CardTitle>
+            <CardTitle className="text-sm font-medium">Favoritos</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Imóveis salvos</p>
-            <Link href="/properties">
-              <Button variant="outline" size="sm" className="mt-2">
-                <Home className="w-4 h-4 mr-2" />
-                Explorar Imóveis
-              </Button>
-            </Link>
+            <p className="text-xs text-muted-foreground">Salvos</p>
           </CardContent>
         </Card>
 
@@ -132,167 +404,28 @@ export default function Dashboard() {
     </div>
   );
 
-  const renderProviderDashboard = () => (
-    <div className="space-y-6">
-      {/* Plan Status Alert */}
-      {user.planStatus !== 'active' && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-amber-800">⚠️ Plano Inativo</CardTitle>
-            <CardDescription className="text-amber-700">
-              Seu plano está {user.planStatus === 'pending' ? 'pendente de pagamento' : 'inativo'}. 
-              Ative seu plano para acessar todas as funcionalidades.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/plans">
-              <Button className="bg-amber-600 hover:bg-amber-700">
-                <CreditCard className="w-4 h-4 mr-2" />
-                {user.planStatus === 'pending' ? 'Completar Pagamento' : 'Escolher Plano'}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Perfil</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{user.completionPercentage || 0}%</p>
-            <p className="text-xs text-muted-foreground">Completo</p>
-            <Badge variant={user.isVerified ? "default" : "secondary"} className="mt-2">
-              {user.isVerified ? "Verificado" : "Não Verificado"}
-            </Badge>
-            <Link href="/profile">
-              <Button variant="outline" size="sm" className="mt-2 w-full">
-                <Settings className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avaliação</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{user.rating || 0}</p>
-            <p className="text-xs text-muted-foreground">⭐ de 5.0</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {user.reviewCount || 0} avaliações
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Visualizações</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-            <p className="text-xs text-green-600 mt-1">+0% vs mês anterior</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contatos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Novos este mês</p>
-            <Button variant="outline" size="sm" className="mt-2 w-full">
-              <Calendar className="w-4 h-4 mr-2" />
-              Ver Agenda
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Properties Section for Real Estate */}
-      {canCreateProperty && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Home className="w-5 h-5" />
-              Meus Imóveis
-            </CardTitle>
-            <CardDescription>
-              Gerencie suas propriedades cadastradas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">0</p>
-                <p className="text-sm text-muted-foreground">Propriedades ativas</p>
-              </div>
-              <Link href="/properties/new">
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Imóvel
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
-          <CardDescription>Gerencie seu negócio</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/profile">
-            <Button variant="outline" className="w-full h-20 flex flex-col">
-              <Camera className="w-6 h-6 mb-2" />
-              Atualizar Fotos
-            </Button>
-          </Link>
-          <Button variant="outline" className="w-full h-20 flex flex-col">
-            <FileText className="w-6 h-6 mb-2" />
-            Ver Relatórios
-          </Button>
-          <Button variant="outline" className="w-full h-20 flex flex-col">
-            <Star className="w-6 h-6 mb-2" />
-            Gerenciar Reviews
-          </Button>
-          </CardContent>
-      </Card>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Olá, {user.name || user.email}! 👋
+            Olá, {user.name}! 👋
           </h1>
           <p className="text-gray-600">
-            {user.userType === 'provider' 
-              ? `Bem-vindo ao seu dashboard de ${user.categories?.[0] || 'prestador'}`
-              : 'Bem-vindo ao seu dashboard Hive'
+            {user.userType === "provider" 
+              ? `Dashboard do ${user.planType === "A" ? "BE HIVE" : "HIVE GOLD"}`
+              : "Bem-vindo ao seu dashboard Hive"
             }
           </p>
-          {user.planType && (
-            <Badge variant="outline" className="mt-2">
-              Plano {user.planType}
-            </Badge>
-          )}
         </div>
 
-        {user.userType === 'provider' ? renderProviderDashboard() : renderViewerDashboard()}
+        {user.userType === "provider" ? (
+          user.completionPercentage && user.completionPercentage < 80 ? 
+            renderProviderOnboarding() : 
+            renderProviderDashboard()
+        ) : (
+          renderViewerDashboard()
+        )}
       </div>
     </div>
   );
