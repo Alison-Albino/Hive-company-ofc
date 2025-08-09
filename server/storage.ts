@@ -77,6 +77,7 @@ export class MemStorage implements IStorage {
     this.sampleProfiles = [];
     this.sampleUsers = [];
     this.seedData();
+    this.seedTestUsers();
   }
 
   private seedData() {
@@ -1498,6 +1499,93 @@ export class MemStorage implements IStorage {
     }
 
     return authUser;
+  }
+
+  private async seedTestUsers() {
+    // Create test users for demonstration
+    const testUsers = [
+      {
+        email: "admin@hive.com",
+        password: "123456",
+        name: "Admin Teste",
+        userType: "viewer" as const,
+      },
+      {
+        email: "viewer@test.com", 
+        password: "123456",
+        name: "João Silva",
+        userType: "viewer" as const,
+      },
+      {
+        email: "eletricista@test.com",
+        password: "123456", 
+        name: "Carlos Elétrico",
+        userType: "provider" as const,
+        categories: ["eletricista"],
+        planType: "A" as const,
+        planActive: true,
+      },
+      {
+        email: "imobiliaria@test.com",
+        password: "123456",
+        name: "Premium Imóveis RJ",
+        userType: "provider" as const,
+        categories: ["imobiliaria"],
+        planType: "B" as const,
+        planActive: true,
+      }
+    ];
+
+    for (const userData of testUsers) {
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const userId = randomUUID();
+      
+      const user: SimpleUser = {
+        id: userId,
+        email: userData.email,
+        password: hashedPassword,
+        name: userData.name,
+        userType: userData.userType,
+        isActive: true,
+      };
+
+      if (userData.userType === "provider") {
+        const providerId = randomUUID();
+        const provider: ServiceProvider = {
+          id: providerId,
+          userId: userId,
+          name: userData.name,
+          speciality: userData.categories[0] === "imobiliaria" ? "Imóveis de luxo" : "Instalações elétricas",
+          description: userData.categories[0] === "imobiliaria" 
+            ? "Imobiliária especializada em imóveis de alto padrão"
+            : "Eletricista experiente com mais de 10 anos no mercado",
+          documentType: userData.planType === "A" ? "CPF" : "CNPJ",
+          documentNumber: userData.planType === "A" ? "12345678901" : "12345678000123",
+          location: "Rio de Janeiro, RJ",
+          rating: "4.8",
+          reviewCount: 15,
+          imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+          portfolioImages: [],
+          categories: userData.categories,
+          phone: "(21) 99999-9999",
+          email: userData.email,
+          planType: userData.planType,
+          planActive: userData.planActive,
+          verified: true,
+        };
+
+        user.providerId = providerId;
+        this.serviceProviders.set(providerId, provider);
+      }
+
+      this.users.set(userId, user);
+    }
+
+    console.log("✅ Usuários de teste criados:");
+    console.log("📧 admin@hive.com (senha: 123456) - Visualizador Admin");
+    console.log("📧 viewer@test.com (senha: 123456) - Visualizador");
+    console.log("📧 eletricista@test.com (senha: 123456) - Prestador Eletricista (Plano A)");
+    console.log("📧 imobiliaria@test.com (senha: 123456) - Prestador Imobiliária (Plano B)");
   }
 }
 

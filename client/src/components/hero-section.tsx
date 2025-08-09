@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoPath from "@assets/logo hive_1754700716189.png";
@@ -87,6 +88,20 @@ export default function HeroSection() {
               Buscar
             </Button>
           </div>
+        </div>
+        
+        {/* Development/Test Helper */}
+        <div className="pt-8">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-black"
+            asChild
+          >
+            <Link href="/login-guide">
+              🧪 Usuários de Teste - Clique aqui para fazer login
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

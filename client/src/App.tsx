@@ -16,6 +16,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import RegisterProvider from "./pages/register-provider";
 import AuthTest from "./pages/auth-test";
+import LoginGuide from "./pages/login-guide";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatManager from "./components/chat/ChatManager";
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/register-provider" component={RegisterProvider} />
       <Route path="/auth-test" component={AuthTest} />
+      <Route path="/login-guide" component={LoginGuide} />
       <Route component={NotFound} />
     </Switch>
   );

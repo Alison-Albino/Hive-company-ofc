@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { AuthStatus } from "@/components/auth-status";
 import logoPath from "@assets/logo hive_1754700716189.png";
 
 export default function Navigation() {
@@ -41,9 +42,7 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
-            <Button className="bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
-              Entrar
-            </Button>
+            <AuthStatus />
           </div>
           
           <button
