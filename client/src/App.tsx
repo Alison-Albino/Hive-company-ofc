@@ -9,6 +9,7 @@ import Properties from "./pages/properties";
 import Services from "./pages/services";
 import Plans from "./pages/plans";
 import ProfilePage from "./pages/profile";
+import ChatPage from "./pages/chat";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatManager from "./components/chat/ChatManager";
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/services/:category" component={Services} />
       <Route path="/profile/:profileId" component={ProfilePage} />
       <Route path="/plans" component={Plans} />
+      <Route path="/chat" component={ChatPage} />
       <Route component={NotFound} />
     </Switch>
   );
