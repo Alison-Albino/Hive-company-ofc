@@ -212,13 +212,8 @@ export default function SelectCategories() {
     if (isBusinessPlan) {
       return true;
     } else {
-      // CPF só vê categorias de serviços básicos
-      return !category.slug.startsWith('imobiliaria') && 
-             !category.slug.startsWith('incorporacao') &&
-             !category.slug.startsWith('administracao') &&
-             !category.slug.startsWith('avaliacao') &&
-             !category.slug.startsWith('corretagem') &&
-             !category.slug.startsWith('regularizacao');
+      // CPF só vê categorias de serviços básicos (exclui apenas a categoria imobiliária)
+      return category.slug !== 'imobiliaria';
     }
   }) || [];
 
@@ -237,7 +232,7 @@ export default function SelectCategories() {
           </p>
           <div className="mt-4">
             <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-              {isBusinessPlan ? 'HIVE GOLD (CNPJ)' : 'BE HIVE (CPF)'} - Todas as categorias disponíveis
+              {isBusinessPlan ? 'HIVE GOLD (CNPJ) - Inclui categoria Imobiliária' : 'BE HIVE (CPF) - Categorias de serviços'}
             </Badge>
           </div>
         </div>

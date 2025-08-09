@@ -490,78 +490,25 @@ export class MemStorage implements IStorage {
         providerCount: 81,
         subcategories: ["Mudanças Residenciais", "Mudanças Comerciais", "Transporte de Móveis", "Embalagem"]
       },
-      // Categorias expandidas para o setor imobiliário (CNPJ)
+      // Categoria consolidada para o setor imobiliário (CNPJ)
       { 
         id: randomUUID(), 
-        name: "Imobiliária Residencial", 
-        icon: "fas fa-home", 
-        slug: "imobiliaria-residencial", 
-        providerCount: 156,
-        subcategories: ["Apartamentos", "Casas", "Coberturas", "Kitinets", "Lofts"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Imobiliária Comercial", 
+        name: "Imobiliária", 
         icon: "fas fa-building", 
-        slug: "imobiliaria-comercial", 
-        providerCount: 89,
-        subcategories: ["Escritórios", "Lojas", "Galpões", "Salas Comerciais", "Shopping Centers"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Incorporação", 
-        icon: "fas fa-city", 
-        slug: "incorporacao", 
-        providerCount: 45,
-        subcategories: ["Lançamentos", "Plantas na Planta", "Financiamento", "Construtoras Parceiras"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Locação de Temporada", 
-        icon: "fas fa-calendar-alt", 
-        slug: "locacao-temporada", 
-        providerCount: 78,
-        subcategories: ["Airbnb", "Casas de Praia", "Apartamentos Mobiliados", "Hospedagem Corporativa"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Administração Predial", 
-        icon: "fas fa-clipboard-list", 
-        slug: "administracao-predial", 
-        providerCount: 34,
-        subcategories: ["Condomínios", "Síndicos Profissionais", "Zeladoria", "Manutenção Predial"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Avaliação Imobiliária", 
-        icon: "fas fa-calculator", 
-        slug: "avaliacao-imobiliaria", 
-        providerCount: 23,
-        subcategories: ["Laudo de Avaliação", "Perícia Técnica", "Vistoria", "Consultoria Imobiliária"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Corretagem Especializada", 
-        icon: "fas fa-handshake", 
-        slug: "corretagem-especializada", 
-        providerCount: 67,
-        subcategories: ["Imóveis de Luxo", "Investimentos", "Leilões", "Permuta"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Regularização Imobiliária", 
-        icon: "fas fa-file-contract", 
-        slug: "regularizacao-imobiliaria", 
-        providerCount: 29,
-        subcategories: ["Documentação", "Cartório", "ITBI", "Escrituras"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Espaços para Eventos", 
-        icon: "fas fa-glass-cheers", 
-        slug: "espacos-eventos", 
-        providerCount: 56,
-        subcategories: ["Salões de Festa", "Casamentos", "Eventos Corporativos", "Formaturas"]
+        slug: "imobiliaria", 
+        providerCount: 245,
+        subcategories: [
+          "Imóveis Residenciais",
+          "Imóveis Comerciais", 
+          "Incorporação e Lançamentos",
+          "Locação de Temporada",
+          "Administração Predial",
+          "Avaliação Imobiliária",
+          "Corretagem Especializada",
+          "Regularização Imobiliária",
+          "Espaços para Eventos",
+          "Consultoria Imobiliária"
+        ]
       }
     ];
 

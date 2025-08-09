@@ -25,6 +25,21 @@ The application uses a modern full-stack architecture with React frontend, Expre
   - Improved error handling for payment processing
 - **Platform Policy Enforcement**: Complete removal of direct contact methods ensures all communication flows through Hive marketplace
 
+### Enhanced Category System with Subcategories (January 2025)
+- **Consolidated Category Structure**: Single category approach implemented:
+  - 13 basic service categories for CPF plans (BE HIVE)
+  - 1 consolidated "Imobiliária" category exclusive to CNPJ plans (HIVE GOLD)
+  - Each category has 4-10 specific subcategories for specialization
+- **Subcategory Selection System**: Advanced provider configuration:
+  - Providers select 1 main category and 1-3 subcategories
+  - Mandatory biography field (minimum requirements)
+  - Optional profile image upload
+  - Optional portfolio images (up to 5 images)
+- **Plan-Based Filtering**: Intelligent category access control:
+  - CPF users see all service categories except "Imobiliária"
+  - CNPJ users get full access including the comprehensive "Imobiliária" category
+  - Backend validation ensures plan compliance
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -52,7 +67,7 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 - **Schema**: Four main entities:
   - **Properties**: Real estate listings with pricing, location, amenities, and agency information
   - **Service Providers**: Professional service providers with ratings, categories, and portfolio
-  - **Service Categories**: Organized categories of services with icons and provider counts
+  - **Service Categories**: 14 total categories (13 basic services + 1 consolidated imobiliária) with subcategories and provider counts
   - **Plans**: Subscription plans for different user types (CPF individuals vs CNPJ companies)
 
 ### Component Architecture
