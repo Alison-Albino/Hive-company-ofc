@@ -296,6 +296,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Process payment success endpoint
+  app.post("/api/process-payment-success", requireAuth, async (req, res) => {
+    try {
+      const { paymentIntentId, planType } = req.body;
+      const user = (req as any).user;
+
+      // Verify payment intent with Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status === 'succeeded' && paymentIntent.metadata.userId === user.id) {
+        // Upgrade user to provider with the selected plan
+        const upgradeData = {
+          planType: planType as "A" | "B",
+          speciality: planType === 'A' ? 'Prestador Pessoa Física' : 'Prestador Empresarial',
+          categories: planType === 'B' ? ['imobiliaria'] : ['geral'],
+        };
+
+        const result = await storage.upgradeToProvider(user.id, upgradeData);
+        
+        if (result.success) {
+          // Update session with new user data
+          const sessionId = req.headers.authorization?.replace('Bearer ', '');
+          if (sessionId && sessions.has(sessionId)) {
+            sessions.set(sessionId, { userId: result.user!.id, user: result.user! });
+          }
+          
+          console.log(`User ${user.id} upgraded to provider plan ${planType}`);
+          res.json({ success: true, user: result.user });
+        } else {
+          res.status(400).json({ success: false, message: "Erro ao fazer upgrade" });
+        }
+      } else {
+        res.status(400).json({ success: false, message: "Pagamento não verificado" });
+      }
+    } catch (error) {
+      console.error('Process payment success error:', error);
+      res.status(500).json({ success: false, error: "Erro interno do servidor" });
+    }
+  });
+
   // Webhook endpoint for Stripe events (for production use)
   app.post("/api/webhook/stripe", async (req, res) => {
     try {

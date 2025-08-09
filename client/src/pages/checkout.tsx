@@ -31,25 +31,41 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
 
     setIsProcessing(true);
 
-    const { error } = await stripe.confirmPayment({
+    const result = await stripe.confirmPayment({
       elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/dashboard`,
-      },
+      redirect: 'if_required',
     });
 
-    if (error) {
+    if (result.error) {
       toast({
         title: "Erro no Pagamento",
-        description: error.message,
+        description: result.error.message,
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Pagamento Realizado com Sucesso!",
-        description: "Você agora é um prestador Hive. Redirecionando...",
-      });
-      setTimeout(() => setLocation('/dashboard'), 2000);
+      // Process the successful payment
+      try {
+        await apiRequest("POST", "/api/process-payment-success", {
+          paymentIntentId: result.paymentIntent.id,
+          planType,
+        });
+        
+        toast({
+          title: "Pagamento Realizado com Sucesso!",
+          description: "Você agora é um prestador Hive. Redirecionando...",
+        });
+        
+        setTimeout(() => {
+          setLocation('/dashboard');
+        }, 2000);
+      } catch (error) {
+        console.error('Error processing payment success:', error);
+        toast({
+          title: "Pagamento Processado",
+          description: "Seu pagamento foi processado. Redirecionando...",
+        });
+        setTimeout(() => setLocation('/dashboard'), 2000);
+      }
     }
 
     setIsProcessing(false);
