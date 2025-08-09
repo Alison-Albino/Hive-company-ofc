@@ -1,3 +1,5 @@
+import logoPath from "@assets/logo hive_1754700716189.png";
+
 export default function Footer() {
   return (
     <footer className="bg-hive-black text-white py-16">
@@ -5,10 +7,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="bg-hive-gold p-2 rounded-lg">
-                <i className="fas fa-th-large text-white text-xl"></i>
-              </div>
-              <span className="text-2xl font-bold">Hive</span>
+              <img 
+                src={logoPath}
+                alt="Hive Company Logo" 
+                className="h-10 w-auto"
+              />
             </div>
             <p className="text-gray-300 mb-4">
               Conectando imóveis a quem realmente precisa. A plataforma completa para encontrar imóveis e serviços especializados.
