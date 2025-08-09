@@ -32,8 +32,6 @@ export const properties = pgTable("properties", {
   amenities: jsonb("amenities").$type<string[]>().default([]),
   agencyName: text("agency_name").notNull(),
   agencyId: varchar("agency_id").references(() => serviceProviders.id), // Reference to service provider (real estate agency)
-  agencyPhone: text("agency_phone"),
-  agencyEmail: text("agency_email"),
   agencyLogo: text("agency_logo"),
   status: varchar("status", { length: 20 }).default("available"), // 'available', 'sold', 'rented'
   featured: boolean("featured").default(false),
@@ -55,8 +53,6 @@ export const serviceProviders = pgTable("service_providers", {
   imageUrl: text("image_url").notNull(),
   portfolioImages: jsonb("portfolio_images").$type<string[]>().default([]),
   categories: jsonb("categories").$type<string[]>().notNull(),
-  phone: text("phone"),
-  email: text("email"),
   planType: varchar("plan_type", { length: 10 }).default("A"), // 'A' or 'B'
   planActive: boolean("plan_active").default(false),
   verified: boolean("verified").default(false),

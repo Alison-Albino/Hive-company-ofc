@@ -375,18 +375,15 @@ export default function PropertyDetail() {
                 <Separator />
 
                 <div className="space-y-3">
-                  {property.agencyPhone && (
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-3 text-hive-gold" />
-                      <span className="text-sm">{property.agencyPhone}</span>
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <div className="flex items-center text-sm text-orange-800">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      <span className="font-medium">Primeiro contato via Hive</span>
                     </div>
-                  )}
-                  {property.agencyEmail && (
-                    <div className="flex items-center">
-                      <Mail className="w-4 h-4 mr-3 text-hive-gold" />
-                      <span className="text-sm">{property.agencyEmail}</span>
-                    </div>
-                  )}
+                    <p className="text-xs text-orange-700 mt-1">
+                      Inicie a conversa conosco através da plataforma. Informações de contato direto serão compartilhadas durante o chat se necessário.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 pt-4">
@@ -394,18 +391,12 @@ export default function PropertyDetail() {
                     onClick={handleStartChat}
                     disabled={startChatMutation.isPending}
                     className="bg-hive-gold hover:bg-hive-gold-dark"
+                    size="lg"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     {startChatMutation.isPending ? "Iniciando..." : 
                      !isAuthenticated ? "Fazer login para conversar" : "Iniciar conversa"}
                   </Button>
-                  
-                  {property.agencyPhone && (
-                    <Button variant="outline">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Ligar agora
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>

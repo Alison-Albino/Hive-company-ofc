@@ -434,15 +434,6 @@ export default function ServicesPage() {
                             <MessageCircle className="w-4 h-4 mr-1" />
                             {!isAuthenticated ? "Login" : "Conversar"}
                           </Button>
-                          {profile.socialLinks?.whatsapp && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(`https://wa.me/${profile.socialLinks?.whatsapp}`, '_blank')}
-                            >
-                              <Phone className="w-4 h-4" />
-                            </Button>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
