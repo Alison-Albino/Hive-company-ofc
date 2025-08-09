@@ -131,8 +131,10 @@ export default function AuthPage() {
           title: "Cadastro realizado com sucesso!",
           description: `Bem-vindo ao Hive, ${result.user.name}!`,
         });
-        // Redirect automatically to dashboard after registration
-        window.location.href = "/dashboard";
+        // Wait for auth state to be updated before redirecting
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1000);
       } else {
         toast({
           title: "Erro no cadastro",
@@ -189,8 +191,10 @@ export default function AuthPage() {
           title: "Cadastro de prestador realizado!",
           description: `Bem-vindo ao Hive, ${result.user.name}! Complete seu perfil para começar.`,
         });
-        // Redirect automatically to dashboard after registration
-        window.location.href = "/dashboard";
+        // Wait for auth state to be updated before redirecting
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1000);
       } else {
         toast({
           title: "Erro no cadastro",

@@ -84,8 +84,6 @@ export function useAuth() {
       isLoading: false,
       isAuthenticated: true,
     });
-    // Force re-check to ensure consistency
-    setTimeout(() => checkAuth(), 100);
   };
 
   const refreshAuth = () => {

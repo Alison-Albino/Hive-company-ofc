@@ -22,7 +22,16 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { user, isAuthenticated, canCreateProperty } = useAuth();
+  const { user, isAuthenticated, isLoading, canCreateProperty } = useAuth();
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (
@@ -30,7 +39,7 @@ export default function Dashboard() {
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
             <p className="text-gray-600 mb-4">Você precisa fazer login para acessar o dashboard</p>
-            <Link href="/login">
+            <Link href="/auth">
               <Button>Fazer Login</Button>
             </Link>
           </CardContent>
