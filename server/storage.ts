@@ -831,8 +831,9 @@ export class MemStorage implements IStorage {
   }
 
   async getOrCreateConversation(userId: string, providerId: string): Promise<any> {
+    // Buscar conversa existente usando o participantId (não participantIds)
     const existingConversation = Array.from(this.conversations.values()).find(c => 
-      c.participantIds?.includes(userId) && c.participantIds?.includes(providerId)
+      c.participantId === providerId
     );
     
     if (existingConversation) {
@@ -860,17 +861,18 @@ export class MemStorage implements IStorage {
   async getMessagesByConversationId(conversationId: string): Promise<any[]> {
     return Array.from(this.chatMessages.values())
       .filter(m => m.conversationId === conversationId)
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      .sort((a, b) => new Date(a.createdAt || a.timestamp).getTime() - new Date(b.createdAt || b.timestamp).getTime());
   }
 
   async createMessage(message: any): Promise<any> {
     const newMessage = {
       id: randomUUID(),
       conversationId: message.conversationId,
-      sender: message.sender,
+      senderId: message.senderId || message.sender,
+      receiverId: message.receiverId,
       message: message.message,
-      timestamp: message.timestamp,
-      isRead: message.isRead
+      createdAt: message.createdAt || message.timestamp,
+      read: message.read || message.isRead || false
     };
 
     this.chatMessages.set(newMessage.id, newMessage);
@@ -879,7 +881,7 @@ export class MemStorage implements IStorage {
     const conversation = this.conversations.get(message.conversationId);
     if (conversation) {
       conversation.lastMessage = message.message;
-      conversation.lastMessageAt = message.timestamp;
+      conversation.lastMessageAt = message.createdAt || message.timestamp;
     }
 
     return newMessage;

@@ -127,35 +127,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoint
-  app.post("/api/chat", (req, res) => {
+  // Chat endpoint - Assistant
+  app.post("/api/chat", async (req, res) => {
     const { message } = req.body;
 
-    // Simular resposta do chat baseada na mensagem
-    const responses = {
-      ola: "Olá! Como posso ajudá-lo hoje? Está procurando por alguma propriedade específica?",
-      ajuda:
-        "Estou aqui para ajudar! Você pode buscar propriedades por localização, ver detalhes de imóveis ou encontrar prestadores de serviços.",
-      propriedades:
-        "Temos várias propriedades disponíveis! Use o mapa para explorar diferentes regiões ou digite uma localização específica na busca.",
-      default:
-        "Interessante! Como posso ajudá-lo com propriedades ou serviços? Digite sua dúvida e eu terei prazer em ajudar.",
-    };
+    try {
+      // Criar mensagem do usuário na conversa do assistente
+      await storage.createMessage({
+        conversationId: 'conv-assistant',
+        senderId: 'user',
+        receiverId: 'assistant',
+        message,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
 
-    const lowerMessage = message.toLowerCase();
-    let response = responses.default;
+      // Simular resposta do assistente
+      const responses = {
+        ola: "Olá! Como posso ajudá-lo hoje? Está procurando por alguma propriedade específica?",
+        ajuda: "Estou aqui para ajudar! Você pode buscar propriedades por localização, ver detalhes de imóveis ou encontrar prestadores de serviços.",
+        propriedades: "Temos várias propriedades disponíveis! Use o mapa para explorar diferentes regiões ou digite uma localização específica na busca.",
+        servicos: "Temos prestadores qualificados em várias categorias! Que tipo de serviço você precisa?",
+        default: "Interessante! Como posso ajudá-lo com propriedades ou serviços? Digite sua dúvida e eu terei prazer em ajudar."
+      };
 
-    for (const [key, value] of Object.entries(responses)) {
-      if (key !== "default" && lowerMessage.includes(key)) {
-        response = value;
-        break;
+      const lowerMessage = message.toLowerCase();
+      let response = responses.default;
+
+      for (const [key, value] of Object.entries(responses)) {
+        if (key !== "default" && lowerMessage.includes(key)) {
+          response = value;
+          break;
+        }
       }
-    }
 
-    res.json({
-      message: response,
-      timestamp: new Date().toISOString(),
-    });
+      // Criar resposta do assistente
+      await storage.createMessage({
+        conversationId: 'conv-assistant',
+        senderId: 'assistant',
+        receiverId: 'user',
+        message: response,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+
+      res.json({
+        message: response,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error in chat:', error);
+      res.status(500).json({ message: 'Failed to process chat message' });
+    }
   });
 
   // Chat endpoints
@@ -196,18 +219,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/chat/conversations/:id/messages', async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, receiverId } = req.body;
       if (!message) {
         return res.status(400).json({ message: 'Message is required' });
       }
-      const newMessage = await storage.createMessage({
+      
+      // Criar mensagem do usuário
+      const userMessage = await storage.createMessage({
         conversationId: req.params.id,
-        sender: 'user',
+        senderId: 'user',
+        receiverId: receiverId || 'provider',
         message,
-        timestamp: new Date().toISOString(),
-        isRead: false
+        createdAt: new Date().toISOString(),
+        read: false
       });
-      res.json(newMessage);
+
+      // Se não é o assistente, simular resposta do prestador
+      if (req.params.id !== 'conv-assistant') {
+        setTimeout(async () => {
+          const responses = [
+            "Olá! Obrigado por entrar em contato. Como posso ajudar?",
+            "Oi! Vou verificar sua demanda e retorno já com o orçamento.",
+            "Entendi sua necessidade. Posso fazer o trabalho sim, quando precisa?",
+            "Perfeito! Tenho disponibilidade para atender. Vamos conversar melhor?",
+            "Boa tarde! Recebi sua mensagem. Posso ajudar sim com esse serviço."
+          ];
+          
+          await storage.createMessage({
+            conversationId: req.params.id,
+            senderId: receiverId || 'provider',
+            receiverId: 'user',
+            message: responses[Math.floor(Math.random() * responses.length)],
+            createdAt: new Date().toISOString(),
+            read: false
+          });
+        }, 2000);
+      }
+
+      res.json(userMessage);
     } catch (error) {
       console.error('Error sending message:', error);
       res.status(500).json({ message: 'Failed to send message' });
