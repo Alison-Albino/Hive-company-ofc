@@ -505,8 +505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoint - Assistant
-  app.post("/api/chat", async (req, res) => {
+  // Chat endpoint - Assistant (requires authentication)
+  app.post("/api/chat", requireAuth, async (req, res) => {
     const { message } = req.body;
 
     try {
@@ -559,8 +559,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoints
-  app.get('/api/chat/conversations', async (req, res) => {
+  // Chat endpoints (all require authentication)
+  app.get('/api/chat/conversations', requireAuth, async (req, res) => {
     try {
       const conversations = await storage.getAllConversations();
       res.json(conversations);
@@ -570,13 +570,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/chat/conversations', async (req, res) => {
+  app.post('/api/chat/conversations', requireAuth, async (req, res) => {
     try {
       const { providerId } = req.body;
       if (!providerId) {
         return res.status(400).json({ message: 'Provider ID is required' });
       }
-      const userId = 'mock-user-id'; // Mock user ID for demo
+      const userId = (req as any).user.id; // Get authenticated user ID
       const conversation = await storage.getOrCreateConversation(userId, providerId);
       res.json(conversation);
     } catch (error) {
@@ -585,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/chat/conversations/:id/messages', async (req, res) => {
+  app.get('/api/chat/conversations/:id/messages', requireAuth, async (req, res) => {
     try {
       const messages = await storage.getMessagesByConversationId(req.params.id);
       res.json(messages);
@@ -595,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/chat/conversations/:id/messages', async (req, res) => {
+  app.post('/api/chat/conversations/:id/messages', requireAuth, async (req, res) => {
     try {
       const { message, receiverId } = req.body;
       if (!message) {
@@ -641,10 +641,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Notifications endpoints
-  app.get('/api/notifications', async (req, res) => {
+  // Notifications endpoints (require authentication)
+  app.get('/api/notifications', requireAuth, async (req, res) => {
     try {
-      const userId = 'mock-user-id'; // Mock user ID for demo
+      const userId = (req as any).user.id; // Get authenticated user ID
       const notifications = await storage.getNotificationsByUserId(userId);
       res.json(notifications);
     } catch (error) {
@@ -653,9 +653,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/notifications/count', async (req, res) => {
+  app.get('/api/notifications/count', requireAuth, async (req, res) => {
     try {
-      const userId = 'mock-user-id'; // Mock user ID for demo
+      const userId = (req as any).user.id; // Get authenticated user ID
       const count = await storage.getUnreadNotificationCount(userId);
       res.json({ count });
     } catch (error) {
@@ -664,7 +664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/notifications/:id/read', async (req, res) => {
+  app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
     try {
       await storage.markNotificationAsRead(req.params.id);
       res.json({ message: 'Notification marked as read' });

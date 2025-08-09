@@ -3,6 +3,8 @@ import logoPath from "@assets/logo hive_1754700716189.png";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useChatContext } from '@/context/ChatContext';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +56,46 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { setIsChatPageOpen } = useChatContext();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <MessageCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900">Acesso Restrito</h2>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-600">
+              Você precisa fazer login para acessar o chat e conversar com prestadores.
+            </p>
+            <div className="space-y-2">
+              <Link href="/auth">
+                <Button className="w-full">Fazer Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="outline" className="w-full">Criar Conta</Button>
+              </Link>
+            </div>
+            <Link href="/">
+              <Button variant="ghost" size="sm">Voltar ao Início</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Desabilitar popups quando a página de chat estiver aberta
   useEffect(() => {
