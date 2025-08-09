@@ -34,7 +34,8 @@ export default function Register() {
     setSuccess(null);
 
     try {
-      const response = await apiRequest("POST", "/api/auth/register", data) as any;
+      const res = await apiRequest("POST", "/api/auth/register", data);
+      const response = await res.json();
       
       if (response.success && response.sessionId) {
         // Store session

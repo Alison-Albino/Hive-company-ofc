@@ -30,7 +30,8 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await apiRequest("POST", "/api/auth/login", data) as any;
+      const res = await apiRequest("POST", "/api/auth/login", data);
+      const response = await res.json();
       
       if (response.success && response.sessionId) {
         // Store session

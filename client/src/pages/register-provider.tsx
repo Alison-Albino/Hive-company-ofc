@@ -53,10 +53,11 @@ export default function RegisterProvider() {
     setSuccess(null);
 
     try {
-      const response = await apiRequest("POST", "/api/auth/register-provider", {
+      const res = await apiRequest("POST", "/api/auth/register-provider", {
         ...data,
         categories: selectedCategories,
-      }) as any;
+      });
+      const response = await res.json();
       
       if (response.success && response.sessionId) {
         // Store session

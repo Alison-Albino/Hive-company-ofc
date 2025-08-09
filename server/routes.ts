@@ -124,14 +124,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/auth/me", requireAuth, (req, res) => {
-    res.json({ user: req.user });
+    res.json({ user: (req as any).user });
   });
 
   // Provider property creation endpoint
   app.post("/api/properties", requireAuth, requireRealEstateProvider, async (req, res) => {
     try {
       const validatedData = createPropertySchema.parse(req.body);
-      const property = await storage.createPropertyAsProvider(req.userId, validatedData);
+      const property = await storage.createPropertyAsProvider((req as any).userId, validatedData);
       
       if (property) {
         res.status(201).json({ success: true, property });

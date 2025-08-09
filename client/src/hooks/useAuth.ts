@@ -84,6 +84,10 @@ export function useAuth() {
     });
   };
 
+  const refreshAuth = () => {
+    checkAuth();
+  };
+
   const logout = async () => {
     try {
       const sessionId = localStorage.getItem("hive_session");
@@ -126,6 +130,6 @@ export function useAuth() {
     login,
     logout,
     canCreateProperty,
-    refresh: checkAuth,
+    refresh: refreshAuth,
   };
 }
