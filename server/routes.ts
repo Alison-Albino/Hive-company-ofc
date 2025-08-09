@@ -204,6 +204,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user categories (for business providers)
+  app.put("/api/user/categories", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const { categoryIds } = req.body;
+      
+      if (!Array.isArray(categoryIds)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "categoryIds deve ser um array" 
+        });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "Usuário não encontrado" });
+      }
+
+      if (user.userType !== "provider" || user.providerPlan !== "B") {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Apenas prestadores empresariais podem definir categorias" 
+        });
+      }
+
+      const updatedUser = await storage.updateUserCategories(userId, categoryIds);
+      
+      res.json({ 
+        success: true, 
+        user: updatedUser, 
+        message: "Categorias atualizadas com sucesso" 
+      });
+    } catch (error: any) {
+      console.error("Update categories error:", error);
+      res.status(500).json({ success: false, message: "Erro interno do servidor" });
+    }
+  });
+
   // Provider property creation endpoint
   app.post("/api/properties", requireAuth, requireRealEstateProvider, async (req, res) => {
     try {

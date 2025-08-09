@@ -55,11 +55,16 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
         if (data.success) {
           toast({
             title: "Pagamento Realizado com Sucesso!",
-            description: "Você agora é um prestador Hive. Redirecionando...",
+            description: planType === 'B' ? "Agora escolha as categorias da sua empresa." : "Você agora é um prestador Hive. Redirecionando...",
           });
           
           setTimeout(() => {
-            setLocation('/dashboard');
+            // Redirecionar empresas para seleção de categorias, outros para dashboard
+            if (planType === 'B') {
+              setLocation('/select-categories');
+            } else {
+              setLocation('/dashboard');
+            }
           }, 2000);
         } else {
           throw new Error(data.message || 'Payment processing failed');

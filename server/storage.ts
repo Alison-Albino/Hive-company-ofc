@@ -37,6 +37,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<AuthUser | undefined>;
   getUserById(id: string): Promise<AuthUser | undefined>;
   updateUserProfile(id: string, profileData: any): Promise<AuthUser | null>;
+  updateUserCategories(userId: string, categoryIds: string[]): Promise<AuthUser | null>;
   upgradeToProvider(userId: string, providerData: any): Promise<{ success: boolean; user?: AuthUser; message?: string }>;
   
   // Property operations for providers
@@ -60,6 +61,8 @@ interface SimpleUser {
   userType: "viewer" | "provider";
   isActive: boolean;
   providerId?: string;
+  providerPlan?: string;
+  categories?: string[];
 }
 
 export class MemStorage implements IStorage {
@@ -1275,6 +1278,28 @@ export class MemStorage implements IStorage {
       return this.sampleProfiles[index];
     }
     return undefined;
+  }
+
+  async updateUserCategories(userId: string, categoryIds: string[]): Promise<AuthUser | null> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return null;
+    }
+
+    // Update user categories
+    user.categories = categoryIds;
+    this.users.set(userId, user);
+
+    // If user has a provider profile, update it too
+    if (user.providerId) {
+      const provider = this.serviceProviders.get(user.providerId);
+      if (provider) {
+        provider.categories = categoryIds;
+        this.serviceProviders.set(user.providerId, provider);
+      }
+    }
+
+    return this.buildAuthUser(user);
   }
 
   // User management operations
