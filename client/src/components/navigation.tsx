@@ -25,8 +25,7 @@ export default function Navigation() {
             <img 
               src={logoPath}
               alt="Hive Company Logo" 
-              className="h-8 w-auto opacity-60 group-hover:opacity-80 transition-all duration-300"
-              style={{ filter: 'brightness(0) saturate(100%) invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' }}
+              className="h-8 w-auto opacity-90 group-hover:opacity-100 transition-all duration-300"
             />
           </Link>
           
@@ -36,7 +35,7 @@ export default function Navigation() {
                 key={link.path}
                 href={link.path}
                 className={`transition-colors duration-300 hover:text-hive-gold ${
-                  isActive(link.path) ? "text-hive-black font-medium" : "text-gray-600"
+                  isActive(link.path) ? "text-hive-gold font-medium" : "text-gray-600"
                 }`}
               >
                 {link.label}
@@ -65,7 +64,7 @@ export default function Navigation() {
                 key={link.path}
                 href={link.path}
                 className={`block transition-colors duration-300 hover:text-hive-gold ${
-                  isActive(link.path) ? "text-hive-black font-medium" : "text-gray-600"
+                  isActive(link.path) ? "text-hive-gold font-medium" : "text-gray-600"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
