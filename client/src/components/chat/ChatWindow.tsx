@@ -65,7 +65,7 @@ export default function ChatWindow({
 
   // Buscar mensagens da conversa
   const { data: messages, refetch: refetchMessages } = useQuery<ChatMessage[]>({
-    queryKey: ['/api/chat/conversations', conversationId, 'messages'],
+    queryKey: ['/api', 'chat', 'conversations', conversationId, 'messages'],
     enabled: !!conversationId,
     refetchInterval: 3000,
   });
@@ -83,7 +83,7 @@ export default function ChatWindow({
     onSuccess: () => {
       setNewMessage('');
       refetchMessages();
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api', 'notifications'] });
     }
   });
 

@@ -29,7 +29,7 @@ export default function ChatManager() {
 
   // Buscar contagem de notificações não lidas
   const { data: notificationData } = useQuery({
-    queryKey: ['/api/notifications/count'],
+    queryKey: ['/api', 'notifications', 'count'],
     refetchInterval: 5000,
   });
 
