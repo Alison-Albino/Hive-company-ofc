@@ -188,11 +188,11 @@ export default function ChatWidget({ providerId, providerName, providerImage }: 
                       {messages.map((message) => (
                         <div
                           key={message.id}
-                          className={`flex ${message.senderId === 'user' || message.senderId === 'mock-user-id' ? 'justify-end' : 'justify-start'}`}
+                          className={`flex ${(message as any).sender === 'user' || message.senderId === 'mock-user-id' || message.senderId === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
                             className={`max-w-[75%] p-3 rounded-lg ${
-                              message.senderId === 'user' || message.senderId === 'mock-user-id'
+                              (message as any).sender === 'user' || message.senderId === 'mock-user-id' || message.senderId === 'user'
                                 ? 'bg-hive-gold text-white'
                                 : 'bg-gray-100 text-gray-900'
                             }`}
