@@ -85,18 +85,20 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pesquisas Salvas</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-amber-800">Torne-se Prestador</CardTitle>
+            <Crown className="h-4 w-4 text-amber-600" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Filtros salvos</p>
-            <Button variant="outline" size="sm" className="mt-2">
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Pesquisa
-            </Button>
+            <p className="text-2xl font-bold text-amber-900">🚀</p>
+            <p className="text-xs text-amber-700 mb-3">Ofereça seus serviços</p>
+            <Link href="/plans">
+              <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Crown className="w-4 h-4 mr-2" />
+                Ver Planos
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

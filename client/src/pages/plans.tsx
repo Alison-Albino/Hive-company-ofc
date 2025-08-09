@@ -10,9 +10,7 @@ export default function Plans() {
   });
 
   const handleSubscribe = (planType: string) => {
-    console.log("Subscribe to plan:", planType);
-    alert("Redirecionando para o pagamento...");
-    // TODO: Implement payment integration
+    window.location.href = `/checkout?plan=${planType}`;
   };
 
   const formatPrice = (price: string) => {

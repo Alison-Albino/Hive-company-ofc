@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { loginSchema, registerSchema, providerRegistrationSchema, createPropertySchema } from "@shared/auth-schema";
 import type { AuthUser } from "@shared/auth-schema";
+import Stripe from "stripe";
 
 // Simple session storage (in production, use proper session management)
 interface Session {
@@ -45,6 +46,14 @@ function requireRealEstateProvider(req: any, res: any, next: any) {
   
   next();
 }
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication endpoints
@@ -213,6 +222,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ success: false, message: error.message || "Dados inválidos" });
     }
   });
+
+  // Stripe subscription endpoint
+  app.post("/api/create-subscription", requireAuth, async (req, res) => {
+    try {
+      const { planType } = req.body;
+      const user = (req as any).user;
+      
+      if (!user.email) {
+        return res.status(400).json({ error: "Email do usuário é obrigatório" });
+      }
+
+      // Plan pricing
+      const planPrices = {
+        A: 2900, // R$ 29.00 in centavos
+        B: 5900, // R$ 59.00 in centavos
+      };
+
+      if (!planPrices[planType as keyof typeof planPrices]) {
+        return res.status(400).json({ error: "Tipo de plano inválido" });
+      }
+
+      // Create or retrieve Stripe customer
+      let customer;
+      try {
+        const customers = await stripe.customers.list({
+          email: user.email,
+          limit: 1,
+        });
+
+        if (customers.data.length > 0) {
+          customer = customers.data[0];
+        } else {
+          customer = await stripe.customers.create({
+            email: user.email,
+            name: user.name,
+            metadata: {
+              userId: user.id,
+              planType: planType,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Error creating/retrieving customer:', error);
+        return res.status(500).json({ error: "Erro ao criar cliente no Stripe" });
+      }
+
+      // Create payment intent for subscription
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: planPrices[planType as keyof typeof planPrices],
+          currency: 'brl',
+          customer: customer.id,
+          setup_future_usage: 'off_session',
+          metadata: {
+            userId: user.id,
+            planType: planType,
+            subscription: 'true',
+          },
+        });
+
+        res.json({
+          clientSecret: paymentIntent.client_secret,
+          customerId: customer.id,
+        });
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        res.status(500).json({ error: "Erro ao criar intenção de pagamento" });
+      }
+    } catch (error: any) {
+      console.error('Create subscription error:', error);
+      res.status(500).json({ error: error.message || "Erro interno do servidor" });
+    }
+  });
+
+  // Webhook endpoint for Stripe events (for production use)
+  app.post("/api/webhook/stripe", async (req, res) => {
+    try {
+      const event = req.body;
+
+      // Handle successful payment
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const { userId, planType } = paymentIntent.metadata;
+
+        if (paymentIntent.metadata.subscription === 'true') {
+          // Upgrade user to provider with the selected plan
+          const upgradeData = {
+            planType: planType,
+            speciality: planType === 'A' ? 'Prestador Pessoa Física' : 'Prestador Empresarial',
+            categories: planType === 'B' ? ['imobiliaria'] : ['geral'],
+          };
+
+          await storage.upgradeToProvider(userId, upgradeData);
+          console.log(`User ${userId} upgraded to provider plan ${planType}`);
+        }
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(400).json({ error: 'Webhook error' });
+    }
+  });
+
   // Properties routes
   app.get("/api/properties", async (req, res) => {
     try {
