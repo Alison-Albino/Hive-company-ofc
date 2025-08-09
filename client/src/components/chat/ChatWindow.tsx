@@ -167,11 +167,11 @@ export default function ChatWindow({
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.senderId === 'mock-user-id' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.senderId === 'user' || message.senderId === 'mock-user-id' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-[75%] p-2 rounded-lg text-sm ${
-                          message.senderId === 'mock-user-id'
+                          message.senderId === 'user' || message.senderId === 'mock-user-id'
                             ? 'bg-hive-gold text-white'
                             : 'bg-gray-100 text-gray-900'
                         }`}
