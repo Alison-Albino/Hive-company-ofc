@@ -145,7 +145,7 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      <div className="flex h-full">
+      <div className="flex h-full max-h-screen">
         {/* Sidebar - Lista de Conversas */}
         <div className={`${selectedConversation ? 'hidden lg:flex' : 'flex'} w-full lg:w-80 flex-col bg-white dark:bg-gray-800 border-r`}>
           {/* Header da Sidebar */}
@@ -243,11 +243,11 @@ export default function ChatPage() {
         </div>
 
         {/* Área de Chat Principal */}
-        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800 h-full max-h-screen overflow-hidden`}>
+        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800 h-full`}>
           {selectedConversation && selectedConvData ? (
             <>
               {/* Header do Chat */}
-              <div className="px-4 py-3 border-b bg-white dark:bg-gray-800 flex items-center justify-between">
+              <div className="px-4 py-2 border-b bg-white dark:bg-gray-800 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center space-x-3">
                   <Button
                     variant="ghost"
@@ -311,7 +311,7 @@ export default function ChatPage() {
               {/* Área de Mensagens */}
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  <div className="px-4 py-3 space-y-4 min-h-full">
+                  <div className="px-4 py-2 space-y-3 min-h-full">
                     {messages.map((message) => {
                       const isUserMessage = (message.sender === 'user' || message.senderId === 'user');
                       const isAssistant = (message.sender === 'assistant' || message.senderId === 'assistant');
@@ -358,7 +358,7 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Input - Fixa na parte inferior */}
-              <div className="border-t bg-white dark:bg-gray-800 px-4 py-3 flex-shrink-0">
+              <div className="border-t bg-white dark:bg-gray-800 px-4 py-2 flex-shrink-0">
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -371,7 +371,7 @@ export default function ChatPage() {
                       placeholder="Digite uma mensagem..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold"
+                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold h-10"
                       disabled={sendMessageMutation.isPending}
                     />
                   </div>
