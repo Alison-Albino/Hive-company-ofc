@@ -32,7 +32,7 @@ export default function SelectCategories() {
       return;
     }
     
-    if (user?.userType !== "provider" || (user?.planType !== "B" && user?.providerPlan !== "B")) {
+    if (user?.userType !== "provider" || (!user?.planType && !user?.providerPlan)) {
       console.log('User access check:', { 
         userType: user?.userType, 
         planType: user?.planType, 
@@ -43,7 +43,7 @@ export default function SelectCategories() {
       setTimeout(() => {
         toast({
           title: "Acesso Negado",
-          description: "Esta página é apenas para prestadores empresariais.",
+          description: "Esta página é apenas para prestadores com plano ativo.",
           variant: "destructive",
         });
         setLocation('/dashboard');
@@ -141,17 +141,17 @@ export default function SelectCategories() {
           </div>
           
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Finalize seu Perfil Empresarial
+            Complete seu Perfil de Prestador
           </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Selecione as categorias de serviços que sua empresa oferece. Isso ajudará os clientes a encontrarem vocês mais facilmente.
+            Selecione as categorias de serviços que você oferece. Isso ajudará os clientes a encontrarem você mais facilmente na plataforma Hive.
           </p>
           
           <div className="mt-6">
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <CheckCircle className="h-4 w-4 mr-1" />
-              Plano HIVE GOLD Ativado
+              {user?.planType === 'A' || user?.providerPlan === 'A' ? 'Plano BE HIVE Ativado' : 'Plano HIVE GOLD Ativado'}
             </Badge>
           </div>
         </div>

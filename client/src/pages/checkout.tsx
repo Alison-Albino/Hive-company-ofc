@@ -60,16 +60,12 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
           
           toast({
             title: "Pagamento Realizado com Sucesso!",
-            description: planType === 'B' ? "Agora escolha as categorias da sua empresa." : "Você agora é um prestador Hive. Redirecionando...",
+            description: "Agora complete seu cadastro escolhendo suas categorias de atuação.",
           });
           
           setTimeout(() => {
-            // Redirecionar empresas para seleção de categorias, outros para dashboard
-            if (planType === 'B') {
-              setLocation('/select-categories');
-            } else {
-              setLocation('/dashboard');
-            }
+            // AMBOS os planos devem ir para seleção de categorias
+            setLocation('/select-categories');
           }, 2000);
         } else {
           throw new Error(data.message || 'Payment processing failed');
@@ -81,11 +77,8 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
           description: "Seu pagamento foi processado. Redirecionando para o dashboard...",
         });
         setTimeout(() => {
-          if (planType === 'B') {
-            setLocation('/select-categories');
-          } else {
-            setLocation('/dashboard');
-          }
+          // AMBOS os planos devem ir para seleção de categorias
+          setLocation('/select-categories');
         }, 2000);
       }
     }
