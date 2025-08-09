@@ -19,6 +19,7 @@ interface ChatWindowData {
   providerName?: string;
   providerImage?: string;
   position: number;
+  isMinimized: boolean;
 }
 
 export default function ChatManager() {
@@ -53,7 +54,8 @@ export default function ChatManager() {
           providerId,
           providerName,
           providerImage,
-          position: newActiveChats.size
+          position: newActiveChats.size,
+          isMinimized: false
         });
         
         // Adicionar à lista de chats persistidos
@@ -141,13 +143,28 @@ export default function ChatManager() {
             <div key={id} className="relative">
               <Button
                 onClick={() => {
-                  // Chat já está aberto, apenas focar (scroll para ele)
-                  const chatElement = document.querySelector(`[data-chat-id="${id}"]`);
-                  if (chatElement) {
-                    chatElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
+                  setChatState(prev => {
+                    const newActiveChats = new Map(prev.activeChats);
+                    
+                    // Minimizar todos os outros chats
+                    for (const [otherId, otherChat] of newActiveChats) {
+                      if (otherId !== id) {
+                        otherChat.isMinimized = true;
+                      }
+                    }
+                    
+                    // Alternar o estado do chat clicado
+                    const currentChat = newActiveChats.get(id);
+                    if (currentChat) {
+                      currentChat.isMinimized = !currentChat.isMinimized;
+                    }
+                    
+                    return { ...prev, activeChats: newActiveChats };
+                  });
                 }}
-                className="rounded-full w-12 h-12 bg-hive-gold hover:bg-hive-gold-dark text-white shadow-lg relative"
+                className={`rounded-full w-12 h-12 text-white shadow-lg relative transition-all duration-200 hover:scale-110 ${
+                  chat.isMinimized ? 'bg-gray-400 hover:bg-gray-500' : 'bg-hive-gold hover:bg-hive-gold-dark'
+                }`}
               >
                 {chat.providerImage ? (
                   <img 
@@ -217,7 +234,18 @@ export default function ChatManager() {
           providerImage={chat.providerImage}
           position={chat.position}
           totalChats={chatState.activeChats.size}
+          isMinimized={chat.isMinimized}
           onClose={() => closeProviderChat(id)}
+          onToggleMinimize={() => {
+            setChatState(prev => {
+              const newActiveChats = new Map(prev.activeChats);
+              const currentChat = newActiveChats.get(id);
+              if (currentChat) {
+                currentChat.isMinimized = !currentChat.isMinimized;
+              }
+              return { ...prev, activeChats: newActiveChats };
+            });
+          }}
         />
       ))}
     </>

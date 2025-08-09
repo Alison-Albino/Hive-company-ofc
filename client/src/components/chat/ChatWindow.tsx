@@ -31,7 +31,9 @@ interface ChatWindowProps {
   providerImage?: string;
   position: number;
   totalChats: number;
+  isMinimized: boolean;
   onClose: () => void;
+  onToggleMinimize: () => void;
 }
 
 export default function ChatWindow({
@@ -40,9 +42,10 @@ export default function ChatWindow({
   providerImage,
   position,
   totalChats,
-  onClose
+  isMinimized,
+  onClose,
+  onToggleMinimize
 }: ChatWindowProps) {
-  const [isMinimized, setIsMinimized] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -110,7 +113,11 @@ export default function ChatWindow({
 
   return (
     <div 
-      className={`fixed z-30 w-80 ${isMinimized ? 'h-14' : 'h-96'} transition-all duration-300`}
+      className={`fixed z-30 w-80 transition-all duration-300 ease-in-out transform ${
+        isMinimized 
+          ? 'h-14 scale-95 opacity-80' 
+          : 'h-96 scale-100 opacity-100'
+      }`}
       style={{ 
         right: `${rightOffset}px`, 
         bottom: `${bottomOffset}px`
@@ -134,8 +141,8 @@ export default function ChatWindow({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsMinimized(!isMinimized)}
-                className="text-white hover:bg-hive-gold-dark w-6 h-6 p-0"
+                onClick={onToggleMinimize}
+                className="text-white hover:bg-hive-gold-dark w-6 h-6 p-0 transition-transform duration-200 hover:scale-110"
               >
                 {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
               </Button>
