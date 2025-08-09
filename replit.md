@@ -40,7 +40,12 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 - **Design System**: Consistent component library with variants and proper TypeScript support
 - **Card-based UI**: Property cards, service provider cards, and category cards for intuitive browsing
 - **Interactive Map**: Custom map component with property markers and nearby places visualization
-- **Chat System**: Real-time chat widget with intelligent responses and contextual help
+- **Chat System**: Complete messaging platform with widget and full-page interface
+  - Real-time chat widget with intelligent responses and contextual help
+  - Full chat page (/chat) with Facebook-style interface
+  - Sidebar with conversation list, search functionality, and user status
+  - Message history with read/unread status indicators
+  - Responsive design for mobile and desktop
 - **Responsive Layout**: Mobile-first design with grid systems that adapt to different screen sizes
 - **Navigation**: Sticky header with mobile hamburger menu and desktop horizontal navigation
 - **Multi-view Interface**: Toggle between grid view and mixed map+list view for property browsing
