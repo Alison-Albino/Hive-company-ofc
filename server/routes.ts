@@ -229,8 +229,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { planType } = req.body;
       const user = (req as any).user;
       
-      if (!user.email) {
-        return res.status(400).json({ error: "Email do usuário é obrigatório" });
+      console.log('Creating subscription for user:', user.id, 'plan:', planType, 'email:', user.email);
+      
+      if (!user || !user.email) {
+        console.log('Invalid user or no email for user:', user?.id);
+        return res.status(400).json({ error: "Usuário ou email inválido" });
       }
 
       // Plan pricing

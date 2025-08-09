@@ -45,24 +45,30 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
     } else {
       // Process the successful payment
       try {
-        await apiRequest("POST", "/api/process-payment-success", {
+        const response = await apiRequest("POST", "/api/process-payment-success", {
           paymentIntentId: result.paymentIntent.id,
           planType,
         });
         
-        toast({
-          title: "Pagamento Realizado com Sucesso!",
-          description: "Você agora é um prestador Hive. Redirecionando...",
-        });
+        const data = await response.json();
         
-        setTimeout(() => {
-          setLocation('/dashboard');
-        }, 2000);
+        if (data.success) {
+          toast({
+            title: "Pagamento Realizado com Sucesso!",
+            description: "Você agora é um prestador Hive. Redirecionando...",
+          });
+          
+          setTimeout(() => {
+            setLocation('/dashboard');
+          }, 2000);
+        } else {
+          throw new Error(data.message || 'Payment processing failed');
+        }
       } catch (error) {
         console.error('Error processing payment success:', error);
         toast({
           title: "Pagamento Processado",
-          description: "Seu pagamento foi processado. Redirecionando...",
+          description: "Seu pagamento foi processado. Redirecionando para o dashboard...",
         });
         setTimeout(() => setLocation('/dashboard'), 2000);
       }
@@ -137,10 +143,11 @@ export default function Checkout() {
     
     // Create subscription intent with specific plan type
     apiRequest("POST", "/api/create-subscription", { planType })
-      .then((response) => {
-        console.log('Subscription response:', response);
-        if (response.clientSecret) {
-          setClientSecret(response.clientSecret);
+      .then(async (response) => {
+        const data = await response.json();
+        console.log('Subscription response:', data);
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
         } else {
           throw new Error('Failed to create subscription - no client secret');
         }
