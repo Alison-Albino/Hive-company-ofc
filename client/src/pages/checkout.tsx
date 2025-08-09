@@ -55,6 +55,7 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
         if (data.success) {
           // Update local user data to avoid auth check failure
           if (data.user) {
+            console.log('Updating localStorage with user data:', data.user);
             localStorage.setItem("hive_user", JSON.stringify(data.user));
           }
           
@@ -63,8 +64,10 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
             description: "Agora complete seu cadastro escolhendo suas categorias de atuação.",
           });
           
+          console.log('Redirecting to select-categories in 2 seconds...');
           setTimeout(() => {
             // AMBOS os planos devem ir para seleção de categorias
+            console.log('Now redirecting to select-categories');
             setLocation('/select-categories');
           }, 2000);
         } else {

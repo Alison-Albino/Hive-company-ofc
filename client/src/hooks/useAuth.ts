@@ -86,9 +86,9 @@ export function useAuth() {
     });
   };
 
-  const refreshAuth = () => {
+  const refreshAuth = async () => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-    checkAuth();
+    await checkAuth();
   };
 
   const logout = async () => {

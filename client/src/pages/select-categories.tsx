@@ -13,7 +13,8 @@ import { CheckCircle, Building2, ArrowRight } from "lucide-react";
 import type { ServiceCategory } from "@shared/schema";
 
 export default function SelectCategories() {
-  const { user, isAuthenticated, refresh } = useAuth();
+  const authState = useAuth();
+  const { user, isAuthenticated, refresh } = authState;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -22,12 +23,21 @@ export default function SelectCategories() {
 
   // Refresh auth data on component mount
   useEffect(() => {
-    refresh();
+    const refreshData = async () => {
+      await refresh();
+    };
+    refreshData();
   }, [refresh]);
 
-  // Verificar se o usuário é empresarial
+  // Verificar se o usuário é empresarial - aguardar loading terminar
   useEffect(() => {
+    // Aguardar até loading terminar
+    if (authState.isLoading) {
+      return;
+    }
+    
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to auth');
       setLocation('/auth');
       return;
     }
@@ -36,10 +46,11 @@ export default function SelectCategories() {
       console.log('User access check:', { 
         userType: user?.userType, 
         planType: user?.planType, 
-        providerPlan: user?.providerPlan 
+        providerPlan: user?.providerPlan,
+        isLoading: authState.isLoading
       });
       
-      // Aguardar um pouco para permitir atualização dos dados
+      // Aguardar um pouco mais para permitir atualização dos dados
       setTimeout(() => {
         toast({
           title: "Acesso Negado",
@@ -47,10 +58,10 @@ export default function SelectCategories() {
           variant: "destructive",
         });
         setLocation('/dashboard');
-      }, 1000);
+      }, 2000);
       return;
     }
-  }, [user, isAuthenticated, setLocation, toast]);
+  }, [user, isAuthenticated, authState.isLoading, setLocation, toast]);
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["/api/service-categories"],
