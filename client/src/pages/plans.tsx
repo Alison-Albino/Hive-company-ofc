@@ -104,7 +104,6 @@ export default function Plans() {
           )}
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
 
         {/* Plans Cards */}
@@ -122,7 +121,7 @@ export default function Plans() {
                 <>
                   {/* Popular Badge */}
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg">
+                    <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg mt-[18px] mb-[18px] pt-[8px] pb-[8px]">
                       ⭐ MAIS ESCOLHIDO
                     </div>
                   </div>
