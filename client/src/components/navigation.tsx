@@ -70,9 +70,9 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
-            <Button className="w-full bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
-              Entrar
-            </Button>
+            <div className="pt-2 border-t">
+              <AuthStatus />
+            </div>
           </div>
         </div>
       )}

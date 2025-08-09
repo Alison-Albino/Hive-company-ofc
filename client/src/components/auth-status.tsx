@@ -16,26 +16,21 @@ export function AuthStatus() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" asChild>
-          <a href="/login">
-            <LogIn className="w-4 h-4 mr-1" />
-            Entrar
-          </a>
-        </Button>
-        <Button size="sm" asChild>
-          <a href="/register">Cadastrar</a>
-        </Button>
-      </div>
+      <Button size="sm" asChild className="bg-amber-600 hover:bg-amber-700 text-white">
+        <a href="/auth">
+          <LogIn className="w-4 h-4 mr-2" />
+          Entrar
+        </a>
+      </Button>
     );
   }
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 text-amber-600 border-amber-600 hover:bg-amber-50">
           <User className="w-4 h-4" />
-          {user?.name}
+          Perfil
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
@@ -47,39 +42,39 @@ export function AuthStatus() {
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Badge variant={user?.userType === "provider" ? "default" : "secondary"}>
-              {user?.userType === "provider" ? "Prestador" : "Visualizador"}
-            </Badge>
-            {user?.provider && (
-              <Badge variant={user.provider.planActive ? "default" : "secondary"}>
-                Plano {user.provider.planType}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant={user?.userType === "provider" ? "default" : "secondary"}>
+                {user?.userType === "provider" ? "Prestador" : "Visualizador"}
               </Badge>
+              {user?.planType && (
+                <Badge variant={user.planStatus === "active" ? "default" : "secondary"}>
+                  Plano {user.planType} - {user.planStatus === "active" ? "Ativo" : "Inativo"}
+                </Badge>
+              )}
+            </div>
+            
+            {user?.userType === "provider" && (
+              <div className="text-sm">
+                <p className="text-gray-600 mb-1">Status da Conta:</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant={user.isVerified ? "default" : "outline"}>
+                    {user.isVerified ? "Verificada" : "Pendente"}
+                  </Badge>
+                  <span className="text-xs text-gray-500">
+                    {user.completionPercentage}% completo
+                  </span>
+                </div>
+              </div>
             )}
           </div>
-
-          {user?.provider && (
-            <div className="text-sm space-y-1">
-              <p className="text-gray-600">Categorias:</p>
-              <div className="flex flex-wrap gap-1">
-                {user.provider.categories.map((cat) => (
-                  <Badge key={cat} variant="outline" className="text-xs">
-                    {cat}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
 
           <div className="space-y-2 pt-2 border-t">
             <Button variant="outline" size="sm" className="w-full" asChild>
               <Link href="/dashboard">
                 <Home className="w-4 h-4 mr-2" />
-                Meu Dashboard
+                Acessar Painel
               </Link>
-            </Button>
-            <Button variant="outline" size="sm" className="w-full" asChild>
-              <a href="/auth-test">Status de Autenticação</a>
             </Button>
             <Button 
               variant="outline" 
