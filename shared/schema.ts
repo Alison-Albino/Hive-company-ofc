@@ -65,6 +65,7 @@ export const serviceCategories = pgTable("service_categories", {
   slug: text("slug").notNull().unique(),
   providerCount: integer("provider_count").default(0),
   subcategories: text("subcategories").array().default([]),
+  planType: varchar("plan_type", { length: 10 }).notNull().default("CPF"), // CPF ou CNPJ
 });
 
 export const plans = pgTable("plans", {

@@ -392,111 +392,136 @@ export class MemStorage implements IStorage {
       this.properties.set(property.id, property);
     });
 
-    // Seed Service Categories with subcategories
-    const categories: ServiceCategory[] = [
+    // CATEGORIAS PARA PLANOS CPF (BE HIVE R$ 29/mês) - 13 categorias de serviços básicos
+    const cpfCategories: ServiceCategory[] = [
       { 
         id: randomUUID(), 
         name: "Encanador", 
         icon: "fas fa-wrench", 
-        slug: "plumber", 
+        slug: "encanador", 
         providerCount: 156,
+        planType: "CPF",
         subcategories: ["Desentupimento", "Instalação Hidráulica", "Vazamentos", "Aquecedores"]
       },
       { 
         id: randomUUID(), 
         name: "Eletricista", 
         icon: "fas fa-bolt", 
-        slug: "electrician", 
+        slug: "eletricista", 
         providerCount: 89,
+        planType: "CPF",
         subcategories: ["Instalação Residencial", "Manutenção Industrial", "Iluminação", "Tomadas e Interruptores"]
       },
       { 
         id: randomUUID(), 
         name: "Pintor", 
         icon: "fas fa-paint-roller", 
-        slug: "painter", 
+        slug: "pintor", 
         providerCount: 203,
+        planType: "CPF",
         subcategories: ["Pintura Residencial", "Pintura Comercial", "Textura", "Verniz e Lacas"]
       },
       { 
         id: randomUUID(), 
-        name: "Gesseiro", 
-        icon: "fas fa-hammer", 
-        slug: "plasterer", 
+        name: "Pedreiro", 
+        icon: "fas fa-hard-hat", 
+        slug: "pedreiro", 
         providerCount: 67,
-        subcategories: ["Reboco", "Sanca", "Divisórias", "Molduras"]
+        planType: "CPF",
+        subcategories: ["Construção", "Reforma", "Acabamentos", "Reparos"]
       },
       { 
         id: randomUUID(), 
-        name: "Fotógrafo", 
-        icon: "fas fa-camera", 
-        slug: "photographer", 
+        name: "Marceneiro", 
+        icon: "fas fa-hammer", 
+        slug: "marceneiro", 
         providerCount: 42,
-        subcategories: ["Eventos", "Produtos", "Arquitetural", "Retratos"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Decorador", 
-        icon: "fas fa-paint-brush", 
-        slug: "decorator", 
-        providerCount: 38,
-        subcategories: ["Design de Interiores", "Ambientação", "Móveis Planejados", "Feng Shui"]
+        planType: "CPF",
+        subcategories: ["Móveis Planejados", "Móveis Sob Medida", "Reparos", "Restauração"]
       },
       { 
         id: randomUUID(), 
         name: "Limpeza", 
         icon: "fas fa-broom", 
-        slug: "cleaning", 
+        slug: "limpeza", 
         providerCount: 124,
-        subcategories: ["Limpeza Residencial", "Limpeza Pós-Obra", "Limpeza de Vidros", "Impermeabilização"]
+        planType: "CPF",
+        subcategories: ["Limpeza Residencial", "Limpeza Pós-Obra", "Limpeza de Vidros", "Diarista"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Jardinagem", 
+        icon: "fas fa-leaf", 
+        slug: "jardinagem", 
+        providerCount: 95,
+        planType: "CPF",
+        subcategories: ["Paisagismo", "Manutenção", "Poda", "Irrigação"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Ar Condicionado", 
+        icon: "fas fa-snowflake", 
+        slug: "ar-condicionado", 
+        providerCount: 167,
+        planType: "CPF",
+        subcategories: ["Instalação", "Manutenção", "Reparo", "Limpeza"]
+      },
+      { 
+        id: randomUUID(), 
+        name: "Dedetização", 
+        icon: "fas fa-bug", 
+        slug: "dedetizacao", 
+        providerCount: 76,
+        planType: "CPF",
+        subcategories: ["Controle de Pragas", "Desinsetização", "Desratização", "Descupinização"]
       },
       { 
         id: randomUUID(), 
         name: "Segurança", 
         icon: "fas fa-shield-alt", 
-        slug: "security", 
+        slug: "seguranca", 
         providerCount: 73,
-        subcategories: ["Câmeras de Segurança", "Sistemas de Alarme", "Portaria Eletrônica", "Controle de Acesso"]
+        planType: "CPF",
+        subcategories: ["Câmeras", "Alarmes", "Cercas Elétricas", "Monitoramento"]
       },
       { 
         id: randomUUID(), 
-        name: "Jardinagem", 
-        icon: "fas fa-seedling", 
-        slug: "gardening", 
-        providerCount: 95,
-        subcategories: ["Paisagismo", "Manutenção de Jardins", "Irrigação", "Poda de Árvores"]
-      },
-      { 
-        id: randomUUID(), 
-        name: "Reforma", 
+        name: "Assistência Técnica", 
         icon: "fas fa-tools", 
-        slug: "renovation", 
-        providerCount: 167,
-        subcategories: ["Reforma Completa", "Ampliação", "Cozinha e Banheiro", "Fachadas"]
+        slug: "assistencia-tecnica", 
+        providerCount: 145,
+        planType: "CPF",
+        subcategories: ["Eletrodomésticos", "Eletrônicos", "Celulares", "Informática"]
       },
       { 
         id: randomUUID(), 
-        name: "Arquitetura", 
-        icon: "fas fa-drafting-compass", 
-        slug: "architecture", 
-        providerCount: 29,
-        subcategories: ["Projetos Residenciais", "Projetos Comerciais", "Regularização", "Aprovação de Obras"]
+        name: "Serralheria", 
+        icon: "fas fa-industry", 
+        slug: "serralheria", 
+        providerCount: 89,
+        planType: "CPF",
+        subcategories: ["Portões", "Grades", "Estruturas Metálicas", "Soldas"]
       },
       { 
         id: randomUUID(), 
         name: "Mudanças", 
         icon: "fas fa-truck", 
-        slug: "moving", 
+        slug: "mudancas", 
         providerCount: 81,
+        planType: "CPF",
         subcategories: ["Mudanças Residenciais", "Mudanças Comerciais", "Transporte de Móveis", "Embalagem"]
       },
-      // Categoria consolidada para o setor imobiliário (CNPJ)
+    ];
+
+    // CATEGORIA PARA PLANOS CNPJ (HIVE GOLD R$ 59/mês) - Categoria imobiliária exclusiva
+    const cnpjCategories: ServiceCategory[] = [
       { 
         id: randomUUID(), 
         name: "Imobiliária", 
         icon: "fas fa-building", 
         slug: "imobiliaria", 
         providerCount: 245,
+        planType: "CNPJ",
         subcategories: [
           "Imóveis Residenciais",
           "Imóveis Comerciais", 
@@ -512,7 +537,10 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    categories.forEach(category => {
+    // Combinar todas as categorias
+    const allCategories = [...cpfCategories, ...cnpjCategories];
+    
+    allCategories.forEach(category => {
       this.serviceCategories.set(category.id, category);
     });
 

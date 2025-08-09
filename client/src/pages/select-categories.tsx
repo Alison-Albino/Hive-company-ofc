@@ -207,13 +207,13 @@ export default function SelectCategories() {
 
   const isBusinessPlan = user?.planType === 'B' || user?.providerPlan === 'B';
   const availableCategories = categories?.filter(category => {
-    // Para planos CNPJ, mostrar todas as categorias
-    // Para planos CPF, filtrar categorias básicas
+    // Para planos CNPJ, mostrar todas as categorias (CPF + CNPJ)
+    // Para planos CPF, mostrar apenas categorias CPF (não pode ver imobiliária)
     if (isBusinessPlan) {
-      return true;
+      return true; // CNPJ vê todas as categorias
     } else {
-      // CPF só vê categorias de serviços básicos (exclui apenas a categoria imobiliária)
-      return category.slug !== 'imobiliaria';
+      // CPF só vê categorias básicas de serviços (sem imobiliária)
+      return category.planType === 'CPF' || category.slug !== 'imobiliaria';
     }
   }) || [];
 

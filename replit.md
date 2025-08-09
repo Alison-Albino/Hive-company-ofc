@@ -25,20 +25,23 @@ The application uses a modern full-stack architecture with React frontend, Expre
   - Improved error handling for payment processing
 - **Platform Policy Enforcement**: Complete removal of direct contact methods ensures all communication flows through Hive marketplace
 
-### Enhanced Category System with Subcategories (January 2025)
-- **Consolidated Category Structure**: Single category approach implemented:
-  - 13 basic service categories for CPF plans (BE HIVE)
-  - 1 consolidated "Imobiliária" category exclusive to CNPJ plans (HIVE GOLD)
-  - Each category has 4-10 specific subcategories for specialization
+### Enhanced Category System with Plan-Based Access Control (January 2025)
+- **Clear Plan-Based Category Separation**: Logical category organization:
+  - **CPF Plans (BE HIVE R$ 29/mês)**: 13 service categories with planType="CPF"
+    * Eletricista, Encanador, Pintor, Pedreiro, Marceneiro, Limpeza, Jardinagem
+    * Ar Condicionado, Dedetização, Segurança, Assistência Técnica, Serralheria, Mudanças
+  - **CNPJ Plans (HIVE GOLD R$ 59/mês)**: All CPF categories PLUS exclusive "Imobiliária" category
+    * Single consolidated "Imobiliária" category with planType="CNPJ"
+    * 10 real estate subcategories (Residenciais, Comerciais, Incorporação, etc.)
 - **Subcategory Selection System**: Advanced provider configuration:
   - Providers select 1 main category and 1-3 subcategories
   - Mandatory biography field (minimum requirements)
   - Optional profile image upload
   - Optional portfolio images (up to 5 images)
-- **Plan-Based Filtering**: Intelligent category access control:
-  - CPF users see all service categories except "Imobiliária"
-  - CNPJ users get full access including the comprehensive "Imobiliária" category
-  - Backend validation ensures plan compliance
+- **Plan-Based Filtering**: Strict access control implementation:
+  - CPF users see ONLY categories with planType="CPF" (13 service categories)
+  - CNPJ users see ALL categories (13 CPF service categories + 1 CNPJ imobiliária)
+  - Frontend and backend validation ensures plan compliance
 
 ## User Preferences
 
