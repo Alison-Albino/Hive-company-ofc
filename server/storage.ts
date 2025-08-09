@@ -1343,19 +1343,23 @@ export class MemStorage implements IStorage {
     if (profileData.name) user.name = profileData.name;
     if (profileData.email) user.email = profileData.email;
 
-    // For now, return the updated user with additional profile data
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      userType: user.userType,
-      isActive: user.isActive,
-      ...profileData,
-      completionPercentage: user.userType === 'provider' ? 75 : 65,
-      planStatus: user.userType === 'provider' ? 'active' : undefined,
-      isVerified: user.userType === 'provider',
-      documentsVerified: false,
-    };
+    // Update provider data if exists
+    if (user.userType === 'provider' && user.providerId) {
+      const provider = this.serviceProviders.get(user.providerId);
+      if (provider) {
+        if (profileData.speciality) provider.speciality = profileData.speciality;
+        if (profileData.description) provider.description = profileData.description;
+        if (profileData.location) provider.location = profileData.location;
+        if (profileData.phone) provider.phone = profileData.phone;
+        if (profileData.imageUrl) provider.imageUrl = profileData.imageUrl;
+        if (profileData.categories) provider.categories = profileData.categories;
+        if (profileData.documentType) provider.documentType = profileData.documentType;
+        if (profileData.documentNumber) provider.documentNumber = profileData.documentNumber;
+      }
+    }
+
+    // Return updated auth user
+    return this.buildAuthUser(user);
   }
 
   async upgradeToProvider(userId: string, providerData: any): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
@@ -1570,6 +1574,34 @@ export class MemStorage implements IStorage {
     return property;
   }
 
+  private calculateCompletionPercentage(user: SimpleUser, provider?: ServiceProvider): number {
+    if (user.userType === 'viewer') {
+      // For viewers: basic profile completion
+      const fields = [
+        user.name,
+        user.email,
+      ];
+      const filledFields = fields.filter(field => field && field.trim().length > 0).length;
+      return Math.round((filledFields / fields.length) * 100);
+    }
+    
+    // For providers: comprehensive profile completion
+    const fields = [
+      user.name,
+      user.email,
+      provider?.speciality,
+      provider?.description,
+      provider?.documentType,
+      provider?.documentNumber,
+      provider?.location,
+      provider?.imageUrl,
+      provider?.phone,
+      provider?.categories?.length ? 'has_categories' : null,
+    ];
+    const filledFields = fields.filter(field => field && (typeof field === 'string' ? field.trim().length > 0 : true)).length;
+    return Math.round((filledFields / fields.length) * 100);
+  }
+
   private async buildAuthUser(user: SimpleUser): Promise<AuthUser> {
     const provider = user.providerId ? this.serviceProviders.get(user.providerId) : undefined;
     
@@ -1583,7 +1615,7 @@ export class MemStorage implements IStorage {
       planType: provider?.planType as "A" | "B" || undefined,
       planStatus: provider?.planActive ? "active" : (user.userType === "provider" ? "inactive" : undefined),
       isVerified: provider?.verified || false,
-      completionPercentage: provider ? 65 : 30,
+      completionPercentage: this.calculateCompletionPercentage(user, provider),
       documentsVerified: false,
     };
 
