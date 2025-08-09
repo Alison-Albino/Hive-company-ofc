@@ -2,7 +2,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { User, LogOut, LogIn } from "lucide-react";
+import { User, LogOut, LogIn, Home } from "lucide-react";
+import { Link } from "wouter";
 
 export function AuthStatus() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -40,7 +41,9 @@ export function AuthStatus() {
       <PopoverContent className="w-80" align="end">
         <div className="space-y-3">
           <div>
-            <p className="font-medium">{user?.name}</p>
+            <Link href="/dashboard" className="hover:text-amber-600 transition-colors">
+              <p className="font-medium cursor-pointer">{user?.name}</p>
+            </Link>
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
           
@@ -69,6 +72,12 @@ export function AuthStatus() {
           )}
 
           <div className="space-y-2 pt-2 border-t">
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link href="/dashboard">
+                <Home className="w-4 h-4 mr-2" />
+                Meu Dashboard
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" className="w-full" asChild>
               <a href="/auth-test">Status de Autenticação</a>
             </Button>
