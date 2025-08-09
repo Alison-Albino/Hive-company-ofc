@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logoPath from "@assets/logo hive_1754700716189.png";
-import heroBackground from "@assets/hero-background.svg";
 
 export default function HeroSection() {
   const [location, setLocation] = useState("");
@@ -16,12 +15,12 @@ export default function HeroSection() {
 
   return (
     <section className="relative py-20 lg:py-32" style={{
-        backgroundImage: `url(${heroBackground})`,
+        backgroundImage: `url(https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=1)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}>
-      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="absolute inset-0 bg-black/50"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="flex flex-col items-center mb-8">
           <img 
