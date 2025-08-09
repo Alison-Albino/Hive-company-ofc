@@ -32,11 +32,6 @@ export default function ChatManager() {
   const [unreadCount, setUnreadCount] = useState(0);
   const { isChatPageOpen } = useChatContext();
 
-  // Não renderizar popups se a página de chat estiver aberta
-  if (isChatPageOpen) {
-    return null;
-  }
-
   // Buscar contagem de notificações não lidas
   const { data: notificationData } = useQuery({
     queryKey: ['/api', 'notifications', 'count'],
@@ -151,6 +146,11 @@ export default function ChatManager() {
       }));
     }
   }, [chatState.persistedChats]);
+
+  // Não renderizar popups se a página de chat estiver aberta
+  if (isChatPageOpen) {
+    return null;
+  }
 
   return (
     <>
