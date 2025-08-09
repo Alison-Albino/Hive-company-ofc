@@ -136,11 +136,15 @@ export default function Checkout() {
   const [location] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
   const { toast } = useToast();
-  const planType = new URLSearchParams(location.split('?')[1] || '').get('plan') || 'A';
+  
+  // Usar window.location.search para capturar os parâmetros corretamente
+  const searchParams = new URLSearchParams(window.location.search);
+  const planType = searchParams.get('plan') || 'A';
   
   // Debug para verificar o parâmetro do plano
   console.log('URL atual:', location);
-  console.log('Parâmetros da URL:', new URLSearchParams(location.split('?')[1] || ''));
+  console.log('window.location.search:', window.location.search);
+  console.log('Parâmetros da URL:', searchParams);
   console.log('Tipo de plano extraído:', planType);
 
   useEffect(() => {
