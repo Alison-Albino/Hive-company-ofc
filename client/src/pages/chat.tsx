@@ -96,13 +96,8 @@ export default function ChatPage() {
     }
   });
 
-  // Auto scroll para última mensagem apenas quando nova mensagem é enviada (não ao selecionar conversa)
-  useEffect(() => {
-    // Só faz scroll automático se uma mensagem foi enviada recentemente
-    if (messages.length > 0 && sendMessageMutation.isSuccess) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages.length, sendMessageMutation.isSuccess]);
+  // Remover scroll automático para evitar rolagem da página toda
+  // O usuário pode rolar manualmente se necessário
 
   // Filtrar conversas por busca
   const filteredConversations = conversations.filter(conv =>
