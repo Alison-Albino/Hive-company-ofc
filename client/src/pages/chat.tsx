@@ -85,14 +85,23 @@ export default function ChatPage() {
     },
     onSuccess: () => {
       setNewMessage('');
-      queryClient.invalidateQueries({ queryKey: ['/api', 'chat'] });
+      // Apenas invalidar as mensagens da conversa específica para evitar duplicações
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations', selectedConversation, 'messages'] 
+      });
+      // Invalidar a lista de conversas para atualizar última mensagem
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api', 'chat', 'conversations'] 
+      });
     }
   });
 
-  // Auto scroll para última mensagem
+  // Auto scroll para última mensagem apenas quando a conversa muda ou nova mensagem é enviada
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (selectedConversation && messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedConversation, messages.length]);
 
   // Filtrar conversas por busca
   const filteredConversations = conversations.filter(conv =>
@@ -135,8 +144,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="flex h-screen">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      <div className="flex h-full">
         {/* Sidebar - Lista de Conversas */}
         <div className={`${selectedConversation ? 'hidden lg:flex' : 'flex'} w-full lg:w-80 flex-col bg-white dark:bg-gray-800 border-r`}>
           {/* Header da Sidebar */}
@@ -234,7 +243,7 @@ export default function ChatPage() {
         </div>
 
         {/* Área de Chat Principal */}
-        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800`}>
+        <div className={`${selectedConversation ? 'flex' : 'hidden lg:flex'} flex-1 flex-col bg-white dark:bg-gray-800 h-full`}>
           {selectedConversation && selectedConvData ? (
             <>
               {/* Header do Chat */}
@@ -300,66 +309,81 @@ export default function ChatPage() {
               </div>
 
               {/* Área de Mensagens */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-[70%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
-                        <div
-                          className={`p-3 rounded-2xl ${
-                            message.sender === 'user'
-                              ? 'bg-hive-gold text-white rounded-br-md'
-                              : message.sender === 'assistant'
-                              ? 'bg-blue-100 text-blue-900 rounded-bl-md'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
-                          }`}
-                        >
-                          <p className="text-sm">{message.message}</p>
-                        </div>
-                        <div className={`flex items-center mt-1 space-x-1 ${
-                          message.sender === 'user' ? 'justify-end' : 'justify-start'
-                        }`}>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatTime(message.timestamp)}
-                          </span>
-                          {message.sender === 'user' && (
-                            <div className="text-gray-500">
-                              {message.isRead ? (
-                                <CheckCheck className="w-3 h-3 text-blue-500" />
-                              ) : (
-                                <Check className="w-3 h-3" />
-                              )}
-                            </div>
-                          )}
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-4 min-h-full">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[70%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
+                          <div
+                            className={`p-3 rounded-2xl ${
+                              message.sender === 'user'
+                                ? 'bg-hive-gold text-white rounded-br-md'
+                                : message.sender === 'assistant'
+                                ? 'bg-blue-100 text-blue-900 rounded-bl-md'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
+                            }`}
+                          >
+                            <p className="text-sm">{message.message}</p>
+                          </div>
+                          <div className={`flex items-center mt-1 space-x-1 ${
+                            message.sender === 'user' ? 'justify-end' : 'justify-start'
+                          }`}>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatTime(message.timestamp)}
+                            </span>
+                            {message.sender === 'user' && (
+                              <div className="text-gray-500">
+                                {message.isRead ? (
+                                  <CheckCheck className="w-3 h-3 text-blue-500" />
+                                ) : (
+                                  <Check className="w-3 h-3" />
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+              </div>
 
-              {/* Área de Input */}
-              <div className="p-4 border-t bg-white dark:bg-gray-800">
-                <div className="flex items-end space-x-2">
-                  <Input
-                    placeholder="Digite uma mensagem..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="flex-1"
-                  />
+              {/* Área de Input - Fixa na parte inferior */}
+              <div className="border-t bg-white dark:bg-gray-800 p-4 flex-shrink-0">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="flex items-center space-x-3"
+                >
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Digite uma mensagem..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="w-full rounded-full border-gray-300 focus:border-hive-gold focus:ring-hive-gold"
+                      disabled={sendMessageMutation.isPending}
+                    />
+                  </div>
                   <Button
-                    onClick={handleSendMessage}
+                    type="submit"
                     disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                    className="bg-hive-gold hover:bg-hive-gold-dark"
+                    className="rounded-full w-10 h-10 p-0 bg-hive-gold hover:bg-hive-gold-dark"
+                    size="sm"
                   >
-                    <Send className="w-4 h-4" />
+                    {sendMessageMutation.isPending ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
                   </Button>
-                </div>
+                </form>
               </div>
             </>
           ) : (
