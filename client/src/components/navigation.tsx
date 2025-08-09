@@ -14,7 +14,6 @@ export default function Navigation() {
     { path: "/", label: "Início" },
     { path: "/properties", label: "Imóveis" },
     { path: "/services", label: "Serviços" },
-    { path: "/dashboard", label: "Dashboard" },
     { path: "/chat", label: "Chat" },
     { path: "/plans", label: "Planos" },
   ];
