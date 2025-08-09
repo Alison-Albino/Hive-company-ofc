@@ -28,7 +28,6 @@ export default function Navigation() {
               className="h-8 w-auto opacity-60 group-hover:opacity-80 transition-all duration-300"
               style={{ filter: 'brightness(0) saturate(100%) invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%)' }}
             />
-            <span className="text-2xl font-bold text-hive-black">Hive</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
