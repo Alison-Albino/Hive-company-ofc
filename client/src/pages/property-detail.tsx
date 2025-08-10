@@ -78,45 +78,57 @@ export default function PropertyDetail() {
 
   const startChatMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/chat/conversations", {
-        providerId: property?.agencyId || "agency-" + property?.id,
+      if (!isAuthenticated) {
+        setLocation('/login');
+        return;
+      }
+      
+      if (!property?.agencyId) {
+        throw new Error("Informações da imobiliária não disponíveis");
+      }
+
+      const response = await apiRequest("POST", "/api/conversations", {
+        participantId: property.agencyId,
+        participantType: "provider",
+        initialMessage: `Olá! Tenho interesse no imóvel "${property.title}" em ${property.location}.`
       });
+      
+      return response.json();
     },
-    onSuccess: (conversation: any) => {
-      window.location.href = `/chat?conversation=${conversation.id}`;
-    },
-    onError: (error: any) => {
-      if (error.message.includes("401") || error.message.includes("Não autorizado")) {
+    onSuccess: (conversation) => {
+      if (conversation) {
         toast({
-          title: "Acesso Restrito",
-          description: "Você precisa fazer login para conversar com imobiliárias.",
-          variant: "destructive",
+          title: "Conversa iniciada!",
+          description: "Você será redirecionado para o chat.",
         });
         setTimeout(() => {
-          setLocation('/auth');
-        }, 1500);
-      } else {
-        toast({
-          title: "Erro",
-          description: "Não foi possível iniciar a conversa. Tente novamente.",
-          variant: "destructive",
-        });
+          setLocation('/chat');
+        }, 1000);
       }
+    },
+    onError: (error) => {
+      console.error("Error starting chat:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível iniciar a conversa. Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
   const handleStartChat = () => {
     if (!isAuthenticated) {
       toast({
-        title: "Login Necessário",
-        description: "Você precisa fazer login para conversar com imobiliárias.",
+        title: "Login necessário",
+        description: "Faça login para conversar com a imobiliária.",
         variant: "destructive",
       });
       setTimeout(() => {
-        setLocation('/auth');
+        setLocation('/login');
       }, 1500);
       return;
     }
+    
     startChatMutation.mutate();
   };
 
@@ -169,9 +181,11 @@ export default function PropertyDetail() {
   }
 
   const formatPrice = (price: string, type: string) => {
-    const formatted = new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(parseFloat(price));
     
     if (type === "rent") return `${formatted}/mês`;
