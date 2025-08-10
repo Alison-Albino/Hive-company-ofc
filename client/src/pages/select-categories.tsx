@@ -69,22 +69,33 @@ export default function SelectCategories() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({
         title: "Configuração Concluída!",
         description: "Seu perfil de prestador foi configurado com sucesso.",
       });
       
+      // Atualizar localStorage com dados do usuário
+      if (response.user) {
+        localStorage.setItem("hive_user", JSON.stringify(response.user));
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      
+      // Marcar como definitivamente completado
+      setIsSubmitting(false);
       
       setTimeout(() => {
         setLocation('/dashboard');
       }, 1500);
     },
     onError: (error) => {
+      console.error("Setup error:", error);
+      setIsSubmitting(false);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar as configurações.",
+        description: "Não foi possível salvar as configurações. Tente novamente.",
         variant: "destructive",
       });
     },
@@ -247,14 +258,14 @@ export default function SelectCategories() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-1">
-                      {category.subcategories.slice(0, 3).map((sub) => (
+                      {category.subcategories?.slice(0, 3).map((sub) => (
                         <Badge key={sub} variant="secondary" className="text-xs">
                           {sub}
                         </Badge>
                       ))}
-                      {category.subcategories.length > 3 && (
+                      {(category.subcategories?.length || 0) > 3 && (
                         <Badge variant="secondary" className="text-xs">
-                          +{category.subcategories.length - 3} mais
+                          +{(category.subcategories?.length || 0) - 3} mais
                         </Badge>
                       )}
                     </div>
@@ -292,7 +303,7 @@ export default function SelectCategories() {
                     Subcategorias de Especialização
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {selectedCategory.subcategories.map((subcategory) => (
+                    {selectedCategory.subcategories?.map((subcategory) => (
                       <div
                         key={subcategory}
                         className={`

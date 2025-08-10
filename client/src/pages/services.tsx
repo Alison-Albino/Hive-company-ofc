@@ -405,14 +405,22 @@ export default function ServicesPage() {
                         </div>
 
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {profile.specialties.slice(0, 3).map((specialty) => (
-                            <Badge key={specialty} variant="secondary" className="text-xs">
-                              {specialty}
-                            </Badge>
-                          ))}
-                          {profile.specialties.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{profile.specialties.length - 3}
+                          {profile.specialties && profile.specialties.length > 0 ? (
+                            <>
+                              {profile.specialties.slice(0, 3).map((specialty) => (
+                                <Badge key={specialty} variant="secondary" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                              {profile.specialties.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{profile.specialties.length - 3}
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            <Badge variant="outline" className="text-xs">
+                              Especialidades não informadas
                             </Badge>
                           )}
                         </div>

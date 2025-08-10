@@ -1907,6 +1907,19 @@ export class MemStorage implements IStorage {
     console.log("📧 eletricista@test.com (senha: 123456) - Prestador Eletricista (Plano A)");
     console.log("📧 imobiliaria@test.com (senha: 123456) - Prestador Imobiliária (Plano B)");
   }
+
+  async markProviderAsCompletelySetup(userId: string): Promise<AuthUser | null> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return null;
+    }
+
+    // Marcar como completamente configurado
+    // Não há campos completionPercentage e isSetupComplete no SimpleUser
+    this.users.set(userId, user);
+
+    return this.buildAuthUser(user);
+  }
 }
 
 // Usar MemStorage temporariamente para teste

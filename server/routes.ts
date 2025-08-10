@@ -453,8 +453,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         portfolioImages: portfolioImages || [],
       });
       
-      // Atualizar categorias do usuário
+      // Atualizar categorias do usuário e marcar como completamente configurado
       const updatedUser = await storage.updateUserCategories(user.id, [category.slug]);
+      
+      // Marcar perfil como completamente configurado para evitar redirecionamento
+      if (updatedUser) {
+        await storage.markProviderAsCompletelySetup(user.id);
+      }
       
       if (!updatedUser) {
         return res.status(404).json({ error: "Usuário não encontrado" });
