@@ -315,7 +315,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: planPrices[planType as keyof typeof planPrices],
           currency: 'brl',
           customer: customer.id,
-          automatic_payment_methods: { enabled: true },
+          automatic_payment_methods: { 
+            enabled: true,
+            allow_redirects: 'always'
+          },
+          payment_method_types: ['card'],
           setup_future_usage: 'off_session',
           metadata: {
             userId: user.id,

@@ -120,7 +120,12 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <PaymentElement 
               options={{
-                layout: 'tabs'
+                layout: 'tabs',
+                wallets: {
+                  applePay: 'auto',
+                  googlePay: 'auto'
+                },
+                paymentMethodOrder: ['card', 'apple_pay', 'google_pay', 'link']
               }}
             />
             <div className="flex items-center gap-2 text-sm text-gray-600">
