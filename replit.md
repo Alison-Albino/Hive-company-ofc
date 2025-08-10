@@ -24,6 +24,10 @@ The application uses a modern full-stack architecture with React frontend, Expre
   - Plan B: "HIVE GOLD" - R$ 59/mês (CNPJ companies)
   - Improved error handling for payment processing
 - **Platform Policy Enforcement**: Complete removal of direct contact methods ensures all communication flows through Hive marketplace
+- **Enhanced Payment Methods**: Stripe configured with automatic payment methods detection:
+  - Supports all available payment methods based on account configuration
+  - Dynamic payment method detection (card, PIX, boleto when enabled)
+  - Improved checkout experience with tabbed layout for multiple options
 
 ### Enhanced Category System with Plan-Based Access Control (January 2025)
 - **Clear Plan-Based Category Separation**: Logical category organization:

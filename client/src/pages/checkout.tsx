@@ -118,7 +118,11 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <PaymentElement />
+            <PaymentElement 
+              options={{
+                layout: 'tabs'
+              }}
+            />
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Shield className="h-4 w-4" />
               <span>Pagamento seguro processado pelo Stripe</span>
