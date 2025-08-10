@@ -15,7 +15,7 @@ import type { ServiceCategory } from "@shared/schema";
 
 export default function SelectCategories() {
   const authState = useAuth();
-  const { user, isAuthenticated, refresh } = authState;
+  const { user, isAuthenticated } = authState;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -26,13 +26,7 @@ export default function SelectCategories() {
   const [portfolioImages, setPortfolioImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Refresh auth data on component mount
-  useEffect(() => {
-    const refreshData = async () => {
-      await refresh();
-    };
-    refreshData();
-  }, [refresh]);
+
 
   // Verificar se o usuário é empresarial - aguardar loading terminar
   useEffect(() => {
@@ -42,31 +36,20 @@ export default function SelectCategories() {
     }
     
     if (!isAuthenticated) {
-      console.log('Not authenticated, redirecting to auth');
       setLocation('/auth');
       return;
     }
     
     if (user?.userType !== "provider" || (!user?.planType && !user?.providerPlan)) {
-      console.log('User access check:', { 
-        userType: user?.userType, 
-        planType: user?.planType, 
-        providerPlan: user?.providerPlan,
-        isLoading: authState.isLoading
+      toast({
+        title: "Acesso Negado",
+        description: "Esta página é apenas para prestadores com plano ativo.",
+        variant: "destructive",
       });
-      
-      // Aguardar um pouco mais para permitir atualização dos dados
-      setTimeout(() => {
-        toast({
-          title: "Acesso Negado",
-          description: "Esta página é apenas para prestadores com plano ativo.",
-          variant: "destructive",
-        });
-        setLocation('/dashboard');
-      }, 2000);
+      setLocation('/dashboard');
       return;
     }
-  }, [user, isAuthenticated, authState.isLoading, setLocation, toast]);
+  }, [user?.userType, user?.planType, user?.providerPlan, isAuthenticated, authState.isLoading]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<ServiceCategory[]>({
     queryKey: ["/api/service-categories"],
