@@ -52,7 +52,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-01-27.acacia",
+  apiVersion: "2025-07-30.basil" as any,
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -315,6 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: planPrices[planType as keyof typeof planPrices],
           currency: 'brl',
           customer: customer.id,
+          payment_method_types: ['card', 'pix', 'boleto'],
           setup_future_usage: 'off_session',
           metadata: {
             userId: user.id,
@@ -431,8 +432,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Validar se as subcategorias pertencem à categoria
-      const invalidSubcategories = subcategories.filter(sub => 
-        !category.subcategories.includes(sub)
+      const invalidSubcategories = subcategories.filter((sub: string) => 
+        !category.subcategories?.includes(sub)
       );
       if (invalidSubcategories.length > 0) {
         return res.status(400).json({ error: "Subcategorias inválidas para esta categoria" });
@@ -450,6 +451,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Atualizar categorias do usuário
       const updatedUser = await storage.updateUserCategories(user.id, [category.slug]);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
       
       // Update session with new user data
       const sessionId = req.headers.authorization?.replace('Bearer ', '');
