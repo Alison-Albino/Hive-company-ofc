@@ -78,7 +78,7 @@ export default function Profile() {
   // Fetch profile data if viewing another user's profile
   const { data: profileData, isLoading: isLoadingProfile } = useQuery({
     queryKey: [`/api/profiles/${profileId}`],
-    enabled: isViewingOtherProfile,
+    enabled: !!isViewingOtherProfile,
   });
   
   // Use the appropriate user data
@@ -843,133 +843,264 @@ export default function Profile() {
     );
   }
 
-  // Render other user's profile (read-only view)
+  // Render other user's profile (read-only view) - Social Media Style
   if (isViewingOtherProfile && currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
-        <div className="container mx-auto p-6">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {currentUser.name || 'Prestador de Serviços'}
-                </h1>
-                <p className="text-gray-600">
-                  {currentUser.description || currentUser.bio || 'Perfil profissional'}
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Button className="bg-amber-500 hover:bg-amber-600">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Iniciar Conversa
-                </Button>
-                <Link href="/services">
-                  <Button variant="outline">
-                    Voltar aos Serviços
-                  </Button>
-                </Link>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
+        {/* Hero Section with Cover Photo */}
+        <div className="relative">
+          {/* Cover Photo */}
+          <div className="h-64 md:h-80 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/20"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+              <div className="container mx-auto">
+                <div className="flex items-end gap-6">
+                  {/* Profile Picture */}
+                  <div className="relative">
+                    <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-1 shadow-xl">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                        {currentUser?.profileImageUrl ? (
+                          <img 
+                            src={currentUser.profileImageUrl} 
+                            alt="Perfil" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-8 h-8 md:w-12 md:h-12 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+                    {currentUser?.documentsVerified && (
+                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Name and Basic Info */}
+                  <div className="flex-1 text-white mb-2">
+                    <h1 className="text-2xl md:text-4xl font-bold drop-shadow-lg">
+                      {currentUser?.name || 'Prestador de Serviços'}
+                    </h1>
+                    <p className="text-lg md:text-xl text-amber-100 drop-shadow">
+                      {currentUser?.categories?.[0] || 'Profissional'}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-amber-100">{currentUser?.city}, {currentUser?.state}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          
+          {/* Action Buttons */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            <Link href="/services">
+              <Button variant="secondary" size="sm" className="bg-white/90 hover:bg-white">
+                Voltar aos Serviços
+              </Button>
+            </Link>
+          </div>
+        </div>
 
-          {/* Profile info cards */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Informações do Prestador
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                    {currentUser.profileImageUrl ? (
-                      <img 
-                        src={currentUser.profileImageUrl} 
-                        alt="Perfil" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-8 h-8 text-gray-400" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{currentUser.name}</h3>
-                    <p className="text-gray-600">{currentUser.city}, {currentUser.state}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{currentUser.city}, {currentUser.state}</span>
-                  </div>
-                  {currentUser.documentsVerified && (
-                    <Badge variant="default" className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Verificado
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Categories */}
-            {currentUser.categories && currentUser.categories.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Categorias e Especialidades</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Categoria Principal</Label>
-                      <div className="mt-2">
-                        <Badge variant="default">{currentUser.categories[0]}</Badge>
-                      </div>
-                    </div>
-                    
-                    {currentUser.subcategories && currentUser.subcategories.length > 0 && (
-                      <div>
-                        <Label>Especialidades</Label>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {currentUser.subcategories.map((sub, index) => (
-                            <Badge key={index} variant="outline">{sub}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+        {/* Main Content */}
+        <div className="container mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Profile Info */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Contact Action */}
+              <Card className="border-amber-200 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white shadow-lg">
+                    <Phone className="w-5 h-5 mr-2" />
+                    Entrar em Contato
+                  </Button>
+                  <p className="text-sm text-gray-600 mt-3">
+                    Primeiro contato exclusivo via Hive
+                  </p>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Portfolio */}
-            {currentUser.portfolioImages && currentUser.portfolioImages.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Camera className="w-5 h-5" />
-                    Portfólio de Trabalhos
+              {/* About Section */}
+              {(currentUser?.description || currentUser?.bio) ? (
+                <Card className="border-amber-200 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <FileText className="w-5 h-5 text-amber-600" />
+                      Sobre
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-gray-700 leading-relaxed">
+                      {currentUser?.description || currentUser?.bio}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : null}
+
+              {/* Specialties */}
+              {currentUser?.subcategories && currentUser.subcategories.length > 0 && (
+                <Card className="border-amber-200 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Badge className="w-5 h-5 text-amber-600" />
+                      Especialidades
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex flex-wrap gap-2">
+                      {currentUser.subcategories.map((sub: string, index: number) => (
+                        <Badge 
+                          key={index} 
+                          variant="outline" 
+                          className="border-amber-300 text-amber-700 bg-amber-50"
+                        >
+                          {sub}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Professional Info */}
+              <Card className="border-amber-200 shadow-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <User className="w-5 h-5 text-amber-600" />
+                    Informações Profissionais
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {currentUser.portfolioImages.map((image, index) => (
-                      <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={image} 
-                          alt={`Trabalho ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
+                <CardContent className="pt-0 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Categoria:</span>
+                    <Badge variant="default" className="bg-amber-100 text-amber-800 border-amber-300">
+                      {currentUser?.categories?.[0] || 'Profissional'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Tipo de Conta:</span>
+                    <Badge variant="outline" className="border-amber-300">
+                      {currentUser?.planType === 'B' ? 'CNPJ Empresarial' : 'CPF Individual'}
+                    </Badge>
+                  </div>
+                  {currentUser?.businessHours && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Horário:</span>
+                      <span className="text-sm text-gray-800">{currentUser.businessHours}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column - Portfolio and Gallery */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Portfolio Gallery */}
+              {currentUser?.portfolioImages && currentUser.portfolioImages.length > 0 ? (
+                <Card className="border-amber-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <Camera className="w-6 h-6 text-amber-600" />
+                      Portfólio de Trabalhos
+                      <Badge variant="secondary" className="ml-auto">
+                        {currentUser.portfolioImages.length} {currentUser.portfolioImages.length === 1 ? 'foto' : 'fotos'}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {currentUser.portfolioImages.map((image: string, index: number) => (
+                        <div 
+                          key={index} 
+                          className="aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                        >
+                          <img 
+                            src={image} 
+                            alt={`Trabalho ${index + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-center text-gray-600 mt-4 text-sm">
+                      Clique nas imagens para visualizar em tamanho maior
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-amber-200 shadow-lg">
+                  <CardContent className="p-12 text-center">
+                    <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Portfólio em Construção
+                    </h3>
+                    <p className="text-gray-500">
+                      O prestador ainda não adicionou fotos dos seus trabalhos
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Stats/Achievements Section */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border-amber-200 shadow-lg text-center">
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-amber-600">
+                      {currentUser?.documentsVerified ? '✓' : '⏳'}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {currentUser?.documentsVerified ? 'Verificado' : 'Em Análise'}
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-amber-200 shadow-lg text-center">
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-amber-600">
+                      {currentUser?.portfolioImages?.length || 0}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">Trabalhos</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-amber-200 shadow-lg text-center">
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-amber-600">
+                      {currentUser?.subcategories?.length || 0}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">Especialidades</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-amber-200 shadow-lg text-center">
+                  <CardContent className="p-4">
+                    <div className="text-2xl font-bold text-amber-600">⭐</div>
+                    <p className="text-sm text-gray-600 mt-1">Profissional</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Contact Information */}
+              <Card className="border-amber-200 shadow-lg bg-gradient-to-r from-amber-50 to-orange-50">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                      Interessado nos serviços?
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Entre em contato através da plataforma Hive para garantir segurança e qualidade
+                    </p>
+                    <Button className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 text-lg shadow-lg">
+                      <Phone className="w-5 h-5 mr-2" />
+                      Iniciar Conversa Agora
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,21 @@ The application uses a modern full-stack architecture with React frontend, Expre
 
 ## Recent Changes (January 2025)
 
+### Sistema de Perfis Profissionais Estilo Rede Social (Janeiro 2025)
+- **Perfil Público Completo**: Visualização de perfis de prestadores totalmente reformulada estilo rede social
+  - Hero section com foto de capa em gradiente dourado e foto de perfil circular destacada
+  - Layout em colunas: sidebar com informações essenciais e área principal com portfólio
+  - Seção "Sobre" personalizada com biografia do prestador
+  - Grid de especialidades com badges coloridos em tema dourado
+  - Galeria de portfólio com hover effects e contador de trabalhos
+  - Cards de estatísticas (verificação, trabalhos, especialidades)
+  - Área de contato destacada com call-to-action para iniciar conversa
+- **Correção Crítica de Redirecionamento**: Resolvido bug onde "Ver perfil" direcionava incorretamente
+  - ProfilePage agora usa hook useRoute para capturar parâmetro profileId da URL
+  - Sistema diferencia entre visualizar próprio perfil (editável) vs perfil de terceiros (read-only)
+  - Endpoint /api/profiles/:id integrado corretamente para buscar dados de outros usuários
+  - Experiência visual distinta para visualização vs edição de perfis
+
 ### Correção do Sistema de Progressão de Perfil (Janeiro 2025)
 - **Bug Crítico Corrigido**: Sistema de progressão de perfil não detectava corretamente campos preenchidos
   - Critério de mudança de onboarding para dashboard alterado de completionPercentage < 80% para verificação de categories
