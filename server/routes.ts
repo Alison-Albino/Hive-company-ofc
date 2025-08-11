@@ -319,7 +319,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             enabled: true,
             allow_redirects: 'always'
           },
-          payment_method_types: ['card'],
           setup_future_usage: 'off_session',
           metadata: {
             userId: user.id,

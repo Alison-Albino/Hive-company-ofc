@@ -8,6 +8,26 @@ The application uses a modern full-stack architecture with React frontend, Expre
 
 ## Recent Changes (January 2025)
 
+### Sistema de Controle de Assinatura Implementado (Janeiro 2025)
+- **Sistema Completo de Assinatura**: Controle total do ciclo de vida das assinaturas:
+  - Duração fixa de 30 dias para ambos os planos (BE HIVE R$ 29 e HIVE GOLD R$ 59)
+  - Período de cancelamento gratuito de 7 dias após criação da assinatura
+  - Integração completa com Stripe para processamento de pagamentos
+  - Criação automática de registro de assinatura após pagamento bem-sucedido
+- **Dashboard de Assinatura**: Página dedicada `/subscription` para gerenciamento:
+  - Visualização detalhada do status da assinatura ativa
+  - Informações de duração, renovação e elegibilidade para cancelamento
+  - Funcionalidade de cancelamento dentro do período permitido
+  - Histórico completo de assinaturas anteriores
+- **Backend Storage Completo**: Métodos implementados para:
+  - Criação e gerenciamento de assinaturas com status e datas
+  - Verificação de elegibilidade para cancelamento baseada em períodos
+  - Registro de histórico de pagamentos integrado ao Stripe
+  - Ativação/desativação automática de planos de prestadores
+- **Correção de Conflitos Stripe**: Resolvido erro de configuração que impedia pagamentos
+  - Removido conflito entre `automatic_payment_methods` e `payment_method_types`
+  - Sistema de checkout totalmente operacional com todos os métodos de pagamento
+
 ### Complete Implementation of Hive-First Contact Policy
 - **Mandatory Chat Platform**: All user contact now exclusively through Hive platform:
   - Removed all phone numbers and email addresses from provider profiles and property listings
@@ -72,11 +92,13 @@ Language: Portuguese (Brazil) - All interface messages and content should be in 
 
 ### Database Design
 - **ORM**: Drizzle ORM with PostgreSQL dialect
-- **Schema**: Four main entities:
+- **Schema**: Six main entities:
   - **Properties**: Real estate listings with pricing, location, amenities, and agency information
   - **Service Providers**: Professional service providers with ratings, categories, and portfolio
   - **Service Categories**: 14 total categories (13 basic services + 1 consolidated imobiliária) with subcategories and provider counts
   - **Plans**: Subscription plans for different user types (CPF individuals vs CNPJ companies)
+  - **Subscriptions**: Complete subscription management with 30-day duration and 7-day cancellation window
+  - **Payment History**: Transaction records integrated with Stripe payment processing
 
 ### Component Architecture
 - **Design System**: Consistent component library with variants and proper TypeScript support
