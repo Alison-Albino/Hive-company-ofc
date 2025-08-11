@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create payment intent for subscription
       try {
-        const paymentIntent = await stripe.paymentIntents.create({
+        const paymentIntentConfig = {
           amount: planPrices[planType as keyof typeof planPrices],
           currency: 'brl',
           customer: customer.id,
@@ -321,7 +321,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             planType: planType,
             subscription: 'true',
           },
-        });
+        };
+        
+        console.log('Creating PaymentIntent with config:', JSON.stringify(paymentIntentConfig, null, 2));
+        
+        const paymentIntent = await stripe.paymentIntents.create(paymentIntentConfig);
 
         res.json({
           clientSecret: paymentIntent.client_secret,
