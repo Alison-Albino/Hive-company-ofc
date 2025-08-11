@@ -68,7 +68,9 @@ export interface AuthUser {
   state?: string;
   zipCode?: string;
   profileImage?: string;
+  profileImageUrl?: string;
   portfolioImages?: string[];
+  bio?: string;
   businessHours?: string;
   rating?: string;
   reviewCount?: number;

@@ -24,7 +24,8 @@ import {
   AlertCircle,
   Upload,
   Save,
-  Eye
+  Eye,
+  X
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +66,8 @@ export default function Profile() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [profileImage, setProfileImage] = useState(user?.profileImageUrl || "");
+  const [portfolioImages, setPortfolioImages] = useState(user?.portfolioImages || []);
 
   const viewerForm = useForm<ViewerProfileData>({
     resolver: zodResolver(viewerProfileSchema),
@@ -91,12 +94,83 @@ export default function Profile() {
       city: user?.city || "",
       state: user?.state || "",
       zipCode: user?.zipCode || "",
-      description: user?.description || "",
+      description: user?.description || user?.bio || "",
       businessHours: user?.businessHours || "",
-      documentType: (user?.documentType as "CPF" | "CNPJ") || "CPF",
+      documentType: (user?.documentType as "CPF" | "CNPJ") || (user?.planType === "B" ? "CNPJ" : "CPF"),
       documentNumber: user?.documentNumber || "",
     },
   });
+
+  // Update form when user data changes
+  useEffect(() => {
+    if (user) {
+      providerForm.reset({
+        name: user.name || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        city: user.city || "",
+        state: user.state || "",
+        zipCode: user.zipCode || "",
+        description: user.description || user.bio || "",
+        businessHours: user.businessHours || "",
+        documentType: (user.documentType as "CPF" | "CNPJ") || (user.planType === "B" ? "CNPJ" : "CPF"),
+        documentNumber: user.documentNumber || "",
+      });
+      setProfileImage(user.profileImageUrl || "");
+      setPortfolioImages(user.portfolioImages || []);
+    }
+  }, [user]);
+
+  // Handle profile image upload
+  const handleProfileImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        // TODO: Upload to server
+        toast({
+          title: "Foto de perfil alterada",
+          description: "Sua nova foto será salva quando você salvar o perfil",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle portfolio image upload
+  const handlePortfolioImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && portfolioImages.length < 10) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setPortfolioImages(prev => [...prev, result]);
+        toast({
+          title: "Foto adicionada ao portfólio",
+          description: "A foto será salva quando você salvar o perfil",
+        });
+      };
+      reader.readAsDataURL(file);
+    } else if (portfolioImages.length >= 10) {
+      toast({
+        title: "Limite atingido",
+        description: "Você pode adicionar no máximo 10 fotos ao portfólio",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Remove portfolio image
+  const removePortfolioImage = (index: number) => {
+    setPortfolioImages(prev => prev.filter((_, i) => i !== index));
+    toast({
+      title: "Foto removida",
+      description: "A foto foi removida do seu portfólio",
+    });
+  };
 
   if (!isAuthenticated || !user) {
     return (
@@ -145,7 +219,13 @@ export default function Profile() {
   const onProviderSubmit = async (data: ProviderProfileData) => {
     setIsLoading(true);
     try {
-      const res = await apiRequest("PUT", "/api/profile", data);
+      const profileData = {
+        ...data,
+        profileImageUrl: profileImage,
+        portfolioImages: portfolioImages,
+      };
+      
+      const res = await apiRequest("PUT", "/api/profile", profileData);
       const response = await res.json();
       
       if (response.success) {
@@ -524,9 +604,9 @@ export default function Profile() {
                 <Label>Foto de Perfil</Label>
                 <div className="mt-2 flex items-center gap-4">
                   <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                    {user.profileImage ? (
+                    {profileImage ? (
                       <img 
-                        src={user.profileImage} 
+                        src={profileImage} 
                         alt="Perfil" 
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -534,23 +614,65 @@ export default function Profile() {
                       <User className="w-8 h-8 text-gray-400" />
                     )}
                   </div>
-                  <Button variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Alterar Foto
-                  </Button>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfileImageUpload}
+                      className="hidden"
+                      id="profile-image-upload"
+                    />
+                    <label htmlFor="profile-image-upload">
+                      <Button variant="outline" asChild>
+                        <span className="cursor-pointer">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Alterar Foto
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <Label>Portfólio (até 10 fotos)</Label>
+                <Label>Portfólio (até 10 fotos) - {portfolioImages.length}/10</Label>
                 <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                      <Button variant="ghost" size="sm">
-                        <Upload className="w-4 h-4" />
+                  {portfolioImages.map((image, index) => (
+                    <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      <img 
+                        src={image} 
+                        alt={`Portfólio ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 w-6 h-6 p-0"
+                        onClick={() => removePortfolioImage(index)}
+                      >
+                        <X className="w-3 h-3" />
                       </Button>
                     </div>
                   ))}
+                  {portfolioImages.length < 10 && (
+                    <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePortfolioImageUpload}
+                        className="hidden"
+                        id="portfolio-image-upload"
+                      />
+                      <label htmlFor="portfolio-image-upload">
+                        <Button variant="ghost" size="sm" asChild>
+                          <span className="cursor-pointer flex flex-col items-center gap-2">
+                            <Upload className="w-4 h-4" />
+                            <span className="text-xs">Adicionar</span>
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
                   Adicione fotos dos seus trabalhos para mostrar a qualidade dos seus serviços

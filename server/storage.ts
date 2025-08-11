@@ -83,6 +83,18 @@ interface SimpleUser {
   providerId?: string;
   providerPlan?: string;
   categories?: string[];
+  subcategories?: string[];
+  profileImageUrl?: string;
+  portfolioImages?: string[];
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  phoneNumber?: string;
+  businessHours?: string;
+  bio?: string;
+  documentType?: string;
+  documentNumber?: string;
 }
 
 export class MemStorage implements IStorage {
@@ -1547,6 +1559,17 @@ export class MemStorage implements IStorage {
     // Update basic user data
     if (profileData.name) user.name = profileData.name;
     if (profileData.email) user.email = profileData.email;
+    if (profileData.profileImageUrl) user.profileImageUrl = profileData.profileImageUrl;
+    if (profileData.address) user.address = profileData.address;
+    if (profileData.city) user.city = profileData.city;
+    if (profileData.state) user.state = profileData.state;
+    if (profileData.zipCode) user.zipCode = profileData.zipCode;
+    if (profileData.phoneNumber) user.phoneNumber = profileData.phoneNumber;
+    if (profileData.businessHours) user.businessHours = profileData.businessHours;
+    if (profileData.description) user.bio = profileData.description;
+    if (profileData.documentType) user.documentType = profileData.documentType;
+    if (profileData.documentNumber) user.documentNumber = profileData.documentNumber;
+    if (profileData.portfolioImages) user.portfolioImages = profileData.portfolioImages;
 
     // Update provider data if exists
     if (user.userType === 'provider' && user.providerId) {
@@ -1555,11 +1578,12 @@ export class MemStorage implements IStorage {
         if (profileData.speciality) provider.speciality = profileData.speciality;
         if (profileData.description) provider.description = profileData.description;
         if (profileData.location) provider.location = profileData.location;
-        if (profileData.phone) provider.phone = profileData.phone;
-        if (profileData.imageUrl) provider.imageUrl = profileData.imageUrl;
+        if (profileData.phoneNumber) provider.phone = profileData.phoneNumber;
+        if (profileData.profileImageUrl) provider.imageUrl = profileData.profileImageUrl;
         if (profileData.categories) provider.categories = profileData.categories;
         if (profileData.documentType) provider.documentType = profileData.documentType;
         if (profileData.documentNumber) provider.documentNumber = profileData.documentNumber;
+        if (profileData.portfolioImages) provider.portfolioImages = profileData.portfolioImages;
       }
     }
 
@@ -1814,13 +1838,26 @@ export class MemStorage implements IStorage {
       name: user.name,
       userType: user.userType,
       isActive: user.isActive,
-      categories: provider?.categories as string[] || [],
+      categories: user.categories || provider?.categories as string[] || [],
+      subcategories: user.subcategories || [],
       planType: provider?.planType as "A" | "B" || undefined,
       providerPlan: provider?.planType as "A" | "B" || undefined,
       planStatus: provider?.planActive ? "active" : (user.userType === "provider" ? "inactive" : undefined),
       isVerified: provider?.verified || false,
       completionPercentage: this.calculateCompletionPercentage(user, provider),
       documentsVerified: false,
+      profileImageUrl: user.profileImageUrl || provider?.imageUrl,
+      portfolioImages: user.portfolioImages || provider?.portfolioImages || [],
+      address: user.address,
+      city: user.city,
+      state: user.state,
+      zipCode: user.zipCode,
+      phoneNumber: user.phoneNumber,
+      businessHours: user.businessHours,
+      bio: user.bio,
+      description: user.bio,
+      documentType: user.documentType,
+      documentNumber: user.documentNumber,
     };
 
     if (user.userType === "provider" && user.providerId) {
