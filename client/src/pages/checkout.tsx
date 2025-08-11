@@ -138,16 +138,7 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <PaymentElement 
-              options={{
-                layout: 'tabs',
-                wallets: {
-                  applePay: 'auto',
-                  googlePay: 'auto'
-                },
-                paymentMethodOrder: ['card', 'apple_pay', 'google_pay', 'link']
-              }}
-            />
+            <PaymentElement />
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Shield className="h-4 w-4" />
               <span>Pagamento seguro processado pelo Stripe</span>
