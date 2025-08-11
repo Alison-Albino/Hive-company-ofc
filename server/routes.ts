@@ -197,6 +197,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ success: false, message: "Usuário não encontrado" });
       }
 
+      // CRÍTICO: Update session with new user data
+      const sessionId = req.headers.authorization?.replace('Bearer ', '');
+      if (sessionId && sessions.has(sessionId)) {
+        sessions.set(sessionId, { userId: updatedUser.id, user: updatedUser });
+      }
+
       res.json({ success: true, profile: updatedUser, message: "Perfil atualizado com sucesso" });
     } catch (error: any) {
       console.error("Update profile error:", error);

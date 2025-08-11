@@ -1475,6 +1475,15 @@ export class MemStorage implements IStorage {
     return this.buildAuthUser(user);
   }
 
+  async markProviderAsCompletelySetup(userId: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      // Mark user as completely setup to avoid further redirections
+      (user as any).setupCompleted = true;
+      this.users.set(userId, user);
+    }
+  }
+
   // Provider profile management
   private providerProfiles: Map<string, any> = new Map();
 
@@ -1495,6 +1504,16 @@ export class MemStorage implements IStorage {
 
     // Store provider profile details
     this.providerProfiles.set(profileData.userId, profile);
+
+    // CRÍTICO: Update SimpleUser data to persist in buildAuthUser
+    const user = this.users.get(profileData.userId);
+    if (user) {
+      user.subcategories = profileData.subcategories;
+      user.bio = profileData.biography;
+      user.profileImageUrl = profileData.profileImage;
+      user.portfolioImages = profileData.portfolioImages;
+      this.users.set(profileData.userId, user);
+    }
 
     // Update user profile in sampleProfiles to include this data
     const existingProfileIndex = this.sampleProfiles.findIndex(p => p.id === profileData.userId);
