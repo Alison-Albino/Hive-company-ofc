@@ -324,6 +324,11 @@ export default function ProfilesPage() {
                       <Button 
                         className="flex-1 bg-hive-gold hover:bg-hive-gold-dark text-white"
                         size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          window.location.href = `/profile/${profile.id}`;
+                        }}
                       >
                         <i className="fas fa-eye mr-2"></i>
                         Ver Perfil

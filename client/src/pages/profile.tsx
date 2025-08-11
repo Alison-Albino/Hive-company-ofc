@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "wouter";
+import { Link, useRoute } from "wouter";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,20 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("profile");
   const [profileImage, setProfileImage] = useState(user?.profileImageUrl || "");
   const [portfolioImages, setPortfolioImages] = useState(user?.portfolioImages || []);
+  
+  // Check if viewing another user's profile
+  const [match, params] = useRoute("/profile/:profileId");
+  const profileId = params?.profileId;
+  const isViewingOtherProfile = profileId && profileId !== user?.id;
+  
+  // Fetch profile data if viewing another user's profile
+  const { data: profileData, isLoading: isLoadingProfile } = useQuery({
+    queryKey: [`/api/profiles/${profileId}`],
+    enabled: isViewingOtherProfile,
+  });
+  
+  // Use the appropriate user data
+  const currentUser = isViewingOtherProfile ? profileData : user;
 
   const viewerForm = useForm<ViewerProfileData>({
     resolver: zodResolver(viewerProfileSchema),
@@ -797,6 +812,171 @@ export default function Profile() {
     </Tabs>
   );
 
+  // Show loading while fetching other user's profile
+  if (isViewingOtherProfile && (isLoadingProfile || !profileData)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
+        <div className="container mx-auto p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if profile not found
+  if (isViewingOtherProfile && !profileData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
+        <div className="container mx-auto p-6 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Perfil não encontrado</h1>
+            <p className="text-gray-600 mb-4">O perfil que você está procurando não existe.</p>
+            <Link href="/services">
+              <Button>Voltar aos Serviços</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render other user's profile (read-only view)
+  if (isViewingOtherProfile && currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
+        <div className="container mx-auto p-6">
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {currentUser.name || 'Prestador de Serviços'}
+                </h1>
+                <p className="text-gray-600">
+                  {currentUser.description || currentUser.bio || 'Perfil profissional'}
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Button className="bg-amber-500 hover:bg-amber-600">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Iniciar Conversa
+                </Button>
+                <Link href="/services">
+                  <Button variant="outline">
+                    Voltar aos Serviços
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Profile info cards */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Informações do Prestador
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    {currentUser.profileImageUrl ? (
+                      <img 
+                        src={currentUser.profileImageUrl} 
+                        alt="Perfil" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-8 h-8 text-gray-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{currentUser.name}</h3>
+                    <p className="text-gray-600">{currentUser.city}, {currentUser.state}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">{currentUser.city}, {currentUser.state}</span>
+                  </div>
+                  {currentUser.documentsVerified && (
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Verificado
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Categories */}
+            {currentUser.categories && currentUser.categories.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categorias e Especialidades</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Categoria Principal</Label>
+                      <div className="mt-2">
+                        <Badge variant="default">{currentUser.categories[0]}</Badge>
+                      </div>
+                    </div>
+                    
+                    {currentUser.subcategories && currentUser.subcategories.length > 0 && (
+                      <div>
+                        <Label>Especialidades</Label>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {currentUser.subcategories.map((sub, index) => (
+                            <Badge key={index} variant="outline">{sub}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Portfolio */}
+            {currentUser.portfolioImages && currentUser.portfolioImages.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Camera className="w-5 h-5" />
+                    Portfólio de Trabalhos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {currentUser.portfolioImages.map((image, index) => (
+                      <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={image} 
+                          alt={`Trabalho ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render own profile (editable view) 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
       <div className="container mx-auto p-6">
