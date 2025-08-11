@@ -53,6 +53,16 @@ export interface IStorage {
   createPropertyAsProvider(userId: string, property: CreatePropertyData): Promise<Property | null>;
   canCreateProperty(userId: string): Promise<boolean>;
 
+  // Subscription operations
+  createSubscription(userId: string, planType: string, stripeSubscriptionId?: string): Promise<any>;
+  getActiveSubscription(userId: string): Promise<any>;
+  updateSubscriptionStatus(subscriptionId: string, status: string): Promise<any>;
+  cancelSubscription(subscriptionId: string): Promise<boolean>;
+  checkSubscriptionValidity(userId: string): Promise<{ valid: boolean; subscription?: any; canCancel?: boolean }>;
+  createPaymentRecord(paymentData: any): Promise<any>;
+  getSubscriptionHistory(userId: string): Promise<any[]>;
+  checkCancellationEligibility(subscriptionId: string): Promise<{ eligible: boolean; reason?: string }>;
+
   // User profile operations (legacy, keeping for compatibility)
   getUserProfiles(params?: { documentType?: string; city?: string }): Promise<any[]>;
   getUserProfile(id: string): Promise<any>;
@@ -1919,6 +1929,163 @@ export class MemStorage implements IStorage {
     this.users.set(userId, user);
 
     return this.buildAuthUser(user);
+  }
+
+  // Subscription Management
+  private subscriptions: Map<string, any> = new Map();
+  private paymentHistory: Map<string, any> = new Map();
+
+  async createSubscription(userId: string, planType: string, stripeSubscriptionId?: string): Promise<any> {
+    const id = randomUUID();
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + 30); // 30 dias de duração
+
+    const cancellationDeadline = new Date(now);
+    cancellationDeadline.setDate(cancellationDeadline.getDate() + 7); // 7 dias para cancelar
+
+    const planNames = { 'A': 'BE HIVE', 'B': 'HIVE GOLD' };
+    const planPrices = { 'A': '29.00', 'B': '59.00' };
+
+    const subscription = {
+      id,
+      userId,
+      planType,
+      planName: planNames[planType as keyof typeof planNames] || 'BE HIVE',
+      stripeSubscriptionId,
+      status: 'active',
+      startDate: now,
+      endDate,
+      cancellationDeadline,
+      price: planPrices[planType as keyof typeof planPrices] || '29.00',
+      autoRenew: true,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.subscriptions.set(id, subscription);
+    
+    // Ativar plano do prestador se for provider
+    const user = this.users.get(userId);
+    if (user && user.userType === 'provider' && user.providerId) {
+      const provider = this.serviceProviders.get(user.providerId);
+      if (provider) {
+        provider.planActive = true;
+        provider.planType = planType;
+        this.serviceProviders.set(user.providerId, provider);
+      }
+    }
+
+    return subscription;
+  }
+
+  async getActiveSubscription(userId: string): Promise<any> {
+    return Array.from(this.subscriptions.values())
+      .find(sub => sub.userId === userId && sub.status === 'active');
+  }
+
+  async updateSubscriptionStatus(subscriptionId: string, status: string): Promise<any> {
+    const subscription = this.subscriptions.get(subscriptionId);
+    if (subscription) {
+      subscription.status = status;
+      subscription.updatedAt = new Date();
+      
+      // Se cancelado, desativar plano do provider
+      if (status === 'cancelled') {
+        subscription.cancelledAt = new Date();
+        const user = this.users.get(subscription.userId);
+        if (user && user.userType === 'provider' && user.providerId) {
+          const provider = this.serviceProviders.get(user.providerId);
+          if (provider) {
+            provider.planActive = false;
+            this.serviceProviders.set(user.providerId, provider);
+          }
+        }
+      }
+      
+      this.subscriptions.set(subscriptionId, subscription);
+      return subscription;
+    }
+    return null;
+  }
+
+  async cancelSubscription(subscriptionId: string): Promise<boolean> {
+    const subscription = this.subscriptions.get(subscriptionId);
+    if (!subscription) return false;
+
+    const now = new Date();
+    const canCancel = now <= new Date(subscription.cancellationDeadline);
+    
+    if (canCancel) {
+      subscription.status = 'cancellation_pending';
+      subscription.cancelledAt = now;
+      subscription.updatedAt = now;
+      this.subscriptions.set(subscriptionId, subscription);
+      return true;
+    }
+    
+    return false;
+  }
+
+  async checkSubscriptionValidity(userId: string): Promise<{ valid: boolean; subscription?: any; canCancel?: boolean }> {
+    const subscription = await this.getActiveSubscription(userId);
+    if (!subscription) {
+      return { valid: false };
+    }
+
+    const now = new Date();
+    const endDate = new Date(subscription.endDate);
+    const cancellationDeadline = new Date(subscription.cancellationDeadline);
+    
+    const valid = now <= endDate && subscription.status === 'active';
+    const canCancel = now <= cancellationDeadline && subscription.status === 'active';
+    
+    return { valid, subscription, canCancel };
+  }
+
+  async checkCancellationEligibility(subscriptionId: string): Promise<{ eligible: boolean; reason?: string }> {
+    const subscription = this.subscriptions.get(subscriptionId);
+    if (!subscription) {
+      return { eligible: false, reason: 'Assinatura não encontrada' };
+    }
+
+    if (subscription.status !== 'active') {
+      return { eligible: false, reason: 'Assinatura não está ativa' };
+    }
+
+    const now = new Date();
+    const cancellationDeadline = new Date(subscription.cancellationDeadline);
+    
+    if (now > cancellationDeadline) {
+      return { eligible: false, reason: 'Período de cancelamento de 7 dias já expirou' };
+    }
+
+    return { eligible: true };
+  }
+
+  async createPaymentRecord(paymentData: any): Promise<any> {
+    const id = randomUUID();
+    const payment = {
+      id,
+      subscriptionId: paymentData.subscriptionId,
+      userId: paymentData.userId,
+      amount: paymentData.amount,
+      currency: paymentData.currency || 'BRL',
+      stripePaymentIntentId: paymentData.stripePaymentIntentId,
+      status: paymentData.status || 'succeeded',
+      paymentMethod: paymentData.paymentMethod || 'card',
+      paidAt: paymentData.paidAt || new Date(),
+      createdAt: new Date()
+    };
+
+    this.paymentHistory.set(id, payment);
+    return payment;
+  }
+
+  async getSubscriptionHistory(userId: string): Promise<any[]> {
+    return Array.from(this.subscriptions.values())
+      .filter(sub => sub.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 

@@ -45,44 +45,64 @@ const CheckoutForm = ({ planType }: { planType: string }) => {
     } else {
       // Process the successful payment
       try {
-        const response = await apiRequest("POST", "/api/process-payment-success", {
-          paymentIntentId: result.paymentIntent.id,
+        // Get current user from localStorage
+        const storedUser = localStorage.getItem("hive_user");
+        const currentUser = storedUser ? JSON.parse(storedUser) : null;
+        
+        if (!currentUser) {
+          throw new Error('Usuário não encontrado. Faça login novamente.');
+        }
+
+        // Create subscription record
+        const subscriptionResponse = await apiRequest("POST", "/api/subscriptions/create", {
+          userId: currentUser.id,
           planType,
+          stripeSubscriptionId: result.paymentIntent.id,
         });
         
-        const data = await response.json();
+        const subscriptionData = await subscriptionResponse.json();
         
-        if (data.success) {
-          // Update local user data to avoid auth check failure
-          if (data.user) {
-            console.log('Updating localStorage with user data:', data.user);
-            localStorage.setItem("hive_user", JSON.stringify(data.user));
-          }
-          
-          toast({
-            title: "Pagamento Realizado com Sucesso!",
-            description: "Agora complete seu cadastro escolhendo suas categorias de atuação.",
+        if (subscriptionData.success) {
+          // Process payment success with backend
+          const response = await apiRequest("POST", "/api/process-payment-success", {
+            paymentIntentId: result.paymentIntent.id,
+            planType,
+            subscriptionId: subscriptionData.subscription.id,
           });
           
-          console.log('Redirecting to select-categories in 2 seconds...');
-          setTimeout(() => {
-            // AMBOS os planos devem ir para seleção de categorias
-            console.log('Now redirecting to select-categories');
-            setLocation('/select-categories');
-          }, 2000);
+          const data = await response.json();
+          
+          if (data.success) {
+            // Update local user data
+            if (data.user) {
+              console.log('Updating localStorage with user data:', data.user);
+              localStorage.setItem("hive_user", JSON.stringify(data.user));
+            }
+            
+            toast({
+              title: "Assinatura Ativada com Sucesso!",
+              description: `Plano ${planType === 'A' ? 'BE HIVE' : 'HIVE GOLD'} ativo. Duração: 30 dias. Cancelamento gratuito: 7 dias.`,
+            });
+            
+            console.log('Redirecting to select-categories in 2 seconds...');
+            setTimeout(() => {
+              // AMBOS os planos devem ir para seleção de categorias
+              console.log('Now redirecting to select-categories');
+              setLocation('/select-categories');
+            }, 2000);
+          } else {
+            throw new Error(data.message || 'Payment processing failed');
+          }
         } else {
-          throw new Error(data.message || 'Payment processing failed');
+          throw new Error(subscriptionData.message || 'Subscription creation failed');
         }
       } catch (error) {
         console.error('Error processing payment success:', error);
         toast({
-          title: "Pagamento Processado",
-          description: "Seu pagamento foi processado. Redirecionando para o dashboard...",
+          title: "Erro no Processamento",
+          description: error instanceof Error ? error.message : "Houve um erro. Entre em contato com o suporte.",
+          variant: "destructive",
         });
-        setTimeout(() => {
-          // AMBOS os planos devem ir para seleção de categorias
-          setLocation('/select-categories');
-        }, 2000);
       }
     }
 

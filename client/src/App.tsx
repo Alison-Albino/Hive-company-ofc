@@ -19,6 +19,7 @@ import AuthTest from "./pages/auth-test";
 import LoginGuide from "./pages/login-guide";
 import Checkout from "./pages/checkout";
 import SelectCategories from "./pages/select-categories";
+import SubscriptionDashboard from "./pages/subscription-dashboard";
 import Navigation from "./components/navigation";
 import Footer from "./components/footer";
 import ChatManager from "./components/chat/ChatManager";
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/upgrade-to-provider" component={UpgradeToProvider} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/select-categories" component={SelectCategories} />
+      <Route path="/subscription" component={SubscriptionDashboard} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/login" component={AuthPage} />
       <Route path="/register" component={AuthPage} />

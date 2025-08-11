@@ -784,6 +784,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== SUBSCRIPTION MANAGEMENT ROUTES =====
+  
+  // Criar assinatura após pagamento bem-sucedido
+  app.post('/api/subscriptions/create', async (req, res) => {
+    try {
+      const { userId, planType, stripeSubscriptionId } = req.body;
+      
+      if (!userId || !planType) {
+        return res.status(400).json({ message: 'Dados obrigatórios: userId e planType' });
+      }
+
+      const subscription = await storage.createSubscription(userId, planType, stripeSubscriptionId);
+      
+      // Criar registro de pagamento
+      await storage.createPaymentRecord({
+        subscriptionId: subscription.id,
+        userId,
+        amount: subscription.price,
+        currency: 'BRL',
+        stripePaymentIntentId: stripeSubscriptionId,
+        status: 'succeeded',
+        paymentMethod: 'card'
+      });
+
+      res.json({
+        success: true,
+        subscription,
+        message: 'Assinatura criada com sucesso!'
+      });
+    } catch (error) {
+      console.error('Erro ao criar assinatura:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Verificar status da assinatura
+  app.get('/api/subscriptions/status/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const validity = await storage.checkSubscriptionValidity(userId);
+      
+      res.json(validity);
+    } catch (error) {
+      console.error('Erro ao verificar assinatura:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Cancelar assinatura (dentro do período de 7 dias)
+  app.post('/api/subscriptions/:subscriptionId/cancel', async (req, res) => {
+    try {
+      const { subscriptionId } = req.params;
+      
+      // Verificar elegibilidade para cancelamento
+      const eligibility = await storage.checkCancellationEligibility(subscriptionId);
+      if (!eligibility.eligible) {
+        return res.status(400).json({ 
+          success: false, 
+          message: eligibility.reason 
+        });
+      }
+
+      const cancelled = await storage.cancelSubscription(subscriptionId);
+      if (cancelled) {
+        res.json({ 
+          success: true, 
+          message: 'Assinatura cancelada com sucesso' 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Não foi possível cancelar a assinatura' 
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao cancelar assinatura:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Histórico de assinaturas do usuário
+  app.get('/api/subscriptions/history/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const history = await storage.getSubscriptionHistory(userId);
+      res.json(history);
+    } catch (error) {
+      console.error('Erro ao buscar histórico:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Verificar elegibilidade para cancelamento
+  app.get('/api/subscriptions/:subscriptionId/cancellation-eligibility', async (req, res) => {
+    try {
+      const { subscriptionId } = req.params;
+      const eligibility = await storage.checkCancellationEligibility(subscriptionId);
+      res.json(eligibility);
+    } catch (error) {
+      console.error('Erro ao verificar elegibilidade:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  // Atualizar status da assinatura (para webhooks do Stripe)
+  app.post('/api/subscriptions/:subscriptionId/status', async (req, res) => {
+    try {
+      const { subscriptionId } = req.params;
+      const { status } = req.body;
+      
+      const subscription = await storage.updateSubscriptionStatus(subscriptionId, status);
+      if (subscription) {
+        res.json({ success: true, subscription });
+      } else {
+        res.status(404).json({ message: 'Assinatura não encontrada' });
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
