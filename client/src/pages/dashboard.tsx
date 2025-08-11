@@ -399,7 +399,7 @@ export default function Dashboard() {
         </div>
 
         {user.userType === "provider" ? (
-          user.completionPercentage && user.completionPercentage < 80 ? 
+          (!user.categories || user.categories.length === 0) ? 
             renderProviderOnboarding() : 
             renderProviderDashboard()
         ) : (

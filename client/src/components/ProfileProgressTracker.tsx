@@ -30,7 +30,7 @@ export function ProfileProgressTracker({ user, className = "" }: ProfileProgress
         description: 'Nome, foto de perfil e informações de contato',
         icon: <User className="h-5 w-5" />,
         href: '/profile',
-        isCompleted: !!(user?.name && user?.profileImageUrl && user?.email),
+        isCompleted: !!(user?.name && user?.email),
         isRequired: true,
         weight: 20
       },
@@ -40,7 +40,7 @@ export function ProfileProgressTracker({ user, className = "" }: ProfileProgress
         description: 'Localização para facilitar encontros com clientes',
         icon: <MapPin className="h-5 w-5" />,
         href: '/profile',
-        isCompleted: !!(user?.address && user?.city && user?.state && user?.zipCode),
+        isCompleted: !!(user?.city && user?.state),
         isRequired: true,
         weight: 15
       },
@@ -50,7 +50,7 @@ export function ProfileProgressTracker({ user, className = "" }: ProfileProgress
         description: user?.planType === 'A' ? 'CPF verificado' : 'CNPJ e documentos empresariais',
         icon: <FileText className="h-5 w-5" />,
         href: '/profile',
-        isCompleted: !!(user?.documentType && user?.documentNumber && user?.documentsVerified),
+        isCompleted: !!(user?.documentType),
         isRequired: true,
         weight: 20
       },
@@ -70,7 +70,7 @@ export function ProfileProgressTracker({ user, className = "" }: ProfileProgress
         description: 'Mostre seus trabalhos e conte sua história',
         icon: <Camera className="h-5 w-5" />,
         href: '/profile',
-        isCompleted: !!(user?.description && user?.portfolioImages && user?.portfolioImages.length > 0),
+        isCompleted: !!(user?.description || user?.bio),
         isRequired: false,
         weight: 20
       }

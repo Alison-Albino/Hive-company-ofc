@@ -8,6 +8,17 @@ The application uses a modern full-stack architecture with React frontend, Expre
 
 ## Recent Changes (January 2025)
 
+### Correção do Sistema de Progressão de Perfil (Janeiro 2025)
+- **Bug Crítico Corrigido**: Sistema de progressão de perfil não detectava corretamente campos preenchidos
+  - Critério de mudança de onboarding para dashboard alterado de completionPercentage < 80% para verificação de categories
+  - Lógica de detecção de completude de campos simplificada para ser mais flexível
+  - Removida duplicação de "finalizar cadastro" que confundia prestadores
+  - ProfileProgressTracker agora detecta corretamente quando categorias e fotos foram adicionadas
+- **Dashboard Diferenciado**: Implementação completa da experiência personalizada
+  - Prestadores com categorias definidas veem dashboard completo imediatamente
+  - Imobiliárias (categoria 'imobiliaria') têm acesso ao RealEstateDashboard especializado
+  - Endpoint /api/my-properties funcional para buscar propriedades do usuário logado
+
 ### Sistema de Controle de Assinatura Implementado (Janeiro 2025)
 - **Sistema Completo de Assinatura**: Controle total do ciclo de vida das assinaturas:
   - Duração fixa de 30 dias para ambos os planos (BE HIVE R$ 29 e HIVE GOLD R$ 59)
