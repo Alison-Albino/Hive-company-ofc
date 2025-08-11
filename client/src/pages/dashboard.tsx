@@ -20,6 +20,8 @@ import {
   CheckCircle,
   BarChart3
 } from "lucide-react";
+import { ProfileProgressTracker } from "@/components/ProfileProgressTracker";
+import { RealEstateDashboard } from "@/components/RealEstateDashboard";
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading, canCreateProperty } = useAuth();
@@ -50,7 +52,7 @@ export default function Dashboard() {
 
   // PRESTADOR ONBOARDING - Guia o primeiro cadastro
   const renderProviderOnboarding = () => (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="text-center">
         <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Crown className="h-10 w-10 text-amber-600" />
@@ -61,81 +63,35 @@ export default function Dashboard() {
         <p className="text-gray-600 text-lg mb-8">
           Complete seu cadastro para começar a oferecer seus serviços
         </p>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
-          <div 
-            className="bg-amber-500 h-3 rounded-full transition-all duration-300"
-            style={{ width: `${user.completionPercentage}%` }}
-          />
-        </div>
-        <p className="text-sm text-gray-600 mb-8">
-          {user.completionPercentage}% do perfil completo
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ProfileProgressTracker user={user} />
+        </div>
+        
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              1. Completar Perfil Básico
-            </CardTitle>
-            <CardDescription>Nome, foto, especialidade e descrição</CardDescription>
+            <CardTitle>🎯 Dica de Sucesso</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Link href="/profile">
-              <Button className="w-full">
-                Completar Agora
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              2. Definir Localização
-            </CardTitle>
-            <CardDescription>Onde você atende seus clientes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/profile">
-              <Button className="w-full" variant="outline">
-                Definir Local
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              3. Escolher Categorias
-            </CardTitle>
-            <CardDescription>Que tipos de serviços você oferece</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/profile">
-              <Button className="w-full" variant="outline">
-                Escolher Categorias
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-dashed border-gray-300 hover:border-amber-500 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              4. Adicionar Fotos
-            </CardTitle>
-            <CardDescription>Foto de perfil e exemplos do seu trabalho</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" variant="outline">
-              Adicionar Fotos
-            </Button>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Perfis completos recebem até <strong>5x mais contatos</strong> de clientes.
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-green-600">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Foto profissional
+              </div>
+              <div className="flex items-center text-sm text-green-600">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Portfólio com exemplos
+              </div>
+              <div className="flex items-center text-sm text-green-600">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Biografia detalhada
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -267,22 +223,38 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {isCompany && (
+          {user?.categories?.includes('imobiliaria') ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>🏢 Painel Imobiliário</CardTitle>
+                <CardDescription>Gerencie seu portfólio de imóveis</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Link href="#properties-section">
+                  <Button className="w-full justify-start">
+                    <Home className="w-4 h-4 mr-2" />
+                    Gerenciar Imóveis
+                  </Button>
+                </Link>
+                
+                <Button className="w-full justify-start" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Imóvel
+                </Button>
+                
+                <Button className="w-full justify-start" variant="outline">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Relatórios de Vendas
+                </Button>
+              </CardContent>
+            </Card>
+          ) : isCompany && (
             <Card>
               <CardHeader>
                 <CardTitle>Funcionalidades Empresariais</CardTitle>
                 <CardDescription>Recursos exclusivos do HIVE GOLD</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {canCreateProperty && (
-                  <Link href="/properties/create">
-                    <Button className="w-full justify-start">
-                      <Home className="w-4 h-4 mr-2" />
-                      Cadastrar Propriedade
-                    </Button>
-                  </Link>
-                )}
-                
                 <Button className="w-full justify-start" variant="outline">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Relatórios Avançados
@@ -321,6 +293,13 @@ export default function Dashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Real Estate Dashboard - Only for Imobiliaria providers */}
+        {user?.categories?.includes('imobiliaria') && (
+          <div id="properties-section">
+            <RealEstateDashboard />
+          </div>
+        )}
       </div>
     );
   };

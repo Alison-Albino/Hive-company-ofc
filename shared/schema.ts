@@ -221,6 +221,30 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Subscription tables
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planType: varchar("plan_type", { length: 1 }).notNull(), // 'A' ou 'B'
+  status: varchar("status", { length: 20 }).default("active"), // 'active', 'cancelled', 'expired'
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  cancelledAt: timestamp("cancelled_at"),
+  canCancel: boolean("can_cancel").default(true),
+});
+
+export const paymentHistory = pgTable("payment_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  subscriptionId: varchar("subscription_id").references(() => subscriptions.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("BRL"),
+  status: varchar("status", { length: 20 }).notNull(),
+  planType: varchar("plan_type", { length: 1 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const userProfilesRelations = relations(userProfiles, ({ one, many }) => ({
   user: one(users, {
@@ -228,25 +252,6 @@ export const userProfilesRelations = relations(userProfiles, ({ one, many }) => 
     references: [users.id],
   }),
   reviews: many(reviews),
-}));
-
-export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
-  user: one(users, {
-    fields: [subscriptions.userId],
-    references: [users.id],
-  }),
-  paymentHistory: many(paymentHistory),
-}));
-
-export const paymentHistoryRelations = relations(paymentHistory, ({ one }) => ({
-  subscription: one(subscriptions, {
-    fields: [paymentHistory.subscriptionId],
-    references: [subscriptions.id],
-  }),
-  user: one(users, {
-    fields: [paymentHistory.userId],
-    references: [users.id],
-  }),
 }));
 
 
@@ -293,38 +298,24 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Tabela de assinaturas
-export const subscriptions = pgTable("subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  planType: varchar("plan_type", { length: 1 }).notNull(), // 'A' ou 'B'
-  planName: text("plan_name").notNull(), // 'BE HIVE' ou 'HIVE GOLD'
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripeCustomerId: text("stripe_customer_id"),
-  status: varchar("status", { length: 20 }).notNull().default("active"), // 'active', 'cancelled', 'expired', 'cancellation_pending'
-  startDate: timestamp("start_date").defaultNow(),
-  endDate: timestamp("end_date").notNull(),
-  cancellationDeadline: timestamp("cancellation_deadline").notNull(), // 7 dias após start_date
-  cancelledAt: timestamp("cancelled_at"),
-  price: decimal("price", { precision: 8, scale: 2 }).notNull(),
-  autoRenew: boolean("auto_renew").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+  paymentHistory: many(paymentHistory),
+}));
 
-// Tabela de histórico de pagamentos
-export const paymentHistory = pgTable("payment_history", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  subscriptionId: varchar("subscription_id").notNull(),
-  userId: varchar("user_id").notNull(),
-  amount: decimal("amount", { precision: 8, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 3 }).default("BRL"),
-  stripePaymentIntentId: text("stripe_payment_intent_id"),
-  status: varchar("status", { length: 20 }).notNull(), // 'succeeded', 'failed', 'pending', 'refunded'
-  paymentMethod: varchar("payment_method").notNull(), // 'card', 'apple_pay', 'google_pay', etc.
-  paidAt: timestamp("paid_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+export const paymentHistoryRelations = relations(paymentHistory, ({ one }) => ({
+  subscription: one(subscriptions, {
+    fields: [paymentHistory.subscriptionId],
+    references: [subscriptions.id],
+  }),
+  user: one(users, {
+    fields: [paymentHistory.userId],
+    references: [users.id],
+  }),
+}));
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,

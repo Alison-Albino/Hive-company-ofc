@@ -508,6 +508,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get properties for current user (authenticated endpoint)
+  app.get("/api/my-properties", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const userProperties = await storage.getPropertiesByCreator(user.id);
+      res.json(userProperties);
+    } catch (error) {
+      console.error("Error fetching user properties:", error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   // Service providers routes
   app.get("/api/service-providers", async (req, res) => {
     try {

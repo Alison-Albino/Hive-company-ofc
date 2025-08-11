@@ -8,6 +8,7 @@ export interface IStorage {
   getProperties(): Promise<Property[]>;
   getFeaturedProperties(): Promise<Property[]>;
   getProperty(id: string): Promise<Property | undefined>;
+  getPropertiesByCreator(creatorId: string): Promise<Property[]>;
   incrementPropertyViews(id: string): Promise<Property | undefined>;
   createProperty(property: InsertProperty): Promise<Property>;
   
@@ -1173,6 +1174,12 @@ export class MemStorage implements IStorage {
 
   async getFeaturedProperties(): Promise<Property[]> {
     return Array.from(this.properties.values()).filter(property => property.featured);
+  }
+
+  async getPropertiesByCreator(creatorId: string): Promise<Property[]> {
+    // For now, we'll match properties by agencyId since we don't have a createdBy field
+    // In a real implementation with database, you'd filter by a proper createdBy/ownerId field
+    return Array.from(this.properties.values()).filter(p => p.agencyId === creatorId);
   }
 
   async getProperty(id: string): Promise<Property | undefined> {
