@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,6 +65,7 @@ type ProviderProfileData = z.infer<typeof providerProfileSchema>;
 export default function Profile() {
   const { user, isAuthenticated, canCreateProperty } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const [profileImage, setProfileImage] = useState(user?.profileImageUrl || "");
@@ -83,6 +84,35 @@ export default function Profile() {
   
   // Use the appropriate user data
   const currentUser = isViewingOtherProfile ? profileData : user;
+  
+  // Type guard for profile data
+  const hasProfileData = currentUser && typeof currentUser === 'object' && 'id' in currentUser;
+  
+  // Type assertion for profile display (safely handle unknown profile structure)
+  const profileUser = currentUser as any;
+
+  // Function to handle starting a chat
+  const handleStartChat = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para iniciar uma conversa.",
+        variant: "destructive",
+      });
+      setLocation("/login");
+      return;
+    }
+    
+    if (isViewingOtherProfile && profileId) {
+      setLocation(`/chat?with=${profileId}`);
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não é possível iniciar conversa com o próprio perfil.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const viewerForm = useForm<ViewerProfileData>({
     resolver: zodResolver(viewerProfileSchema),
@@ -844,7 +874,7 @@ export default function Profile() {
   }
 
   // Render other user's profile (read-only view) - Social Media Style
-  if (isViewingOtherProfile && currentUser) {
+  if (isViewingOtherProfile && hasProfileData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
         {/* Hero Section with Cover Photo */}
@@ -859,9 +889,9 @@ export default function Profile() {
                   <div className="relative">
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-1 shadow-xl">
                       <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                        {currentUser?.profileImageUrl ? (
+                        {profileUser?.profileImageUrl ? (
                           <img 
-                            src={currentUser.profileImageUrl} 
+                            src={profileUser.profileImageUrl} 
                             alt="Perfil" 
                             className="w-full h-full object-cover"
                           />
@@ -870,7 +900,7 @@ export default function Profile() {
                         )}
                       </div>
                     </div>
-                    {currentUser?.documentsVerified && (
+                    {profileUser?.documentsVerified && (
                       <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
@@ -880,14 +910,14 @@ export default function Profile() {
                   {/* Name and Basic Info */}
                   <div className="flex-1 text-white mb-2">
                     <h1 className="text-2xl md:text-4xl font-bold drop-shadow-lg">
-                      {currentUser?.name || 'Prestador de Serviços'}
+                      {profileUser?.name || 'Prestador de Serviços'}
                     </h1>
                     <p className="text-lg md:text-xl text-amber-100 drop-shadow">
-                      {currentUser?.categories?.[0] || 'Profissional'}
+                      {profileUser?.categories?.[0] || 'Profissional'}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <MapPin className="w-4 h-4" />
-                      <span className="text-amber-100">{currentUser?.city}, {currentUser?.state}</span>
+                      <span className="text-amber-100">{profileUser?.city}, {profileUser?.state}</span>
                     </div>
                   </div>
                 </div>
@@ -924,7 +954,7 @@ export default function Profile() {
               </Card>
 
               {/* About Section */}
-              {(currentUser?.description || currentUser?.bio) ? (
+              {(profileUser?.description || profileUser?.bio) ? (
                 <Card className="border-amber-200 shadow-lg">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -934,14 +964,14 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <p className="text-gray-700 leading-relaxed">
-                      {currentUser?.description || currentUser?.bio}
+                      {profileUser?.description || profileUser?.bio}
                     </p>
                   </CardContent>
                 </Card>
               ) : null}
 
               {/* Specialties */}
-              {currentUser?.subcategories && currentUser.subcategories.length > 0 && (
+              {profileUser?.subcategories && profileUser.subcategories.length > 0 && (
                 <Card className="border-amber-200 shadow-lg">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -951,7 +981,7 @@ export default function Profile() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex flex-wrap gap-2">
-                      {currentUser.subcategories.map((sub: string, index: number) => (
+                      {profileUser.subcategories.map((sub: string, index: number) => (
                         <Badge 
                           key={index} 
                           variant="outline" 
@@ -977,19 +1007,21 @@ export default function Profile() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Categoria:</span>
                     <Badge variant="default" className="bg-amber-100 text-amber-800 border-amber-300">
-                      {currentUser?.categories?.[0] || 'Profissional'}
+                      {profileUser?.categories?.[0] || 'Profissional'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Tipo de Conta:</span>
                     <Badge variant="outline" className="border-amber-300">
-                      {currentUser?.planType === 'B' ? 'CNPJ Empresarial' : 'CPF Individual'}
+                      {profileUser?.documentType === 'CNPJ' || profileUser?.planType === 'B' || profileUser?.providerPlan === 'B' 
+                        ? 'CNPJ Empresarial' 
+                        : 'CPF Individual'}
                     </Badge>
                   </div>
-                  {currentUser?.businessHours && (
+                  {profileUser?.businessHours && (
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Horário:</span>
-                      <span className="text-sm text-gray-800">{currentUser.businessHours}</span>
+                      <span className="text-sm text-gray-800">{profileUser.businessHours}</span>
                     </div>
                   )}
                 </CardContent>
@@ -999,20 +1031,20 @@ export default function Profile() {
             {/* Right Column - Portfolio and Gallery */}
             <div className="lg:col-span-2 space-y-6">
               {/* Portfolio Gallery */}
-              {currentUser?.portfolioImages && currentUser.portfolioImages.length > 0 ? (
+              {profileUser?.portfolioImages && profileUser.portfolioImages.length > 0 ? (
                 <Card className="border-amber-200 shadow-lg">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <Camera className="w-6 h-6 text-amber-600" />
-                      Portfólio de Trabalhos
+                      Galeria de Fotos
                       <Badge variant="secondary" className="ml-auto">
-                        {currentUser.portfolioImages.length} {currentUser.portfolioImages.length === 1 ? 'foto' : 'fotos'}
+                        {profileUser.portfolioImages.length} {profileUser.portfolioImages.length === 1 ? 'foto' : 'fotos'}
                       </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {currentUser.portfolioImages.map((image: string, index: number) => (
+                      {profileUser.portfolioImages.map((image: string, index: number) => (
                         <div 
                           key={index} 
                           className="aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
@@ -1049,10 +1081,10 @@ export default function Profile() {
                 <Card className="border-amber-200 shadow-lg text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-amber-600">
-                      {currentUser?.documentsVerified ? '✓' : '⏳'}
+                      {profileUser?.documentsVerified ? '✓' : '⏳'}
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
-                      {currentUser?.documentsVerified ? 'Verificado' : 'Em Análise'}
+                      {profileUser?.documentsVerified ? 'Verificado' : 'Em Análise'}
                     </p>
                   </CardContent>
                 </Card>
@@ -1060,16 +1092,16 @@ export default function Profile() {
                 <Card className="border-amber-200 shadow-lg text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-amber-600">
-                      {currentUser?.portfolioImages?.length || 0}
+                      {profileUser?.portfolioImages?.length || 0}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Trabalhos</p>
+                    <p className="text-sm text-gray-600 mt-1">Fotos</p>
                   </CardContent>
                 </Card>
                 
                 <Card className="border-amber-200 shadow-lg text-center">
                   <CardContent className="p-4">
                     <div className="text-2xl font-bold text-amber-600">
-                      {currentUser?.subcategories?.length || 0}
+                      {profileUser?.subcategories?.length || 0}
                     </div>
                     <p className="text-sm text-gray-600 mt-1">Especialidades</p>
                   </CardContent>
@@ -1093,7 +1125,10 @@ export default function Profile() {
                     <p className="text-gray-600 mb-4">
                       Entre em contato através da plataforma Hive para garantir segurança e qualidade
                     </p>
-                    <Button className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 text-lg shadow-lg">
+                    <Button 
+                      onClick={handleStartChat}
+                      className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 text-lg shadow-lg"
+                    >
                       <Phone className="w-5 h-5 mr-2" />
                       Iniciar Conversa Agora
                     </Button>
