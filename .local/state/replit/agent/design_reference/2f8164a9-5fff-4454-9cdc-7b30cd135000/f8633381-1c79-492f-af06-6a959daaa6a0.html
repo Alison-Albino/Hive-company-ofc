@@ -1,0 +1,975 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive - Conectando imóveis a quem realmente precisa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'hive-gold': '#F5C842',
+                        'hive-gold-dark': '#E6B532',
+                        'hive-black': '#1A1A1A',
+                        'hive-gray': '#F8F9FA'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="font-inter bg-white">
+    <!-- Navigation -->
+    <!-- @COMPONENT: Navigation [responsive mobile menu, logo, navigation links] -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-hive-gold p-2 rounded-lg">
+                        <i class="fas fa-th-large text-white text-xl"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-hive-black">Hive</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" data-page="home" class="nav-link text-hive-black hover:text-hive-gold transition-colors duration-300">Início</a>
+                    <a href="#" data-page="properties" class="nav-link text-gray-600 hover:text-hive-gold transition-colors duration-300">Imóveis</a>
+                    <a href="#" data-page="services" class="nav-link text-gray-600 hover:text-hive-gold transition-colors duration-300">Serviços</a>
+                    <a href="#" data-page="plans" class="nav-link text-gray-600 hover:text-hive-gold transition-colors duration-300">Planos</a>
+                    <button class="bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
+                        Entrar
+                    </button>
+                </div>
+                
+                <button class="md:hidden text-hive-black" id="mobile-menu-button">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-4 space-y-4">
+                <a href="#" data-page="home" class="nav-link block text-hive-black hover:text-hive-gold transition-colors duration-300">Início</a>
+                <a href="#" data-page="properties" class="nav-link block text-gray-600 hover:text-hive-gold transition-colors duration-300">Imóveis</a>
+                <a href="#" data-page="services" class="nav-link block text-gray-600 hover:text-hive-gold transition-colors duration-300">Serviços</a>
+                <a href="#" data-page="plans" class="nav-link block text-gray-600 hover:text-hive-gold transition-colors duration-300">Planos</a>
+                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
+                    Entrar
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- @END_COMPONENT: Navigation -->
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- HOME PAGE -->
+        <!-- @COMPONENT: HomePage [hero section, featured properties, service categories] -->
+        <div id="page-home" class="page-content">
+            <!-- Hero Section -->
+            <!-- @COMPONENT: HeroSection [banner with slogan and search functionality] -->
+            <section class="relative bg-gradient-to-br from-hive-gold to-hive-gold-dark py-20 lg:py-32">
+                <!-- Modern cityscape with high-rise buildings and blue sky -->
+                <div class="absolute inset-0 bg-black/20"></div>
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                        Conectando imóveis a<br>quem realmente precisa
+                    </h1>
+                    <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                        A plataforma completa para encontrar imóveis e serviços especializados em um só lugar
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-xl max-w-4xl mx-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="relative">
+                                <i class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" placeholder="Onde você está?" 
+                                       class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold focus:border-transparent">
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-home absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <select class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold focus:border-transparent">
+                                    <option>Tipo de imóvel</option>
+                                    <option>Casa</option>
+                                    <option>Apartamento</option>
+                                    <option>Sala comercial</option>
+                                    <option>Salão de festas</option>
+                                </select>
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-dollar-sign absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <select class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold focus:border-transparent">
+                                    <option>Faixa de preço</option>
+                                    <option>Até R$ 500.000</option>
+                                    <option>R$ 500.000 - R$ 1.000.000</option>
+                                    <option>R$ 1.000.000+</option>
+                                </select>
+                            </div>
+                            <button class="bg-hive-gold hover:bg-hive-gold-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
+                                <i class="fas fa-search mr-2"></i>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: HeroSection -->
+
+            <!-- Featured Properties Section -->
+            <!-- @COMPONENT: FeaturedProperties [grid of highlighted property listings] -->
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-hive-black mb-4">Imóveis em Destaque</h2>
+                        <p class="text-gray-600 text-lg">Seleção especial dos melhores imóveis disponíveis</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- @MAP: featuredProperties.map(property => ( -->
+                        <!-- Property Card 1 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer transform hover:scale-105 transition-transform duration-300">
+                            <!-- Modern luxury apartment building exterior with glass facade -->
+                            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                                 alt="Apartamento moderno" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">VENDA</span>
+                                    <span class="text-hive-gold font-bold text-lg" data-bind="property.price">R$ 850.000</span>
+                                </div>
+                                <h3 class="font-semibold text-hive-black mb-2" data-bind="property.title">Apartamento Luxury Vista Mar</h3>
+                                <p class="text-gray-600 text-sm mb-3" data-bind="property.location">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Copacabana, Rio de Janeiro
+                                </p>
+                                <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                                    <span><i class="fas fa-bed mr-1"></i>3 quartos</span>
+                                    <span><i class="fas fa-bath mr-1"></i>2 banheiros</span>
+                                    <span><i class="fas fa-car mr-1"></i>2 vagas</span>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <p class="text-xs text-gray-500" data-bind="property.agency">Imobiliária Premium RJ</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 2 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer transform hover:scale-105 transition-transform duration-300">
+                            <!-- Charming suburban house with garden and modern design -->
+                            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                                 alt="Casa residencial" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">ALUGUEL</span>
+                                    <span class="text-hive-gold font-bold text-lg">R$ 3.500/mês</span>
+                                </div>
+                                <h3 class="font-semibold text-hive-black mb-2">Casa Condomínio Fechado</h3>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Barra da Tijuca, Rio de Janeiro
+                                </p>
+                                <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                                    <span><i class="fas fa-bed mr-1"></i>4 quartos</span>
+                                    <span><i class="fas fa-bath mr-1"></i>3 banheiros</span>
+                                    <span><i class="fas fa-car mr-1"></i>4 vagas</span>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <p class="text-xs text-gray-500">Barra Imóveis Ltda</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 3 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer transform hover:scale-105 transition-transform duration-300">
+                            <!-- Elegant event hall with chandelier and wedding setup -->
+                            <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                                 alt="Salão de eventos" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full">EVENTO</span>
+                                    <span class="text-hive-gold font-bold text-lg">R$ 1.200/dia</span>
+                                </div>
+                                <h3 class="font-semibold text-hive-black mb-2">Salão de Festas Premium</h3>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Ipanema, Rio de Janeiro
+                                </p>
+                                <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                                    <span><i class="fas fa-users mr-1"></i>200 pessoas</span>
+                                    <span><i class="fas fa-utensils mr-1"></i>Cozinha</span>
+                                    <span><i class="fas fa-car mr-1"></i>50 vagas</span>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <p class="text-xs text-gray-500">Eventos & Celebrações</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Card 4 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer transform hover:scale-105 transition-transform duration-300">
+                            <!-- Modern office space with glass windows and city view -->
+                            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                                 alt="Sala comercial" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2 py-1 rounded-full">COMERCIAL</span>
+                                    <span class="text-hive-gold font-bold text-lg">R$ 2.800/mês</span>
+                                </div>
+                                <h3 class="font-semibold text-hive-black mb-2">Sala Comercial Centro</h3>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Centro, Rio de Janeiro
+                                </p>
+                                <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                                    <span><i class="fas fa-expand mr-1"></i>120 m²</span>
+                                    <span><i class="fas fa-wifi mr-1"></i>Fibra óptica</span>
+                                    <span><i class="fas fa-car mr-1"></i>2 vagas</span>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <p class="text-xs text-gray-500">Centro Business Imóveis</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                    
+                    <div class="text-center mt-8">
+                        <button class="bg-white border-2 border-hive-gold text-hive-gold hover:bg-hive-gold hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300">
+                            Ver todos os imóveis
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: FeaturedProperties -->
+
+            <!-- Service Categories Section -->
+            <!-- @COMPONENT: ServiceCategories [grid of service categories with icons] -->
+            <section class="py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-hive-black mb-4">Serviços Especializados</h2>
+                        <p class="text-gray-600 text-lg">Encontre os melhores profissionais para seu imóvel</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        <!-- @MAP: serviceCategories.map(category => ( -->
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="plumber">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-wrench text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Encanador</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">156 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="electrician">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-bolt text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Eletricista</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">89 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="painter">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-paint-roller text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Pintor</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">203 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="plasterer">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-hammer text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Gesseiro</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">67 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="photographer">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-camera text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Fotógrafo</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">42 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="decorator">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-paint-brush text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Decorador</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">38 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="cleaning">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-broom text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Limpeza</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">124 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="security">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-shield-alt text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Segurança</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">73 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="gardening">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-seedling text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Jardinagem</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">95 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="renovation">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-tools text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Reforma</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">167 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="architecture">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-drafting-compass text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Arquitetura</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">29 profissionais</p>
+                        </div>
+
+                        <div class="bg-hive-gray hover:bg-hive-gold group cursor-pointer rounded-xl p-6 text-center transition-all duration-300 transform hover:scale-105" data-category="moving">
+                            <div class="bg-white group-hover:bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
+                                <i class="fas fa-truck text-hive-gold group-hover:text-white text-2xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-hive-black group-hover:text-white transition-colors duration-300">Mudanças</h3>
+                            <p class="text-xs text-gray-600 group-hover:text-white/80 mt-1 transition-colors duration-300">81 profissionais</p>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: ServiceCategories -->
+        </div>
+        <!-- @END_COMPONENT: HomePage -->
+
+        <!-- SERVICES PAGE -->
+        <!-- @COMPONENT: ServicesPage [service provider listings with filters] -->
+        <div id="page-services" class="page-content hidden">
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="mb-8">
+                        <h1 class="text-3xl md:text-4xl font-bold text-hive-black mb-4">Profissionais Especializados</h1>
+                        <p class="text-gray-600 text-lg">Encontre os melhores prestadores de serviço da sua região</p>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Todas as categorias</option>
+                                <option>Encanador</option>
+                                <option>Eletricista</option>
+                                <option>Pintor</option>
+                                <option>Limpeza</option>
+                            </select>
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Localização</option>
+                                <option>Rio de Janeiro</option>
+                                <option>São Paulo</option>
+                                <option>Belo Horizonte</option>
+                            </select>
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Avaliação</option>
+                                <option>5 estrelas</option>
+                                <option>4+ estrelas</option>
+                                <option>3+ estrelas</option>
+                            </select>
+                            <button class="bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300">
+                                Filtrar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Providers Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- @MAP: serviceProviders.map(provider => ( -->
+                        <!-- Service Provider Card 1 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                            <!-- Professional electrician working on electrical panel -->
+                            <img src="https://pixabay.com/get/g38b8c7db49e683675c8436a723ceb21bfc2e9f8a373cb33f57d2ccc2321ce1a52cf2e1f1fc48aef19b057c361196ee2576d8cf480d804d731f88baffbdd11541_1280.jpg" 
+                                 alt="Eletricista profissional" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg text-hive-black" data-bind="provider.name">Carlos Silva</h3>
+                                        <p class="text-gray-600" data-bind="provider.speciality">Eletricista Residencial</p>
+                                        <p class="text-sm text-gray-500" data-bind="provider.type">CPF: ***.***.***-**</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="flex items-center text-hive-gold mb-1">
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <span class="ml-1 text-gray-600 text-sm" data-bind="provider.rating">5.0</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500" data-bind="provider.reviewCount">127 avaliações</p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-600 mb-4" data-bind="provider.location">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Copacabana, Rio de Janeiro
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">Trabalhos recentes:</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <!-- Recent electrical installation work -->
+                                        <img src="https://pixabay.com/get/gd0444e3ea6cc3f32da29a148bd79f8fe34f81f554f4a8763c70e129c51d41295b3e814a2207ab3da6b9b7366ab5338148633d6a15e9aa4e8e65522057a495962_1280.jpg" 
+                                             alt="Trabalho de instalação elétrica" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- Modern electrical panel installation -->
+                                        <img src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Quadro elétrico moderno" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- LED lighting installation in modern home -->
+                                        <img src="https://pixabay.com/get/g81f1cf39f9a0500249e2a888f1ba44a5b0a9e47231271dc7163b26fed922d2c8dbf9cc664dd4795cc4e6d88210e765e7c17c77691b037e3f29fac603b55e618f_1280.jpg" 
+                                             alt="Iluminação LED residencial" 
+                                             class="w-full h-16 object-cover rounded">
+                                    </div>
+                                </div>
+                                
+                                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-semibold py-3 rounded-lg transition-colors duration-300">
+                                    Contratar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Service Provider Card 2 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                            <!-- Professional house cleaning service in action -->
+                            <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
+                                 alt="Serviço de limpeza profissional" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg text-hive-black">Limpeza Premium</h3>
+                                        <p class="text-gray-600">Limpeza Residencial e Comercial</p>
+                                        <p class="text-sm text-gray-500">CNPJ: **.***.***/****-**</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="flex items-center text-hive-gold mb-1">
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <span class="ml-1 text-gray-600 text-sm">4.9</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">89 avaliações</p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-600 mb-4">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Barra da Tijuca, Rio de Janeiro
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">Trabalhos recentes:</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <!-- Clean modern living room after service -->
+                                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Sala limpa e organizada" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- Spotless modern kitchen after cleaning -->
+                                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Cozinha impecável" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- Professional office cleaning result -->
+                                        <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Escritório organizado" 
+                                             class="w-full h-16 object-cover rounded">
+                                    </div>
+                                </div>
+                                
+                                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-semibold py-3 rounded-lg transition-colors duration-300">
+                                    Contratar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Service Provider Card 3 -->
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                            <!-- Professional painter working on wall with roller -->
+                            <img src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
+                                 alt="Pintor profissional trabalhando" 
+                                 class="w-full h-48 object-cover">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg text-hive-black">João Tintas</h3>
+                                        <p class="text-gray-600">Pintura Residencial e Comercial</p>
+                                        <p class="text-sm text-gray-500">CPF: ***.***.***-**</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="flex items-center text-hive-gold mb-1">
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="fas fa-star text-sm"></i>
+                                            <i class="far fa-star text-sm"></i>
+                                            <span class="ml-1 text-gray-600 text-sm">4.7</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">156 avaliações</p>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-gray-600 mb-4">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Ipanema, Rio de Janeiro
+                                </p>
+                                
+                                <div class="mb-4">
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">Trabalhos recentes:</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <!-- Freshly painted modern bedroom -->
+                                        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Quarto recém pintado" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- Modern living room with fresh paint job -->
+                                        <img src="https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Sala com pintura nova" 
+                                             class="w-full h-16 object-cover rounded">
+                                        <!-- Commercial space after professional painting -->
+                                        <img src="https://images.unsplash.com/photo-1497366412874-3415097a27e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=150" 
+                                             alt="Espaço comercial pintado" 
+                                             class="w-full h-16 object-cover rounded">
+                                    </div>
+                                </div>
+                                
+                                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-semibold py-3 rounded-lg transition-colors duration-300">
+                                    Contratar
+                                </button>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- @END_COMPONENT: ServicesPage -->
+
+        <!-- PLANS PAGE -->
+        <!-- @COMPONENT: PlansPage [subscription plans comparison] -->
+        <div id="page-plans" class="page-content hidden">
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h1 class="text-3xl md:text-4xl font-bold text-hive-black mb-4">Escolha seu Plano</h1>
+                        <p class="text-gray-600 text-lg">Planos flexíveis para autônomos e empresas</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <!-- Plan A - CPF -->
+                        <!-- @COMPONENT: PlanCard [individual subscription plan details] -->
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-transparent hover:border-hive-gold transition-all duration-300 transform hover:scale-105">
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-8 text-center">
+                                <div class="bg-hive-gold p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-2xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-hive-black mb-2">Plano A - Autônomos</h3>
+                                <p class="text-gray-600 mb-4">Para profissionais independentes</p>
+                                <div class="text-4xl font-bold text-hive-gold mb-2">R$ 49</div>
+                                <p class="text-gray-500">/mês</p>
+                            </div>
+                            
+                            <div class="p-8">
+                                <ul class="space-y-4 mb-8">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Perfil profissional completo</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Galeria de trabalhos (até 20 fotos)</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Sistema de avaliações</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Contato direto com clientes</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Aparição em buscas</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Todas as categorias de serviço</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Suporte via WhatsApp</span>
+                                    </li>
+                                </ul>
+                                
+                                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-bold py-4 rounded-lg transition-colors duration-300" data-event="click:subscribePlanA">
+                                    Assinar Plano A
+                                </button>
+                                
+                                <p class="text-xs text-gray-500 text-center mt-4">
+                                    * Válido para pessoas físicas (CPF)
+                                </p>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: PlanCard -->
+
+                        <!-- Plan B - CNPJ -->
+                        <!-- @COMPONENT: PlanCard [business subscription plan details] -->
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-hive-gold relative">
+                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-hive-gold text-white px-6 py-2 rounded-full text-sm font-semibold">
+                                MAIS POPULAR
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-hive-gold to-hive-gold-dark p-8 text-center text-white">
+                                <div class="bg-white p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-building text-hive-gold text-2xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold mb-2">Plano B - Empresas</h3>
+                                <p class="text-white/90 mb-4">Para imobiliárias e construtoras</p>
+                                <div class="text-4xl font-bold mb-2">R$ 149</div>
+                                <p class="text-white/80">/mês</p>
+                            </div>
+                            
+                            <div class="p-8">
+                                <ul class="space-y-4 mb-8">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Tudo do Plano A, mais:</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Perfil de empresa completo</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Listagem ilimitada de imóveis</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Destaque em buscas</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Equipe de profissionais</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Galeria ilimitada de fotos</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Relatórios e analytics</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check text-green-500 mr-3"></i>
+                                        <span>Suporte prioritário</span>
+                                    </li>
+                                </ul>
+                                
+                                <button class="w-full bg-hive-gold hover:bg-hive-gold-dark text-white font-bold py-4 rounded-lg transition-colors duration-300" data-event="click:subscribePlanB">
+                                    Assinar Plano B
+                                </button>
+                                
+                                <p class="text-xs text-gray-500 text-center mt-4">
+                                    * Válido para empresas (CNPJ)
+                                </p>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: PlanCard -->
+                    </div>
+
+                    <!-- Payment Methods -->
+                    <div class="mt-16 bg-white rounded-xl p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-hive-black text-center mb-6">Formas de Pagamento Aceitas</h3>
+                        <div class="flex justify-center items-center space-x-8 flex-wrap">
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
+                                <span>Visa</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
+                                <span>Mastercard</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fas fa-credit-card text-2xl text-hive-gold"></i>
+                                <span>Cartão de Crédito</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fas fa-barcode text-2xl text-gray-600"></i>
+                                <span>Boleto</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fab fa-pix text-2xl text-green-600"></i>
+                                <span>PIX</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- @END_COMPONENT: PlansPage -->
+
+        <!-- PROPERTIES PAGE -->
+        <!-- @COMPONENT: PropertiesPage [detailed property listings] -->
+        <div id="page-properties" class="page-content hidden">
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="mb-8">
+                        <h1 class="text-3xl md:text-4xl font-bold text-hive-black mb-4">Todos os Imóveis</h1>
+                        <p class="text-gray-600 text-lg">Encontre o imóvel perfeito para você</p>
+                    </div>
+
+                    <!-- Extended Search Filters -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Tipo de negócio</option>
+                                <option>Venda</option>
+                                <option>Aluguel</option>
+                                <option>Temporada</option>
+                            </select>
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Tipo de imóvel</option>
+                                <option>Casa</option>
+                                <option>Apartamento</option>
+                                <option>Sala comercial</option>
+                                <option>Salão de festas</option>
+                            </select>
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Bairro</option>
+                                <option>Copacabana</option>
+                                <option>Ipanema</option>
+                                <option>Barra da Tijuca</option>
+                                <option>Centro</option>
+                            </select>
+                            <select class="px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-hive-gold">
+                                <option>Quartos</option>
+                                <option>1 quarto</option>
+                                <option>2 quartos</option>
+                                <option>3 quartos</option>
+                                <option>4+ quartos</option>
+                            </select>
+                            <button class="bg-hive-gold hover:bg-hive-gold-dark text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300">
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Properties Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Extended property listings would go here -->
+                        <!-- Similar to featured properties but with more details -->
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- @END_COMPONENT: PropertiesPage -->
+    </main>
+
+    <!-- Footer -->
+    <!-- @COMPONENT: Footer [company info, links, copyright] -->
+    <footer class="bg-hive-black text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-hive-gold p-2 rounded-lg">
+                            <i class="fas fa-th-large text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold">Hive</span>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        Conectando imóveis a quem realmente precisa. A plataforma completa para encontrar imóveis e serviços especializados.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-4">Imóveis</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Casas</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Apartamentos</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Comerciais</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Salões de Festa</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-4">Serviços</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Encanador</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Eletricista</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Pintor</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Limpeza</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-4">Suporte</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Central de Ajuda</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Contato</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Termos de Uso</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-hive-gold transition-colors duration-300">Privacidade</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-8 text-center">
+                <p class="text-gray-300">© Hive 2025 - Todos os direitos reservados</p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        (function() {
+            // Simple SPA Navigation
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-content');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            // @STATE: currentPage:string = 'home'
+            let currentPage = 'home';
+
+            function showPage(pageId) {
+                // Hide all pages
+                pages.forEach(page => {
+                    page.classList.add('hidden');
+                });
+
+                // Show selected page
+                const targetPage = document.getElementById(`page-${pageId}`);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                    currentPage = pageId;
+                }
+
+                // Update active nav link
+                navLinks.forEach(link => {
+                    link.classList.remove('text-hive-black');
+                    link.classList.add('text-gray-600');
+                });
+
+                const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+                if (activeLink) {
+                    activeLink.classList.remove('text-gray-600');
+                    activeLink.classList.add('text-hive-black');
+                }
+
+                // Close mobile menu
+                mobileMenu.classList.add('hidden');
+            }
+
+            // Navigation event listeners
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+
+            // Mobile menu toggle
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Service category clicks
+            const serviceCategories = document.querySelectorAll('[data-category]');
+            serviceCategories.forEach(category => {
+                category.addEventListener('click', () => {
+                    showPage('services');
+                    // TODO: Filter services by category
+                });
+            });
+
+            // Plan subscription buttons
+            const planButtons = document.querySelectorAll('[data-event^="click:subscribe"]');
+            planButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // TODO: Implement payment integration
+                    alert('Redirecionando para pagamento...');
+                });
+            });
+
+            // Property cards hover effects
+            const propertyCards = document.querySelectorAll('.group');
+            propertyCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    // TODO: Add hover animations or load more details
+                });
+            });
+
+            // Search functionality placeholder
+            const searchButtons = document.querySelectorAll('button:contains("Buscar")');
+            searchButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // TODO: Implement search logic
+                    console.log('Search functionality to be implemented');
+                });
+            });
+
+            // Filter functionality placeholder
+            const filterButtons = document.querySelectorAll('button:contains("Filtrar")');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // TODO: Implement filter logic
+                    console.log('Filter functionality to be implemented');
+                });
+            });
+
+            // Initialize with home page
+            showPage('home');
+        })();
+    </script>
+</body>
+</html>
